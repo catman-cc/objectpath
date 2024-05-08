@@ -16,3 +16,6 @@ jobs:
       - name: Compile Project
         run: |
           mvn clean compile
+      - name: verify Project
+        run: |
+          mvn verify
