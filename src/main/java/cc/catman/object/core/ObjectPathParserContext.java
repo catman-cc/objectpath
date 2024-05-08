@@ -1,5 +1,7 @@
 package cc.catman.object.core;
 
+import cc.catman.object.ObjectPathConfiguration;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,6 +34,12 @@ public interface ObjectPathParserContext {
      * @return 当前对象
      */
     Object currentValue();
+
+    /**
+     * 获取配置
+     * @return 配置
+     */
+    ObjectPathConfiguration getConfiguration();
 
     void  updateCurrent(Object current);
     default void updateParent(){

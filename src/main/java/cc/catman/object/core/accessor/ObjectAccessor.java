@@ -10,8 +10,10 @@ import java.util.function.Predicate;
 /**
  * 指定对象访问器,有一些特定的对象不应该使用反射去访问字段
  * 比如,Date对象,应该被视为时间戳或者字符串
+ * @author jpanda
+ * @since 0.0.1
  */
-public interface SpecifyObjectAccessor {
+public interface ObjectAccessor {
     /**
      * 是否支持访问
      * @param object 对象

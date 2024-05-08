@@ -18,6 +18,7 @@ public class RewriteObject {
      */
     private final Object rewrite;
 
+
     public static RewriteObject of(Object raw){
         return new RewriteObject(raw);
     }
@@ -34,6 +35,7 @@ public class RewriteObject {
         this.rewrite = rewrite;
     }
 
+
     /**
      * 是否重写了对象,如果重写了对象则返回true,此处直接比较对象的引用
      * @return 是否重写了对象
@@ -44,4 +46,5 @@ public class RewriteObject {
         }
         return raw!=rewrite;
     }
+
 }

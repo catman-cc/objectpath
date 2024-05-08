@@ -1,5 +1,10 @@
 package cc.catman.object;
 
+import cc.catman.object.cases.basic.Bicycle;
+import cc.catman.object.cases.basic.Book;
+import cc.catman.object.cases.basic.Store;
+import cc.catman.object.cases.basic.StoreHolder;
+
 import java.util.ArrayList;
 import java.util.List;
 

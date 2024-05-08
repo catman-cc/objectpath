@@ -1,13 +1,14 @@
 package cc.catman.object.core;
 
 import cc.catman.object.ObjectPathConfiguration;
-import cc.catman.object.core.accessor.SpecifyObjectAccessor;
+import cc.catman.object.core.accessor.ObjectAccessor;
 import cc.catman.object.core.function.FunctionManager;
 import cc.catman.object.core.function.FunctionProvider;
 import cc.catman.object.core.json.JsonCoder;
 import cc.catman.object.core.rewrite.ObjectRewrite;
 import cc.catman.object.core.script.ScriptExecutor;
 import cc.catman.object.core.script.ScriptExecutorManager;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -23,7 +24,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * 根对象
      */
-    private Object root;
+    private final Object root;
     /**
      * 父对象,需要注意,此处的父对象并不是指当前对象的父对象,而是指当前上下文的创建者所持有的cv
      */
@@ -41,12 +42,12 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * 对象访问器,用于访问对象的属性
      */
-    private SpecifyObjectAccessor objectAccessor;
+    private final ObjectAccessor objectAccessor;
 
     /**
      * 对象重写器,负责将对象重写为指定的对象
      */
-    private ObjectRewrite objectRewrite;
+    private final ObjectRewrite objectRewrite;
 
     /**
      * 函数管理器,用于管理自定义函数
@@ -55,16 +56,37 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * json解析器
      */
-    private JsonCoder jsonCoder;
+    private final JsonCoder jsonCoder;
 
     /**
      * 脚本执行器管理器
      */
-    private ScriptExecutorManager scriptExecutorManager;
+    private final ScriptExecutorManager scriptExecutorManager;
 
+    @Getter
     private ObjectPathConfiguration configuration;
 
-    public DefaultObjectPathParserContext(Object root, Object cv,  SpecifyObjectAccessor objectAccessor, ObjectRewrite objectRewrite, FunctionManager functionManager, JsonCoder jsonCoder, ScriptExecutorManager scriptExecutorManager) {
+    public DefaultObjectPathParserContext(Object root, ObjectPathConfiguration configuration) {
+       this(root,root,configuration);
+    }
+
+    public DefaultObjectPathParserContext(Object root, Object cv, ObjectPathConfiguration configuration) {
+      this(root,cv,null,configuration);
+    }
+
+    public DefaultObjectPathParserContext(Object root, Object cv, ObjectPathParserContext parent, ObjectPathConfiguration configuration) {
+        this.root = root;
+        this.cv = cv;
+        this.parent = parent;
+        this.configuration = configuration;
+        this.objectAccessor=configuration.getObjectAccessor();
+        this.objectRewrite=configuration.getObjectRewrite();
+        this.jsonCoder=configuration.getJsonCoder();
+        this.scriptExecutorManager=configuration.getScriptExecutorManager();
+        this.functionManager=configuration.getFunctionManager();
+    }
+
+    public DefaultObjectPathParserContext(Object root, Object cv, ObjectAccessor objectAccessor, ObjectRewrite objectRewrite, FunctionManager functionManager, JsonCoder jsonCoder, ScriptExecutorManager scriptExecutorManager) {
         this.root = root;
         this.cv = cv;
         this.objectAccessor = objectAccessor;
@@ -123,14 +145,10 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
         DefaultObjectPathParserContext context = new DefaultObjectPathParserContext(
                 root,
                 current,
-                objectAccessor,
-                objectRewrite,
-                functionManager,
-                jsonCoder,
-                scriptExecutorManager
+                this,
+                this.configuration
         );
         context.pv = parent;
-        context.parent = this;
         return context;
     }
 
@@ -168,8 +186,6 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     public Object map(ObjectPathParserContext context, Function<Object, Object> mapper) {
         return objectAccessor.map(cv,mapper);
     }
-
-
 
     @Override
     public Object filter(ObjectPathParserContext context, Predicate<Object> filter) {

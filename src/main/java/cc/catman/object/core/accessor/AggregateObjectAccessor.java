@@ -12,14 +12,14 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 0.0.1
  */
-public class AggregateObjectAccessor implements SpecifyObjectAccessor{
+public class AggregateObjectAccessor implements ObjectAccessor {
 
     /**
      * 访问器
      */
-    private final List<SpecifyObjectAccessor> accessors=new ArrayList<>();
+    private final List<ObjectAccessor> accessors=new ArrayList<>();
 
-    public AggregateObjectAccessor add(SpecifyObjectAccessor accessor){
+    public AggregateObjectAccessor add(ObjectAccessor accessor){
         this.accessors.add(accessor);
         return this;
     }

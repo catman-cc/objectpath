@@ -5,6 +5,7 @@ package cc.catman.object.core.rewrite;
  * @author jpanda
  * @since 0.0.1
  */
+@FunctionalInterface
 public interface ObjectRewrite {
 
     /**

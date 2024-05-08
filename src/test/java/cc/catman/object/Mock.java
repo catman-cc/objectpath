@@ -1,8 +1,8 @@
 package cc.catman.object;
 
-import cc.catman.object.po.Author;
-import cc.catman.object.po.Book;
-import cc.catman.object.po.Library;
+import cc.catman.object.cases.circle.Author;
+import cc.catman.object.cases.circle.Book;
+import cc.catman.object.cases.circle.Library;
 
 import java.util.ArrayList;
 import java.util.Date;

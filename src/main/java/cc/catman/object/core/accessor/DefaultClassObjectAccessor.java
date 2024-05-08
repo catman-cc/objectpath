@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * @since 2021-04-23
  */
 @Slf4j
-public class DefaultClassObjectAccessor implements SpecifyObjectAccessor{
+public class DefaultClassObjectAccessor implements ObjectAccessor {
 
     /**
      * 读取方法查找器

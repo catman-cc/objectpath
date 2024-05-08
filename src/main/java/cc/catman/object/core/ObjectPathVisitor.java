@@ -1,6 +1,7 @@
 package cc.catman.object.core;
 
 
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.path.standard.ObjectPathBaseVisitor;
 import cc.catman.object.path.standard.ObjectPathParser;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     @Getter
     protected ObjectPathParserContext context;
 
+    @Getter
+    protected ObjectPathConfiguration config;
+
     /**
      * 是否停止解析
      */
@@ -32,6 +36,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     public ObjectPathVisitor(ObjectPathParserContext context) {
         this.context = context;
+        this.config=context.getConfiguration();
     }
 
     @Override
@@ -79,7 +84,14 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         List<ObjectPathParser.SelectorContext> selector = ctx.selector();
         // 遍历选择器,每次遍历都会切换上下文
         Object result = nc.currentValue();
+
         for (ObjectPathParser.SelectorContext s : selector) {
+            // 遇到null值,是否停止解析
+            if (config.isStopParseWhenNull()){
+                if (result == null){
+                    return null;
+                }
+            }
             if (childVisitor.stop) {
                 return result;
             }
@@ -298,6 +310,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         int end = Integer.parseInt(numbers.get(1).getText());
         // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
         List<Object> old = this.context.covertToList();
+        if (this.config.isAutoCreateCollectionWhenInvokeMethod()){
+            old = Optional.ofNullable(old).orElseGet(ArrayList::new);
+        }
         // 然后根据切片的范围,获取切片的元素
         // 通常情况下,切片操作是左闭右开的,即[start,end)
         // 如果同时包含start和end,则需要将end+1?
@@ -331,6 +346,11 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     @Override
     public Object visitFilterExpr(ObjectPathParser.FilterExprContext ctx) {
+        if (this.config.isAutoCreateCollectionWhenInvokeMethod()){
+            if (!Optional.ofNullable(this.context.currentValue()).isPresent()) {
+                this.context.updateCurrent(new ArrayList<>());
+            }
+        }
         Object res = this.context.filter((o -> {
             // 创建子上下文
             ObjectPathParserContext child = this.context.createChild(o);

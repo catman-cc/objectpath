@@ -11,7 +11,6 @@ import cc.catman.object.core.classifier.str.StringObjectClassifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 聚合对象分类器

@@ -1,4 +1,4 @@
-package cc.catman.object;
+package cc.catman.object.cases.basic;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

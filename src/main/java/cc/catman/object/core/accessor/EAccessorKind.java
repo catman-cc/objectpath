@@ -12,5 +12,6 @@ public enum EAccessorKind {
     FILTER,
     SIZE,
     COVERT_TO_LIST,
+    COVERT_TO_NUMBER,
     COVERT_TO_STRING,
 }

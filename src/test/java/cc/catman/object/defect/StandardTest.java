@@ -2,7 +2,7 @@ package cc.catman.object.defect;
 
 import cc.catman.object.BaseTest;
 import cc.catman.object.Cases;
-import cc.catman.object.StoreHolder;
+import cc.catman.object.cases.basic.StoreHolder;
 import org.junit.Test;
 
 public class StandardTest extends BaseTest {

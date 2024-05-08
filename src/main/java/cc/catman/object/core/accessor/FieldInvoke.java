@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
  * @since 0.0.1
  */
 public class FieldInvoke implements Invoke{
-    private Field field;
+    private final Field field;
 
     public static FieldInvoke of(Field field) {
         return new FieldInvoke(field);

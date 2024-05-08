@@ -2,7 +2,6 @@ package cc.catman.object;
 
 import cc.catman.object.core.DefaultObjectPathParserContext;
 import cc.catman.object.core.ObjectPathVisitor;
-import cc.catman.object.core.accessor.*;
 import cc.catman.object.path.standard.ObjectPathParser;
 
 public class DefaultObjectPathAccessor implements ObjectPathAccessor{
@@ -26,11 +25,8 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
         return new DefaultObjectPathParserContext(
                 root,
                 root,
-                config.getObjectAccessor(),
-                config.getObjectRewrite(),
-                config.getFunctionManager(),
-                config.getJsonCoder(),
-                config.getScriptExecutorManager()
+                null,
+                config
         );
     }
 }

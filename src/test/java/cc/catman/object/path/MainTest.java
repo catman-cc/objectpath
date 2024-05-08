@@ -2,6 +2,7 @@ package cc.catman.object.path;
 
 import cc.catman.object.GsonCoder;
 import cc.catman.object.Mock;
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.DefaultObjectPathParserContext;
 import cc.catman.object.core.ObjectPathVisitor;
 import cc.catman.object.core.accessor.*;
@@ -11,7 +12,7 @@ import cc.catman.object.core.rewrite.AggregationObjectRewrite;
 import cc.catman.object.core.script.DefaultScriptExecutorManager;
 import cc.catman.object.path.standard.ObjectPathLexer;
 import cc.catman.object.path.standard.ObjectPathParser;
-import cc.catman.object.po.Library;
+import cc.catman.object.cases.circle.Library;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -89,8 +90,15 @@ public class MainTest {
                 .add(new DefaultClassObjectAccessor());
 
         GsonCoder gsonCoder = new GsonCoder();
+        ObjectPathConfiguration config = ObjectPathConfiguration.builder()
+                .objectAccessor(aoa)
+                .jsonCoder(gsonCoder)
+                .objectRewrite(new AggregationObjectRewrite())
+                .functionManager(new DefaultFunctionManager())
+                .scriptExecutorManager(new DefaultScriptExecutorManager())
+                .build();
 
-        return new DefaultObjectPathParserContext(root,root,aoa,new AggregationObjectRewrite(),new DefaultFunctionManager(),gsonCoder,new DefaultScriptExecutorManager());
+        return new DefaultObjectPathParserContext(root,config);
     }
 
 

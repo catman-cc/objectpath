@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * @since 2024-04-23
  */
 @Slf4j
-public class ArrayObjectAccessor implements SpecifyObjectAccessor {
+public class ArrayObjectAccessor implements ObjectAccessor {
     /**
      * 对象验证器
      */

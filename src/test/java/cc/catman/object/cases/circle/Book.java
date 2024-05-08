@@ -1,4 +1,4 @@
-package cc.catman.object.po;
+package cc.catman.object.cases.circle;
 
 import lombok.Data;
 

@@ -37,6 +37,7 @@ public class AggregationObjectRewrite implements ObjectRewrite{
         return this.rewrites.stream()
                 .map(rewrite -> rewrite.rewrite(object))
                 .filter(RewriteObject::isRewrite)
+                .peek(ro -> log.debug("rewrite object:{}",ro.getRewrite()))
                 .findFirst()
                 .map(RewriteObject::getRewrite)
                 .map(this::rewrite)

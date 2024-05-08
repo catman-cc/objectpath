@@ -8,6 +8,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+/**
+ * 默认ObjectPath实现
+ * @author jpanda
+ * @since 0.0.1
+ */
 @Data
 @Builder
 public class DefaultObjectPath implements ObjectPath{

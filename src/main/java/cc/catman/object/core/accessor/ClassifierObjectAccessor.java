@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 0.0.1
  */
-public class ClassifierObjectAccessor implements SpecifyObjectAccessor{
+public class ClassifierObjectAccessor implements ObjectAccessor {
     /**
      * 对象分类器
      */
@@ -27,7 +27,7 @@ public class ClassifierObjectAccessor implements SpecifyObjectAccessor{
     /**
      * 分类访问器
      */
-    private final Map<EObjectClassification,List<SpecifyObjectAccessor>> accessors;
+    private final Map<EObjectClassification,List<ObjectAccessor>> accessors;
 
     public static ClassifierObjectAccessor defaultAccessor(){
         // 获取默认的分类器
@@ -49,24 +49,24 @@ public class ClassifierObjectAccessor implements SpecifyObjectAccessor{
         this(objectClassifier, new HashMap<>());
     }
 
-    public ClassifierObjectAccessor(ObjectClassifier objectClassifier, Map<EObjectClassification, List<SpecifyObjectAccessor>> accessors) {
+    public ClassifierObjectAccessor(ObjectClassifier objectClassifier, Map<EObjectClassification, List<ObjectAccessor>> accessors) {
         this.objectClassifier = objectClassifier;
         this.accessors = accessors;
     }
 
-    public ClassifierObjectAccessor add(EObjectClassification classification, SpecifyObjectAccessor accessor){
+    public ClassifierObjectAccessor add(EObjectClassification classification, ObjectAccessor accessor){
         this.accessors.computeIfAbsent(classification, k -> new ArrayList<>()).add(accessor);
         return this;
     }
 
     @Override
     public boolean isSupport(Object object, Object key, EAccessorKind kind) {
-        List<SpecifyObjectAccessor> as = findAccessors(object);
+        List<ObjectAccessor> as = findAccessors(object);
         return as.stream().anyMatch(accessor -> accessor.isSupport(object, key, kind));
     }
 
 
-    private List<SpecifyObjectAccessor> findAccessors(Object object) {
+    private List<ObjectAccessor> findAccessors(Object object) {
         // 对对象进行分类
         ClassifierObject classify = this.objectClassifier.classify(object);
         // 获取该分类下的访问器

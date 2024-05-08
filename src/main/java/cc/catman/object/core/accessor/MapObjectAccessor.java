@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 2021-04-23
  */
-public class MapObjectAccessor implements SpecifyObjectAccessor{
+public class MapObjectAccessor implements ObjectAccessor {
     /**
      * 要求object必须是Map类型,我们常见的一些对象其实也是Map类型,比如Properties/Hashtable等
      * key值理论上可以是任意类型,所以不会对key值进行验证
