@@ -3,7 +3,7 @@
 > ObjectPath是一个用于访问java对象的路径解析器,类似于jsonpath,但是ObjectPath用于访问java对象,而不是json对象.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=catman-cc_objectpath&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=catman-cc_objectpath)
-
+[![unit test](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml/badge.svg)](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml)
 ---
 ## 快速开始
 ### 1. 引入依赖
