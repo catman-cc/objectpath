@@ -1,6 +1,6 @@
 package cc.catman.object.core.classifier;
 
-import cc.catman.object.core.classifier.Iterator.IteratorObjectClassifier;
+import cc.catman.object.core.classifier.iterator.IteratorObjectClassifier;
 import cc.catman.object.core.classifier.array.ArrayObjectClassifier;
 import cc.catman.object.core.classifier.collection.CollectionObjectClassifier;
 import cc.catman.object.core.classifier.map.MapObjectClassifier;
@@ -51,10 +51,11 @@ public class AggregationObjectClassifier implements ObjectClassifier{
     public ClassifierObject classify(Object object) {
         return this.classifiers.stream()
                 .map(classifier -> classifier.classify(object))
-                .peek(co->{
+                .filter(co->{
                     if (co == null) {
                         throw new NullPointerException("分类器返回的对象不能为空");
                     }
+                    return true;
                 })
                 .filter(ClassifierObject::classified)
                 .findFirst()

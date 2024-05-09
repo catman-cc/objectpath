@@ -46,6 +46,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Object> covertToList(Object object) {
         if (object instanceof List){
             return (List<Object>) object;
@@ -312,12 +313,13 @@ public class ArrayObjectAccessor implements ObjectAccessor {
     }
 
 
-    protected Stream<?> toStream(Object object) {
+    @SuppressWarnings("unchecked")
+    protected Stream<Object> toStream(Object object) {
         if (object instanceof Object[]) {
             return Arrays.stream((Object[]) object);
         }
         if (object instanceof Collection) {
-            return ((Collection<?>) object).stream();
+            return ((Collection<Object>) object).stream();
         }
         if (object instanceof Iterator) {
             Iterator<?> iterator = (Iterator<?>) object;
@@ -413,7 +415,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
             throw new IllegalArgumentException("key is not a number, key:" + value);
         }
     }
-
+    @SuppressWarnings({"java:S3776","java:S6541","java:S3012"})
     protected Object[] convertObjectArray(Object object) {
         if (object instanceof Object[]) {
             return (Object[]) object;

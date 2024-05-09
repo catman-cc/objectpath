@@ -1,25 +1,26 @@
 package cc.catman.object.defect;
 
 import cc.catman.object.BaseTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class StandardMethodTest extends BaseTest {
     @Test
     public void minWhenArrayIsEmpty() {
         Object res = objectPath.parse("$.min()").eval(new int[0]);
-        assert res == null;
+        Assert.assertNull(res);
     }
 
     @Test
     public void minWhenArrayIsNotEmpty() {
         Object res = objectPath.parse("$.min()").eval(new int[]{1, 2, 3});
-        assert res.equals(1);
+        Assert.assertEquals(1, res);
     }
 
     @Test
     public void maxWhenArrayIsEmpty() {
-        Object res = objectPath.parse("$.max()").eval(new int[]{1,2,3});
-        assert 3 == (int) res;
+        Object res = objectPath.parse("$.max()").eval(new int[]{1, 2, 3});
+        Assert.assertEquals(3, res);
     }
 
 }

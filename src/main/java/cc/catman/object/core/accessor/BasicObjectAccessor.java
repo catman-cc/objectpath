@@ -4,7 +4,6 @@ import cc.catman.object.core.Entity;
 import cc.catman.object.core.accessor.matcher.IClassMatcher;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,9 +27,7 @@ public class BasicObjectAccessor implements ObjectAccessor {
         BasicObjectAccessor boa = new BasicObjectAccessor();
         // java基础类型
         boa.matchers.add(Class::isPrimitive);
-        boa.matchers.add((c-> Stream.of(String.class, Long.class, Integer.class, Float.class, Double.class, Byte.class, Short.class, Boolean.class, Character.class).anyMatch(cv->{
-            return cv.isAssignableFrom(c);
-        })));
+        boa.matchers.add((c-> Stream.of(String.class, Long.class, Integer.class, Float.class, Double.class, Byte.class, Short.class, Boolean.class, Character.class).anyMatch(cv-> cv.isAssignableFrom(c))));
         // 同时常见的一些类型,如日期,时间,枚举等,也作为基础类型处理
         // 实际上,此处使用ObjectRewrite才是最合理的处理方式,比如,将Date类型转换为long或者字符串
         boa.matchers.add(Enum.class::isAssignableFrom);

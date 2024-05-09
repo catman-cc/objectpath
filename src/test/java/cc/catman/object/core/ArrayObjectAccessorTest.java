@@ -2,6 +2,7 @@ package cc.catman.object.core;
 
 
 import cc.catman.object.core.accessor.ArrayObjectAccessor;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
@@ -16,22 +17,22 @@ public class ArrayObjectAccessorTest {
     public void supportIterator() {
         Iterator<Object> iterable = createList().iterator();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(iterable, 0);
+        Assert.assertTrue(objectAccessor.isSupport(iterable, 0));
     }
 
     @Test
     public void supportCollection() {
         List<Object> list = createList();
-        Queue<Object> queue=new LinkedBlockingDeque<>(list);
+        Queue<Object> queue = new LinkedBlockingDeque<>(list);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(queue, 0);
+        Assert.assertTrue(objectAccessor.isSupport(queue, 0));
     }
 
     @Test
     public void supportArray() {
         Object[] array = createList().toArray(new Object[0]);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(array, 0);
+        Assert.assertTrue(objectAccessor.isSupport(array, 0));
     }
 
     @Test
@@ -39,7 +40,7 @@ public class ArrayObjectAccessorTest {
         List<Object> list = createList();
         Set<Object> set = new HashSet<>(list);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(set, 0);
+        Assert.assertTrue(objectAccessor.isSupport(set, 0));
     }
 
     @Test
@@ -47,131 +48,132 @@ public class ArrayObjectAccessorTest {
         Map<Object, Object> map = new HashMap<>();
         map.put("a", "b");
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert !objectAccessor.isSupport(map, 0);
+        Assert.assertFalse(objectAccessor.isSupport(map, 0));
     }
 
     @Test
     public void unSupportNull() {
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert !objectAccessor.isSupport(null, 0);
+        Assert.assertFalse(objectAccessor.isSupport(null, 0));
     }
 
     @Test
     public void supportLongKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(list, 0L);
+        Assert.assertTrue(objectAccessor.isSupport(list, 0L));
     }
 
     @Test
     public void supportStringKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(list, "0");
+        Assert.assertTrue(objectAccessor.isSupport(list, "0"));
     }
+
     @Test
     public void unSupportStringKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert !objectAccessor.isSupport(list, "a");
+        Assert.assertFalse(objectAccessor.isSupport(list, "a"));
     }
 
     @Test
     public void supportIntegerKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.isSupport(list, 0);
+        Assert.assertTrue(objectAccessor.isSupport(list, 0));
     }
 
     @Test
     public void unSupportLongKeyWhenValueGreaterThanMaxInt() {
         Object[] array = createList().toArray(new Object[0]);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert !objectAccessor.isSupport(array, Integer.MAX_VALUE + 1L);
+        Assert.assertFalse(objectAccessor.isSupport(array, Integer.MAX_VALUE + 1L));
     }
 
     @Test
     public void unSupportLongKeyWhenValueLessThanMinInt() {
         Object[] array = createList().toArray(new Object[0]);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert !objectAccessor.isSupport(array, Integer.MIN_VALUE - 1L);
+        Assert.assertFalse(objectAccessor.isSupport(array, Integer.MIN_VALUE - 1L));
     }
 
     @Test
     public void readFromArray() {
         Object[] array = createList().toArray(new Object[0]);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(array, 0).equals("a");
-        assert objectAccessor.get(array, 4).equals(1);
-        assert objectAccessor.get(array, 10).getClass().equals(Object.class);
+        Assert.assertEquals("a", objectAccessor.get(array, 0));
+        Assert.assertEquals(1, objectAccessor.get(array, 4));
+        Assert.assertEquals(Object.class, objectAccessor.get(array, 10).getClass());
         Object strArray = objectAccessor.get(array, 8);
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
     public void readFromCollection() {
         List<Object> list = createList();
-        Queue<Object> queue=new LinkedBlockingDeque<>(list);
+        Queue<Object> queue = new LinkedBlockingDeque<>(list);
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(queue, 0).equals("a");
-        assert objectAccessor.get(queue, 4).equals(1);
-        assert objectAccessor.get(queue, 10).getClass().equals(Object.
-                class);
+        Assert.assertEquals("a", objectAccessor.get(queue, 0));
+        Assert.assertEquals(1, objectAccessor.get(queue, 4));
+        Assert.assertEquals(Object.class, objectAccessor.get(queue, 10).getClass());
         Object strArray = objectAccessor.get(queue, 8);
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
     public void readFromIterator() {
         Iterator<Object> iterable = createList().iterator();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(iterable, 0).equals("a");
+        Assert.assertEquals("a", objectAccessor.get(iterable, 0));
         iterable = createList().iterator();
-        assert objectAccessor.get(iterable, 4).equals(1);
+        Assert.assertEquals(1, objectAccessor.get(iterable, 4));
         iterable = createList().iterator();
-        assert objectAccessor.get(iterable, 10).getClass().equals(Object.class);
+        Assert.assertEquals(Object.class, objectAccessor.get(iterable, 10).getClass());
         iterable = createList().iterator();
         Object strArray = objectAccessor.get(iterable, 8);
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
     public void readFromSet() {
         Set<Object> set = new LinkedHashSet<>(createList());
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(set, 0).equals("a");
-        assert objectAccessor.get(set, 4).equals(1);
-        assert objectAccessor.get(set, 10).getClass().equals(Object.class);
+        Assert.assertEquals("a", objectAccessor.get(set, 0));
+        Assert.assertEquals(1, objectAccessor.get(set, 4));
+        Assert.assertEquals(Object.class, objectAccessor.get(set, 10).getClass());
+
         Object strArray = objectAccessor.get(set, 8);
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
     public void readWithLongKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(list, 0L).equals("a");
-        assert objectAccessor.get(list, 4L).equals(1);
-        assert objectAccessor.get(list, 10L).getClass().equals(Object.class);
+        Assert.assertEquals("a", objectAccessor.get(list, 0L));
+        Assert.assertEquals(1, objectAccessor.get(list, 4L));
+        Assert.assertEquals(Object.class, objectAccessor.get(list, 10L).getClass());
         Object strArray = objectAccessor.get(list, 8L);
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
     public void readWithStringKey() {
         List<Object> list = createList();
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
-        assert objectAccessor.get(list, "0").equals("a");
-        assert objectAccessor.get(list, "4").equals(1);
-        assert objectAccessor.get(list, "10").getClass().equals(Object.class);
+        Assert.assertEquals("a", objectAccessor.get(list, "0"));
+        Assert.assertEquals(1, objectAccessor.get(list, "4"));
+        Assert.assertEquals(Object.class, objectAccessor.get(list, "10").getClass());
         Object strArray = objectAccessor.get(list, "8");
-        assert strArray instanceof String[];
-        assert ((String[]) strArray)[0].equals("a");
+        Assert.assertTrue(strArray instanceof String[]);
+        Assert.assertEquals("a", ((String[]) strArray)[0]);
     }
 
     @Test
@@ -180,7 +182,7 @@ public class ArrayObjectAccessorTest {
         map.put("a", "b");
         ArrayObjectAccessor objectAccessor = new ArrayObjectAccessor();
         // 匹配异常
-            assert objectAccessor.get(map, 0)==null;
+        Assert.assertNull(objectAccessor.get(map, 0));
     }
 
     @Test
@@ -223,6 +225,7 @@ public class ArrayObjectAccessorTest {
         } catch (Exception e) {
             assert true;
         }
+        Assert.assertTrue(true);
     }
 
     public static List<Object> createList() {

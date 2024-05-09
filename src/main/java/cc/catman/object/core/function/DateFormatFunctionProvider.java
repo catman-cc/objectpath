@@ -1,5 +1,6 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.core.exception.FunctionRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
@@ -58,11 +59,11 @@ public class DateFormatFunctionProvider extends AbstractFunctionProvider{
         } else if (date instanceof Long) {
             return new SimpleDateFormat(format.toString()).format(new Date((Long) date));
         } else if (date instanceof String) {
-            Long time = null;
+            long time;
             try {
                 time = Long.parseLong((String) date);
             } catch (NumberFormatException e) {
-                throw new RuntimeException(e);
+                throw new FunctionRuntimeException(e, this.name(), params);
             }
             return new SimpleDateFormat(format.toString()).format(new Date(time));
         }

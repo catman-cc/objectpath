@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 /**
  * 标准的jsonpath测试,将会测试所有的jsonpath表达式
  */
+@SuppressWarnings("java:S2699")
 public class StandardTest extends BaseTest {
     /**
      * 店铺

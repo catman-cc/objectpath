@@ -48,14 +48,12 @@ public class MapObjectAccessor implements ObjectAccessor {
     @Override
     public void eachEntry(Object object, Consumer<Entity> consumer) {
         if (object instanceof Map) {
-            ((Map<?, ?>) object).forEach((k, v) -> {
-                consumer.accept(Entity.builder()
-                                .key(k)
-                                .value(v)
-                        .build()
+            ((Map<?, ?>) object).forEach((k, v) -> consumer.accept(Entity.builder()
+                            .key(k)
+                            .value(v)
+                    .build()
 
-                );
-            });
+            ));
         }
 
     }

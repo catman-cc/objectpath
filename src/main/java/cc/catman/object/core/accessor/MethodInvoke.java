@@ -1,5 +1,6 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.core.exception.ReflectionRuntimeException;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,17 +20,19 @@ public class MethodInvoke implements Invoke{
         return new MethodInvoke(method);
     }
 
+    @SuppressWarnings("java:S3011")
     public MethodInvoke(Method method) {
         this.method = method;
         this.method.setAccessible(true);
     }
 
     @Override
+    @SuppressWarnings("java:S3011")
     public Object invoke(Object object,Object... args) {
         try {
             return method.invoke(object,args);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new ReflectionRuntimeException(e);
         }
     }
 }

@@ -9,7 +9,7 @@ import java.util.*;
  */
 public abstract class AbstractCollectionClassifierObject extends AbstractClassifierObject{
 
-    public AbstractCollectionClassifierObject(Object raw) {
+    protected AbstractCollectionClassifierObject(Object raw) {
         super(raw, EObjectClassification.COLLECTION);
     }
 

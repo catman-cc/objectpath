@@ -1,4 +1,4 @@
-package cc.catman.object.core.classifier.Iterator;
+package cc.catman.object.core.classifier.iterator;
 
 import cc.catman.object.core.classifier.ObjectClassifier;
 import cc.catman.object.core.classifier.UnknownClassifierObject;

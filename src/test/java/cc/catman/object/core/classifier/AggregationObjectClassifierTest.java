@@ -1,5 +1,6 @@
 package cc.catman.object.core.classifier;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -15,64 +16,64 @@ public class AggregationObjectClassifierTest {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         Object[] array = new Object[]{1, 2, 3};
         ClassifierObject co = oc.classify(array);
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.COLLECTION);
-        assert co.toList().size() == 3;
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.COLLECTION, co.getClassification());
+        Assert.assertEquals(3, co.toList().size());
     }
 
     @Test
     public void testCollection() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(new java.util.HashSet<>());
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.COLLECTION);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.COLLECTION, co.getClassification());
     }
 
     @Test
     public void testIterable() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(new java.util.ArrayList<>());
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.COLLECTION);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.COLLECTION, co.getClassification());
     }
 
     @Test
     public void testMap() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(new java.util.HashMap<>());
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.MAP);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.MAP, co.getClassification());
     }
 
     @Test
     public void testNull() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(null);
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.NULL);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.NULL, co.getClassification());
     }
 
     @Test
     public void testNumber() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(1);
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.NUMBER);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.NUMBER, co.getClassification());
     }
 
     @Test
     public void testString() {
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify("test");
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.STRING);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.STRING, co.getClassification());
     }
 
     @Test
     public void testObject(){
         AggregationObjectClassifier oc = AggregationObjectClassifier.defaultClassifier();
         ClassifierObject co = oc.classify(new Object());
-        assert co.classified();
-        assert co.getClassification().equals(EObjectClassification.STANDARD_OBJECT);
+        Assert.assertTrue(co.classified());
+        Assert.assertEquals(EObjectClassification.STANDARD_OBJECT, co.getClassification());
     }
 }

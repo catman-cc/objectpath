@@ -17,12 +17,12 @@ public class DefaultClassNameMatcher implements IClassNameMatcher {
 
     protected List<String> classes;
 
-    protected Map<String, Pattern> regex;
+    protected Map<String, Pattern> regexes;
 
     public DefaultClassNameMatcher() {
         this.packages = new ArrayList<>();
         this.classes = new ArrayList<>();
-        this.regex = new HashMap<>();
+        this.regexes = new HashMap<>();
     }
 
 
@@ -54,8 +54,8 @@ public class DefaultClassNameMatcher implements IClassNameMatcher {
         return this;
     }
 
-    protected DefaultClassNameMatcher addClasses(String classNames) {
-        for (String c : classes) {
+    public DefaultClassNameMatcher addClasses(String ... classNames) {
+        for (String c : classNames) {
             if (!this.classes.contains(c)) {
                 this.classes.add(c);
             }
@@ -63,11 +63,9 @@ public class DefaultClassNameMatcher implements IClassNameMatcher {
         return this;
     }
 
-    protected DefaultClassNameMatcher addRegexs(String... regexs) {
-        for (String r : regexs) {
-            if (!this.regex.containsKey(r)) {
-                this.regex.put(r, Pattern.compile(r));
-            }
+    protected DefaultClassNameMatcher addRegexes(String... regexes) {
+        for (String r : regexes) {
+            this.regexes.computeIfAbsent(r, k -> Pattern.compile(r));
         }
         return this;
     }
@@ -80,6 +78,6 @@ public class DefaultClassNameMatcher implements IClassNameMatcher {
 
         return this.packages.stream().anyMatch(cn::startsWith) ||
                this.classes.stream().anyMatch(cn::equals) ||
-               this.regex.values().stream().anyMatch(r -> r.matcher(cn).matches());
+               this.regexes.values().stream().anyMatch(r -> r.matcher(cn).matches());
     }
 }
