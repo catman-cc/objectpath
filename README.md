@@ -1,12 +1,15 @@
-
 # ObjectPath
-> ObjectPath是一个用于访问java对象的路径解析器,类似于jsonpath,但是ObjectPath用于访问java对象,而不是json对象.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=catman-cc_objectpath&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=catman-cc_objectpath)
 [![unit test](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml/badge.svg)](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml)
+
+> ObjectPath is a path parser for accessing Java objects, similar to jsonpath, but ObjectPath is used for accessing Java objects rather than JSON objects.
+
+[中文文档](docs/README-zh.md) | [English Document](README.md)
+
 ---
-## 快速开始
-### 1. 引入依赖
+## Quick Start
+### 1. Add Dependency
 ```xml
 <dependency>
     <groupId>cc.catman</groupId>
@@ -15,11 +18,11 @@
 </dependency>
 ```
 
-## 1. 语法规则
-### 1.1. 语法规则
-objectpath的语法是jsonpath的超集,所以jsonpath的语法规则在objectpath中同样适用,同时objectpath还支持一些额外的语法规则.
-#### 1.1.1. 基础语法
-为了更好的展示objectpath的语法规则,下面的示例中使用的java对象信息如下:
+## 1. Syntax Rules
+### 1.1. Syntax Rules
+The syntax of objectpath is a superset of jsonpath, so the syntax rules of jsonpath also apply in objectpath, and objectpath also supports some additional syntax rules.
+#### 1.1.1. Basic Syntax
+To better demonstrate the syntax rules of objectpath, the java object information used in the following examples is as follows:
 ```json
 {
     "store": {
@@ -61,62 +64,62 @@ objectpath的语法是jsonpath的超集,所以jsonpath的语法规则在objectpa
 ```
 
 
-| 语法 | 说明             |
-|----|----------------|
-| $  | 根节点            |
-| @  | 当前节点           |
-| @@ | 父节点            |
-|ID| 当前节点名为ID的子元素   |
-|.ID| 当前节点名为ID的子元素   |
-|..ID| 递归获取所有名为ID的子元素 |
-|[ID]| 当前节点名为ID的子元素   |
-|[NUMBER]|数组指定下标的元素|
-|[*]|数组中的所有元素|
-|[]|数组中的所有元素|
-|[?(表达式)]|过滤当前数组中的元素|
+| Syntax | Description             |
+|----|--------------------------|
+| $  | Root node                |
+| @  | Current node             |
+| @@ | Parent node              |
+| ID | Child element with the current node named ID   |
+| .ID | Child element with the current node named ID   |
+| ..ID | Recursively get all child elements named ID |
+| [ID] | Child element with the current node named ID   |
+| [NUMBER] | Element at the specified index in the array |
+| [*] | All elements in the array |
+| [] | All elements in the array |
+| [?(expression)] | Filter elements in the current array |
 
-#### 1.1.2 内置简单函数支持
-|函数名称|参数列表|说明|
-|-------|------|----|
-|isNull| -|是否为null|
-|between|Number,Number|是否在两个数值之间|
-| like|-|参考sql的like,使用%%作为前后模式匹配|
-|in|expre|是否在集合中|
-|notIn|expr|不在指定集合中|
-|contains|expr|是否包含指定元素/文本|
-|startWith|expr|是否以指定文本开头|
-|endWith|expr|是否以指定文本结尾|
-|matchs|expr|正则表达式匹配|
+#### 1.1.2. Built-in Simple Function Support
+| Function Name | Parameter List | Description |
+|---------------|----------------|-------------|
+| isNull | - | Whether it is null |
+| between | Number, Number | Whether it is between two numbers |
+| like | - | Similar to SQL's like, using %% as pattern matching before and after |
+| in | expr | Whether it is in the collection |
+| notIn | expr | Not in the specified collection |
+| contains | expr | Whether it contains the specified element/text |
+| startWith | expr | Whether it starts with the specified text |
+| endWith | expr | Whether it ends with the specified text |
+| matches | expr | Regular expression matching |
 
-#### 1.1.3 内置高阶函数支持
-|函数名称| 参数列表 |说明|
-|-------|------|----|
-|min| expr |获取数组中的最小值|
-|max| expr |获取数组中的最大值|
-|sum| expr |获取数组中的和|
-|avg| expr |获取数组中的平均值|
-|size| -    |获取数组的大小|
-|isEmpty| -    |判断数组是否为空|
-|length| -    |获取字符串的长度|
-|keys| -    |获取对象的所有key|
-|values| -    |获取对象的所有value|
-|reverse| -    |数组反转|
-|sort| expr |数组排序|
-|groupBy| expr |数组分组|
-|substring| start,end |截取字符串|
-|replace| old,new |替换字符串|
-|trim| - |去除字符串两端空格|
-|ltrim| - |去除字符串左端空格|
-|rtrim| - |去除字符串右端空格|
-|toUpper| - |转换为大写|
-|toLower| - |转换为小写|
-|concat| expr |字符串拼接|
-|first| - |获取数组的第一个元素|
-|last| - |获取数组的最后一个元素|
+#### 1.1.3. Built-in High-order Function Support
+| Function Name | Parameter List | Description |
+|---------------|----------------|-------------|
+| min | expr | Get the minimum value in the array |
+| max | expr | Get the maximum value in the array |
+| sum | expr | Get the sum in the array |
+| avg | expr | Get the average value in the array |
+| size | - | Get the size of the array |
+| isEmpty | - | Determine whether the array is empty |
+| length | - | Get the length of the string |
+| keys | - | Get all keys of the object |
+| values | - | Get all values of the object |
+| reverse | - | Reverse the array |
+| sort | expr | Sort the array |
+| groupBy | expr | Group the array |
+| substring | start, end | Substring |
+| replace | old, new | Replace |
+| trim | - | Trim whitespace from both ends of the string |
+| ltrim | - | Trim whitespace from the left end of the string |
+| rtrim | - | Trim whitespace from the right end of the string |
+| toUpper | - | Convert to uppercase |
+| toLower | - | Convert to lowercase |
+| concat | expr | Concatenate strings |
+| first | - | Get the first element of the array |
+| last | - | Get the last element of the array |
 
-#### 1.1.4. 内置脚本支持
-除了内置的简单函数和高阶函数之外,objectpath还支持内置脚本的方式,脚本的语法和java的lambda表达式类似,但是objectpath的脚本是一个字符串,而不是一个java对象.
-示例脚本:
+#### 1.1.4. Built-in Script Support
+In addition to built-in simple functions and high-order functions, ObjectPath also supports built-in scripts. The syntax of the script is similar to Java's lambda expressions, but the script in ObjectPath is a string, not a Java object.
+Example script:
 ```xml
 <js name="a" age="18">
     return {
@@ -125,18 +128,18 @@ objectpath的语法是jsonpath的超集,所以jsonpath的语法规则在objectpa
     };
 </js>
 ```
-脚本中的js标签用于表示这是一个javaScript脚本,name和age是脚本的参数,js标签中的内容是脚本的主体,示例脚本的返回值是一个json对象.
-其类似于js代码:
+The 'js' tag in the script is used to indicate that this is a JavaScript script, 'name' and 'age' are parameters of the script, and the content within the 'js' tag is the body of the script. The return value of the example script is a JSON object.
+It is similar to the JavaScript code:
 ```javascript
-    function x(name,age){
+    function x(name, age){
         return {
             name: a,
             age: age
         };
-    x("a",18);
+    x("a", 18);
 }
 ```
-脚本的参数支持objectpath的语法,所以可以使用objectpath的语法来获取参数的值,示例脚本:
+Script parameters support objectpath syntax, so you can use objectpath syntax to get the values of parameters. Example script:
 ```xml
 <js name="$.name" age="$.age">
     return {
@@ -145,32 +148,31 @@ objectpath的语法是jsonpath的超集,所以jsonpath的语法规则在objectpa
     };
 </js>
 ```
-### 管道操作符
-objectpath支持管道操作符,管道操作符用于将前一个操作的结果作为后一个操作的输入,示例:
+
+### Pipeline Operator
+Objectpath supports the pipeline operator, which is used to pass the result of the previous operation as input to the subsequent operation. Example:
 ```
 $.store.book[?(@.price > 10)] | $.title
 ```
-上面的示例中,首先获取了所有价格大于10的书籍,然后获取这些书籍的title属性,最终返回的是一个title的数组.
+In the above example, it first retrieves all books with prices greater than 10, then retrieves the 'title' attribute of these books, and finally returns an array of titles.
 
-除此之外,针对管道的使用场景,还定义了一个特殊的操作符,用于将数组展开,示例:
+In addition to the pipeline usage scenarios, a special operator is defined for the pipeline, which is used to flatten arrays. Example:
 ```
 $.store.book[?(@.price > 10)] | $.title | [^]
 ```
-上述结尾的[^]操作符用于将数组展开,将数组中的所有元素展开为一个一维数组.
-同时[^]操作符还支持参数,用于指定展开的深度,示例:
+The '[^]' operator at the end is used to flatten the array, expanding all elements in the array into a one-dimensional array.
+The '[^]' operator also supports parameters for specifying the depth of expansion, for example:
+
 ```
 $.store.book[?(@.price > 10)] | $.title | [^2]
 ```
-上述示例中,展开的深度为2,表示展开两层.
+In the above example, the depth of expansion is 2, indicating that two levels of expansion are performed.
 
-### 开发指南
-#### 自定义函数
-objectpath支持自定义函数,在语法解析器层面提供了自定义函数的支持,自定义函数的语法如下:
+### Development Guide
+#### Custom Functions
+Objectpath supports custom functions and provides support for custom functions at the syntax parser level. The syntax of custom functions is as follows:
 ```xml
-<fn name="函数名" args="参数列表">
-    函数体
+<fn name="functionName" args="parameterList">
+    functionBody
 </fn>
 ```
-
-
-
