@@ -1,4 +1,4 @@
-name: 基础验证
+name: Compile And Unit Test
 on:
   push:
     branches: [ "*" ]
