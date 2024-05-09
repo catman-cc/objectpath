@@ -5,6 +5,7 @@ import cc.catman.object.Cases;
 import cc.catman.object.cases.basic.StoreHolder;
 import org.junit.Test;
 
+@SuppressWarnings("java:S2699")
 public class StandardTest extends BaseTest {
 
     /**
@@ -23,23 +24,11 @@ public class StandardTest extends BaseTest {
     public void readWhenParentNull() {
         Object root = objectPath.parse("$.store.notExist.some").eval(ROOT);
         assert root == null;
-    }
-
-    @Test
-    public void readWhenParentIsArray() {
-        Object root = objectPath.parse("$.store.notExist[0]").eval(ROOT);
+        root = objectPath.parse("$.store.notExist[0]").eval(ROOT);
         assert root == null;
-    }
-
-    @Test
-    public void readWhenParentIsArrayAndIndexNotExist() {
-        Object root = objectPath.parse("$.store.book[100]").eval(ROOT);
+        root = objectPath.parse("$.store.book[100]").eval(ROOT);
         assert root == null;
-    }
-
-    @Test
-    public void readWhenParentIsNullAndFilter() {
-        Object root = objectPath.parse("$.store.notExist[?(@price<100)]").eval(ROOT);
+        root = objectPath.parse("$.store.notExist[?(@price<100)]").eval(ROOT);
         assert root == null;
     }
 

@@ -23,6 +23,7 @@ public class StandardObjectClassifierObject extends AbstractClassifierObject {
     }
 
     @Override
+    @SuppressWarnings("java:S3011")
     public List<?> toList() {
         Class<?> clazz = this.raw.getClass();
         Field[] fs = clazz.getDeclaredFields();
@@ -39,6 +40,7 @@ public class StandardObjectClassifierObject extends AbstractClassifierObject {
     }
 
     @Override
+    @SuppressWarnings("java:S3011")
     public Map<?, ?> toMap() {
         Class<?> clazz = this.raw.getClass();
         Field[] fs = clazz.getDeclaredFields();

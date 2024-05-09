@@ -37,7 +37,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * 父上下文
      */
-    private ObjectPathParserContext parent;
+    private final ObjectPathParserContext parent;
 
     /**
      * 对象访问器,用于访问对象的属性
@@ -52,7 +52,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * 函数管理器,用于管理自定义函数
      */
-    private FunctionManager functionManager;
+    private final FunctionManager functionManager;
     /**
      * json解析器
      */
@@ -64,7 +64,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     private final ScriptExecutorManager scriptExecutorManager;
 
     @Getter
-    private ObjectPathConfiguration configuration;
+    private final ObjectPathConfiguration configuration;
 
     public DefaultObjectPathParserContext(Object root, ObjectPathConfiguration configuration) {
        this(root,root,configuration);
@@ -85,17 +85,6 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
         this.scriptExecutorManager=configuration.getScriptExecutorManager();
         this.functionManager=configuration.getFunctionManager();
     }
-
-    public DefaultObjectPathParserContext(Object root, Object cv, ObjectAccessor objectAccessor, ObjectRewrite objectRewrite, FunctionManager functionManager, JsonCoder jsonCoder, ScriptExecutorManager scriptExecutorManager) {
-        this.root = root;
-        this.cv = cv;
-        this.objectAccessor = objectAccessor;
-        this.objectRewrite = objectRewrite;
-        this.functionManager = functionManager;
-        this.jsonCoder = jsonCoder;
-        this.scriptExecutorManager = scriptExecutorManager;
-    }
-
 
     @Override
     public ObjectPathParserContext parent() {
@@ -158,11 +147,6 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
-    public ObjectPathParserContext exit() {
-        return Optional.ofNullable(this.parent).orElse(this);
-    }
-
-    @Override
     public Object eval(String path) {
         return objectAccessor.get(cv, path);
     }
@@ -214,10 +198,9 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
 
     @Override
     public List<Object> covertToList() {
-        if (cv==null){
-            if (configuration.isAutoCreateCollectionWhenInvokeMethod()){
+        if (cv==null && (configuration.isAutoCreateCollectionWhenInvokeMethod())){
                return objectAccessor.covertToList(new ArrayList<>());
-            }
+
         }
         return objectAccessor.covertToList(cv);
     }
@@ -261,6 +244,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object executeScript(String scriptName, Object nas, String text) {
         ScriptExecutor executor = this.scriptExecutorManager.getExecutor(scriptName);
         if (executor!=null){

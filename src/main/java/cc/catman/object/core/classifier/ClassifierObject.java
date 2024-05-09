@@ -43,6 +43,7 @@ public interface ClassifierObject {
      * 将对象转换为列表
      * @return 列表
      */
+    @SuppressWarnings({"java:S1452"})
     List<?> toList();
     /**
      * 将对象转换为Map
@@ -53,5 +54,6 @@ public interface ClassifierObject {
      * 将对象转换为Map
      * @return Map
      */
+    @SuppressWarnings({"java:S1452"})
     Map<?, ?> toMap();
 }

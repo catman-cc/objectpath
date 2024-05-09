@@ -16,8 +16,9 @@ import java.util.stream.IntStream;
 
 /**
  * 对象路径访问器,用于访问对象路径表达式
+ *
  * @author jpanda
- * @since  0.0.1
+ * @since 0.0.1
  */
 public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     /**
@@ -36,7 +37,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     public ObjectPathVisitor(ObjectPathParserContext context) {
         this.context = context;
-        this.config=context.getConfiguration();
+        this.config = context.getConfiguration();
     }
 
     @Override
@@ -87,10 +88,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
         for (ObjectPathParser.SelectorContext s : selector) {
             // 遇到null值,是否停止解析
-            if (config.isStopParseWhenNull()){
-                if (result == null){
-                    return null;
-                }
+            if (config.isStopParseWhenNull() && (result == null)) {
+                return null;
+
             }
             if (childVisitor.stop) {
                 return result;
@@ -188,7 +188,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         }
         List<ParseTree> children = parent.children;
         // 遍历当前对象,执行后续操作
-        return this.context.map((obj) -> {
+        return this.context.map(obj -> {
             // 创建子上下文
             ObjectPathParserContext child = this.context.createContext(this.context.rootValue(), this.context.currentValue(), obj);
             // 创建子访问器
@@ -282,17 +282,17 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     @Override
     public Object visitMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx) {
         String functionName = unquote(ctx.ID().getText());
-        List<Object> params=new ArrayList<>();
+        List<Object> params = new ArrayList<>();
         Optional.ofNullable(ctx.args())
-                .ifPresent(args->{
+                .ifPresent(args -> {
                     Object res = this.visit(args);
-                    if (res instanceof List){
-                       params.addAll((List<?>) res);
-                    }else {
+                    if (res instanceof List) {
+                        params.addAll((List<?>) res);
+                    } else {
                         params.add(res);
                     }
                 });
-        return this.context.invokeMethod(functionName,params);
+        return this.context.invokeMethod(functionName, params);
     }
 
     /**
@@ -310,7 +310,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         int end = Integer.parseInt(numbers.get(1).getText());
         // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
         List<Object> old = this.context.covertToList();
-        if (this.config.isAutoCreateCollectionWhenInvokeMethod()){
+        if (this.config.isAutoCreateCollectionWhenInvokeMethod()) {
             old = Optional.ofNullable(old).orElseGet(ArrayList::new);
         }
         // 然后根据切片的范围,获取切片的元素
@@ -346,10 +346,10 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     @Override
     public Object visitFilterExpr(ObjectPathParser.FilterExprContext ctx) {
-        if (this.config.isAutoCreateCollectionWhenInvokeMethod()){
-            if (!Optional.ofNullable(this.context.currentValue()).isPresent()) {
-                this.context.updateCurrent(new ArrayList<>());
-            }
+        if (this.config.isAutoCreateCollectionWhenInvokeMethod()
+            && (!Optional.ofNullable(this.context.currentValue()).isPresent())) {
+            this.context.updateCurrent(new ArrayList<>());
+
         }
         Object res = this.context.filter((o -> {
             // 创建子上下文
@@ -365,7 +365,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             } else if (Optional.ofNullable(ctx.scripts()).isPresent()) {
                 match = childVisitor.visit(ctx.scripts());
             }
-            return match instanceof Boolean ? (Boolean) match : false;
+            return match instanceof Boolean && (Boolean) match;
         }));
         this.context.updateCurrent(res);
         return res;
@@ -514,16 +514,25 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         return useRegexTest(regex, str);
     }
 
+    /**
+     * 使用正则表达式测试字符串
+     * js中正则表达式格式为/正则表达式/修饰符,这里需要将正则表达式提取出来 /pattern/flags;
+     * 移除开头的/,然后以最后一个/为分隔符,分割正则表达式和修饰符
+     * 尝试获取修饰符,这里只支持i,g,m三个修饰符,因为这三个修饰符是java支持的,其他的,比如s,x等修饰符,java不支持
+     * i: 忽略大小写 g:全局匹配 m:多行匹配 s:单行匹配 x:忽略空白字符
+     * modifier有可能为空,因为正则表达式不一定有修饰符
+     *
+     * @param regex 正则表达式
+     * @param str   字符串
+     * @return 是否匹配
+     */
     private static boolean useRegexTest(String regex, Object str) {
-        // js中正则表达式格式为/正则表达式/修饰符,这里需要将正则表达式提取出来 /pattern/flags;
-        // 移除开头的/,然后以最后一个/为分隔符,分割正则表达式和修饰符
         regex = regex.substring(1);
         int index = regex.lastIndexOf('/');
         String finalRegex = regex.substring(0, index);
-        // 尝试获取修饰符,这里只支持i,g,m三个修饰符,因为这三个修饰符是java支持的,其他的,比如s,x等修饰符,java不支持
-        // i: 忽略大小写 g:全局匹配 m:多行匹配 s:单行匹配 x:忽略空白字符
-        // modifier有可能为空,因为正则表达式不一定有修饰符
+
         String modifier = regex.substring(index + 1);
+
         int flag = 0;
         if (modifier.contains("i")) {
             flag = Pattern.CASE_INSENSITIVE;
@@ -561,7 +570,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     public Object visitLIKE(ObjectPathParser.LIKEContext ctx) {
         ObjectPathParser.ExprContext expr = ctx.expr();
         Object target = visit(expr);
-        String likeStr = unquote( ctx.ID().getText());
+        String likeStr = unquote(ctx.ID().getText());
         if (likeStr.startsWith("%") && likeStr.endsWith("%")) {
             return target.toString().contains(likeStr.substring(1, likeStr.length() - 1));
         }
@@ -913,7 +922,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         return sorted;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     public List<?> sortByExprs(List<ObjectPathParser.ExprContext> exprs) {
         List<?> objects = this.context.covertToList();
         if (objects.isEmpty()) {
@@ -1076,7 +1085,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     @Override
     public Object visitSPLIT(ObjectPathParser.SPLITContext ctx) {
         String s = this.context.covertToString();
-        String split =  unquote(ctx.ID().getText());
+        String split = unquote(ctx.ID().getText());
         // 移除开头和结尾的引号
         String[] splitStr = s.split(split);
         this.context.updateCurrent(Arrays.asList(splitStr));
@@ -1172,12 +1181,12 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     @Override
     public Object visitNamedArgs(ObjectPathParser.NamedArgsContext ctx) {
-        Map<Object,Object> namedArgs = new HashMap<>();
+        Map<Object, Object> namedArgs = new HashMap<>();
         List<ObjectPathParser.NamedArgContext> namedArg = ctx.namedArg();
         for (ObjectPathParser.NamedArgContext nac : namedArg) {
             String name = nac.ID().getText();
             Object obj = visit(nac.arg());
-            namedArgs.put(name,obj);
+            namedArgs.put(name, obj);
         }
         return namedArgs;
     }
@@ -1228,7 +1237,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     public Object visitValue(ObjectPathParser.ValueContext ctx) {
         if (Optional.ofNullable(ctx.ID()).isPresent()) {
             String id = ctx.ID().getText();
-            id=unquote(id);
+            id = unquote(id);
             this.context = this.context.createChild(id);
             return id;
         }
@@ -1245,7 +1254,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 this.context = this.context.createChild(d);
                 return d;
             }
-            if (number.endsWith("d")||number.endsWith("D")){
+            if (number.endsWith("d") || number.endsWith("D")) {
                 number = number.substring(0, number.length() - 1);
                 double d = Double.parseDouble(number);
                 this.context = this.context.createChild(d);

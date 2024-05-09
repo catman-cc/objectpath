@@ -6,10 +6,7 @@ import cc.catman.object.core.classifier.ClassifierObject;
 import cc.catman.object.core.classifier.EObjectClassification;
 import cc.catman.object.core.classifier.ObjectClassifier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -46,7 +43,7 @@ public class ClassifierObjectAccessor implements ObjectAccessor {
     }
 
     public ClassifierObjectAccessor(ObjectClassifier objectClassifier) {
-        this(objectClassifier, new HashMap<>());
+        this(objectClassifier, new EnumMap<>(EObjectClassification.class));
     }
 
     public ClassifierObjectAccessor(ObjectClassifier objectClassifier, Map<EObjectClassification, List<ObjectAccessor>> accessors) {

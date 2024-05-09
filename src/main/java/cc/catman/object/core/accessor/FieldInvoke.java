@@ -1,5 +1,7 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.core.exception.ReflectionRuntimeException;
+
 import java.lang.reflect.Field;
 
 /**
@@ -14,17 +16,19 @@ public class FieldInvoke implements Invoke{
         return new FieldInvoke(field);
     }
 
+    @SuppressWarnings("java:S3011")
     public FieldInvoke(Field field) {
         this.field = field;
         this.field.setAccessible(true);
     }
 
     @Override
+    @SuppressWarnings("java:S3011")
     public Object invoke(Object object, Object... args) {
         try {
             return field.get(object);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new ReflectionRuntimeException(e);
         }
     }
 }

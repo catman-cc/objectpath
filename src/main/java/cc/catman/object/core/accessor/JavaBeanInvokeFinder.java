@@ -1,5 +1,7 @@
 package cc.catman.object.core.accessor;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -12,21 +14,24 @@ import java.util.Optional;
  * @since 0.0.1
  */
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JavaBeanInvokeFinder {
+
 
     /**
      * 根据类和方法名查找方法
+     * 尝试寻找key对应的属性值,根据javabean的规范,我们将按照一下规则去寻找属性:
+     * 1. get+key,如果存在该方法,则调用该方法
+     * 2. is+key,如果存在该方法,则调用该方法
+     * 3. key,如果存在该属性,则直接返回该属性
+     * 4. 直接寻找对应key值的方法,如果存在,则调用该方法,但是不推荐这种方式
+     * 5. 如果都不存在,则返回null
+     *
      * @param clazz 类
      * @param name 方法名
      * @return 方法调用器
      */
     public static Invoke findInvoke(Class<?> clazz, String name) {
-        // 尝试寻找key对应的属性值,根据javabean的规范,我们将按照一下规则去寻找属性:
-        // 1. get+key,如果存在该方法,则调用该方法
-        // 2. is+key,如果存在该方法,则调用该方法
-        // 3. key,如果存在该属性,则直接返回该属性
-        // 4. 直接寻找对应key值的方法,如果存在,则调用该方法,但是不推荐这种方式
-        // 5. 如果都不存在,则返回null
         String keyString = name;
         // 这里需要注意,keyString可能被包裹在了引号中,我们需要去掉引号
         if (keyString.startsWith("\"") && keyString.endsWith("\"")) {
@@ -59,6 +64,7 @@ public final class JavaBeanInvokeFinder {
         return Optional.empty();
     }
 
+    @SuppressWarnings("java:S3011")
     private static Optional<Field> tryGetFieldAccessor(Class<?> clazz,String name){
         Field field;
         try {
@@ -69,7 +75,7 @@ public final class JavaBeanInvokeFinder {
         field.setAccessible(true);
         return Optional.of(field);
     }
-
+    @SuppressWarnings("java:S3011")
     private static Optional<Method> getMethod(Class<?> clazz, String methodName) {
         try {
             Method method = clazz.getDeclaredMethod(methodName);

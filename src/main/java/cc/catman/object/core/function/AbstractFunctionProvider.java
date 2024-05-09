@@ -32,34 +32,34 @@ public abstract class AbstractFunctionProvider implements FunctionProvider {
     private final FunctionResultDesc result;
 
 
-    public AbstractFunctionProvider(String name) {
+    protected AbstractFunctionProvider(String name) {
         this(name, "", new ArrayList<>());
     }
 
-    public AbstractFunctionProvider(String name, FunctionResultDesc result) {
+    protected AbstractFunctionProvider(String name, FunctionResultDesc result) {
         this(name, "", new ArrayList<>(), result);
     }
 
-    public AbstractFunctionProvider(String name, List<List<FunctionArgDesc>> args) {
+    protected AbstractFunctionProvider(String name, List<List<FunctionArgDesc>> args) {
         this(name, "", args);
     }
 
-    public AbstractFunctionProvider(String name, List<List<FunctionArgDesc>> args, FunctionResultDesc result) {
+    protected AbstractFunctionProvider(String name, List<List<FunctionArgDesc>> args, FunctionResultDesc result) {
         this(name, "", args, result);
     }
 
-    public AbstractFunctionProvider(String name, String desc) {
+    protected AbstractFunctionProvider(String name, String desc) {
         this(name, desc, new ArrayList<>());
     }
 
-    public AbstractFunctionProvider(String name, String desc, List<List<FunctionArgDesc>> args) {
+    protected AbstractFunctionProvider(String name, String desc, List<List<FunctionArgDesc>> args) {
         this(name, desc, args, FunctionResultDesc.builder()
                 .type("void")
                 .desc("")
                 .build());
     }
 
-    public AbstractFunctionProvider(String name, String desc, List<List<FunctionArgDesc>> args, FunctionResultDesc result) {
+    protected AbstractFunctionProvider(String name, String desc, List<List<FunctionArgDesc>> args, FunctionResultDesc result) {
         this.name = name;
         this.desc = desc;
         this.args = args;
@@ -88,11 +88,9 @@ public abstract class AbstractFunctionProvider implements FunctionProvider {
 
     @Override
     public boolean isMatch(String name, List<Object> params) {
-        if (name.equals(this.name)) {
-            // 从多组参数中找到一个匹配的参数
-            if (args.stream().anyMatch(argDescList -> doCheckParams(argDescList, params))) {
-                return this.doCheckMatch(params);
-            }
+        if (name.equals(this.name) && (args.stream().anyMatch(argDescList -> doCheckParams(argDescList, params)))) {
+            return this.doCheckMatch(params);
+
         }
         return false;
     }
@@ -121,7 +119,8 @@ public abstract class AbstractFunctionProvider implements FunctionProvider {
 
     protected abstract Object doApply(List<Object> params);
 
-    private boolean doCheckMatch(List<Object> params) {
+    @SuppressWarnings("unused")
+    protected boolean doCheckMatch(List<Object> params) {
         return true;
     }
 }

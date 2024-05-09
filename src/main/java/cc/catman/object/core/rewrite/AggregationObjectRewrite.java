@@ -33,6 +33,7 @@ public class AggregationObjectRewrite implements ObjectRewrite{
      * @return 重写对象
      */
     @Override
+    @SuppressWarnings({"java:S3864"})
     public RewriteObject rewrite(final Object object) {
         return this.rewrites.stream()
                 .map(rewrite -> rewrite.rewrite(object))

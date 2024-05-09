@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * 分类器对象,用于包装被分类的对象
+ *
  * @author jpanda
  * @since 0.0.1
  */
@@ -21,35 +22,47 @@ public abstract class AbstractClassifierObject implements ClassifierObject {
      */
     protected EObjectClassification classification;
 
-    public AbstractClassifierObject(Object raw, EObjectClassification classification) {
+    /**
+     * 不支持的操作
+     */
+    private static final String UNSUPPORTED_OPERATION = "不支持的操作";
+
+    protected AbstractClassifierObject(Object raw, EObjectClassification classification) {
         this.raw = raw;
         this.classification = classification;
     }
 
     /**
      * 判断被包装的对象是否已经被分类
+     *
      * @return 是否已经被分类
      */
+    @Override
     public boolean classified() {
-        return classification != null&&classification!=EObjectClassification.UNKNOWN;
+        return classification != null && classification != EObjectClassification.UNKNOWN;
     }
 
+    @Override
     public String toText() {
-        throw new UnsupportedOperationException("不支持的操作");
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION);
     }
 
+    @Override
     public Number toNumber() {
-        throw new UnsupportedOperationException("不支持的操作");
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION);
     }
 
+    @Override
     public List<?> toList() {
-        throw new UnsupportedOperationException("不支持的操作");
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION);
     }
 
-    public Map<?,?> toMap() {
-        throw new UnsupportedOperationException("不支持的操作");
+    @Override
+    public Map<?, ?> toMap() {
+        throw new UnsupportedOperationException(UNSUPPORTED_OPERATION);
     }
 
+    @Override
     public Object toObject() {
         return raw;
     }

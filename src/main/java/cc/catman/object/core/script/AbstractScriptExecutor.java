@@ -1,5 +1,7 @@
 package cc.catman.object.core.script;
 
+import cc.catman.object.core.exception.ScriptRuntimeException;
+
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -18,11 +20,11 @@ public abstract class AbstractScriptExecutor implements ScriptExecutor{
      */
     private final ScriptObjectMirrorParser scriptObjectMirrorParser;
 
-    public AbstractScriptExecutor() {
+    protected AbstractScriptExecutor() {
         this(new ScriptObjectMirrorParser());
     }
 
-    public AbstractScriptExecutor(ScriptObjectMirrorParser scriptObjectMirrorParser) {
+    protected AbstractScriptExecutor(ScriptObjectMirrorParser scriptObjectMirrorParser) {
         this.scriptObjectMirrorParser = scriptObjectMirrorParser;
     }
 
@@ -41,7 +43,7 @@ public abstract class AbstractScriptExecutor implements ScriptExecutor{
             Object res = scriptEngine.eval(scriptStr, bindings);
             return scriptObjectMirrorParser.parse(res);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ScriptRuntimeException(e,script,args,this.getClass().getSimpleName());
         }
     }
 

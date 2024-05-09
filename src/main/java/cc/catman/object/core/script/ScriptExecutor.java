@@ -28,6 +28,7 @@ public interface ScriptExecutor {
      * @param args   参数
      * @return 执行结果
      */
+    @SuppressWarnings("java:S106")
     default Object eval(String script, Map<String, Object> args) {
         return eval(script, args, new PrintWriter(System.out), new PrintWriter(System.err));
     }

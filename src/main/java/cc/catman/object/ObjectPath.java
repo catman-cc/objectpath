@@ -2,6 +2,8 @@ package cc.catman.object;
 
 /**
  * 对象路径
+ * @author jpanda
+ * @since 0.0.1
  */
 public interface ObjectPath {
     /**

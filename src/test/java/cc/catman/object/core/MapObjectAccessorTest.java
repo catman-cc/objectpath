@@ -1,6 +1,7 @@
 package cc.catman.object.core;
 
 import cc.catman.object.core.accessor.MapObjectAccessor;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -14,24 +15,24 @@ public class MapObjectAccessorTest {
     @Test
     public void testIsSupport() {
         MapObjectAccessor objectAccessor = new MapObjectAccessor();
-        assert objectAccessor.isSupport(createMap(), "a");
+        Assert.assertTrue(objectAccessor.isSupport(createMap(), "a"));
     }
 
     @Test
     public void unSupport() {
         MapObjectAccessor objectAccessor = new MapObjectAccessor();
-        assert !objectAccessor.isSupport(null, "a");
+        Assert.assertFalse(objectAccessor.isSupport(new Object(), "a"));
     }
 
     @Test
     public void testGet() {
         MapObjectAccessor objectAccessor = new MapObjectAccessor();
-        assert objectAccessor.get(createMap(), "a").equals("b");
+        Assert.assertEquals("b", objectAccessor.get(createMap(), "a"));
     }
     @Test
     public void testGetNull() {
         MapObjectAccessor objectAccessor = new MapObjectAccessor();
-        assert objectAccessor.get(null, "a") == null;
+        Assert.assertNull(objectAccessor.get(createMap(), "c"));
     }
 
 

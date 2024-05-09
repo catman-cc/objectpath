@@ -56,6 +56,7 @@ public interface ObjectAccessor {
         throw new UnsupportedOperationException("不支持eachEntry操作");
     }
 
+    @SuppressWarnings("all")
     default Object map(Object object, Function<Object,Object> mapper){
         throw new UnsupportedOperationException("不支持map操作");
     }

@@ -59,6 +59,6 @@ public class AdvanceTest extends BaseTest {
         map.put("name","world");
         ObjectPathAccessor ac = op.parse("$.name.[<js name=$.name>return \"hello,\"+name;</js>]");
         Object res = ac.eval(map);
-        assert res.equals("hello,world");
+        Assert.assertEquals("hello,world", res);
     }
 }

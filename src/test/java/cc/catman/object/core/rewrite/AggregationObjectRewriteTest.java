@@ -1,5 +1,6 @@
 package cc.catman.object.core.rewrite;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
@@ -28,6 +29,6 @@ public class AggregationObjectRewriteTest {
         });
 
         RewriteObject rewrite = or.rewrite(new Date());
-        assert rewrite.getRewrite() instanceof String;
+        Assert.assertTrue(rewrite.getRewrite() instanceof String);
     }
 }

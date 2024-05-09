@@ -206,9 +206,4 @@
         <module name="SuperFinalize" />
 
     </module>
-    <!-- externalize the ignored/suppressed checks -->
-<!--    <module name="SuppressionFilter">-->
-<!--        <property name="file" value="./.checkstyle-suppressions.xml" />-->
-<!--        <property name="optional" value="false" />-->
-<!--    </module>-->
 </module>

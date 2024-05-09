@@ -1,5 +1,6 @@
 package cc.catman.object.core.script;
 
+import cc.catman.object.core.exception.ScriptObjectReadRuntimeException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.util.ArrayList;
@@ -23,13 +24,11 @@ public class ScriptObjectMirrorParser {
     public Object parse(ScriptObjectMirror mirror) {
         if (mirror.isArray()){
             List<Object> list = new ArrayList<>();
-            mirror.values().forEach(o->{
-                list.add(parse(o));
-            });
+            mirror.values().forEach(o-> list.add(parse(o)));
             return list;
         }
         if (mirror.isFunction()){
-            throw new RuntimeException("script return a function");
+            throw new ScriptObjectReadRuntimeException("script return a function",mirror);
         }
         if (mirror.isEmpty()) {
             return null;
