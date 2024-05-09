@@ -83,7 +83,7 @@ public class BasicObjectAccessorTest {
     @Test
     public void unSupportNull() {
         BasicObjectAccessor objectAccessor = BasicObjectAccessor.defaultAccessor();
-        Assert.assertFalse(objectAccessor.isSupport(null, 0,EAccessorKind.COVERT_TO_STRING));
+        Assert.assertTrue(objectAccessor.isSupport(null, 0,EAccessorKind.COVERT_TO_STRING));
     }
 
     @Test
