@@ -10,7 +10,7 @@ import cc.catman.object.core.rewrite.AggregationObjectRewrite;
  */
 public abstract class BaseTest {
 
-    protected static ObjectPath objectPath;
+    protected static IObjectPath IObjectPath;
 
     static {
         ObjectPathConfiguration configuration = ObjectPathConfiguration.builder()
@@ -20,7 +20,7 @@ public abstract class BaseTest {
                 .objectRewrite(new AggregationObjectRewrite())
                 .build();
 
-        objectPath =DefaultObjectPath.builder()
+        IObjectPath = ObjectPath.builder()
                 .config(configuration)
                 .build();
     }

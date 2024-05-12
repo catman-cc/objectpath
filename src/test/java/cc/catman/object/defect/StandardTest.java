@@ -16,19 +16,19 @@ public class StandardTest extends BaseTest {
 
     @Test
     public void readNull() {
-        Object res = objectPath.parse("$.store.notExist").eval(ROOT);
+        Object res = IObjectPath.parse("$.store.notExist").eval(ROOT);
         assert res == null;
     }
 
     @Test
     public void readWhenParentNull() {
-        Object root = objectPath.parse("$.store.notExist.some").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.notExist.some").eval(ROOT);
         assert root == null;
-        root = objectPath.parse("$.store.notExist[0]").eval(ROOT);
+        root = IObjectPath.parse("$.store.notExist[0]").eval(ROOT);
         assert root == null;
-        root = objectPath.parse("$.store.book[100]").eval(ROOT);
+        root = IObjectPath.parse("$.store.book[100]").eval(ROOT);
         assert root == null;
-        root = objectPath.parse("$.store.notExist[?(@price<100)]").eval(ROOT);
+        root = IObjectPath.parse("$.store.notExist[?(@price<100)]").eval(ROOT);
         assert root == null;
     }
 

@@ -61,6 +61,7 @@ public interface ObjectPathParserContext {
     /**
      * 创建派生子上下文
      *
+     * @param location 寻址标志
      * @return 子上下文
      */
     ObjectPathParserContext createChildContext(ELocation location);
@@ -86,25 +87,50 @@ public interface ObjectPathParserContext {
     /**
      * 在指定上下文中解析表达式,并获取结果
      *
+     * @param path 表达式
      * @return 解析结果
      */
     Object eval(String path);
 
+    /**
+     * 在当前上下文中获取当前对象的属性,并将属性名传递给消费者
+     *
+     * @param consumer 消费者
+     */
     default void eachKey(Consumer<Object> consumer) {
         eachKey(this, consumer);
     }
 
+    /**
+     * 在指定上下文中获取当前对象的属性,并将属性名传递给消费者
+     *
+     * @param context  上下文
+     * @param consumer 消费者
+     */
     void eachKey(ObjectPathParserContext context, Consumer<Object> consumer);
 
 
+    /**
+     * 在指定上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param context 上下文
+     * @param consumer 消费者
+     */
     void each(ObjectPathParserContext context, Consumer<Entity> consumer);
 
+    /**
+     * 在当前上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param consumer 消费者
+     */
     default void each(Consumer<Entity> consumer) {
         each(this, consumer);
     }
 
     /**
      * 在当前上下文中解析表达式,并获取结果
+     *
+     * @param consumer 消费者
      */
     default void eachValue(Consumer<Object> consumer) {
         eachValue(this, consumer);
@@ -113,20 +139,50 @@ public interface ObjectPathParserContext {
 
     /**
      * 在指定上下文中解析表达式,并获取结果
+     *
+     * @param context  上下文
+     * @param consumer 消费者
      */
     void eachValue(ObjectPathParserContext context, Consumer<Object> consumer);
 
+    /**
+     * 在当前上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param mapper 消费者
+     * @return 映射后的对象
+     */
     @SuppressWarnings("all")
     default Object map(Function<Object, Object> mapper) {
         return map(this, mapper);
     }
+
+    /**
+     * 在指定上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param context 上下文
+     * @param mapper  消费者
+     * @return 映射后的对象
+     */
     @SuppressWarnings("all")
     Object map(ObjectPathParserContext context, Function<Object, Object> mapper);
 
+    /**
+     * 在当前上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param filter 过滤器
+     * @return 过滤后的对象
+     */
     default Object filter(Predicate<Object> filter) {
         return filter(this, filter);
     }
 
+    /**
+     * 在指定上下文中获取当前对象的属性,并将属性名和属性值传递给消费者
+     *
+     * @param context 上下文
+     * @param filter  过滤器
+     * @return 过滤后的对象
+     */
     Object filter(ObjectPathParserContext context, Predicate<Object> filter);
 
     /**
@@ -153,6 +209,7 @@ public interface ObjectPathParserContext {
 
     /**
      * 反转集合中的数据
+     * @return 反转后的数据
      */
     List<String> reverse();
 
@@ -166,6 +223,7 @@ public interface ObjectPathParserContext {
     /**
      * 将对象转换为字符串,默认情况下,不会处理对象,集合,数组等
      *
+     * @param object 对象
      * @return 字符串
      */
     String covertToString(Object object);
@@ -176,7 +234,7 @@ public interface ObjectPathParserContext {
 
     /**
      * 将对象转换为数值
-     *
+     * @param object 对象
      * @return 数值
      */
     Number covertToNumber(Object object);

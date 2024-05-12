@@ -20,6 +20,7 @@ public interface JsonCoder {
      *
      * @param json  JSON字符串
      * @param clazz 对象类型
+     * @param <T>  对象类型
      * @return 对象
      */
     <T> T decode(String json, Class<T> clazz);

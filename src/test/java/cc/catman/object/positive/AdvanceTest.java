@@ -29,7 +29,7 @@ public class AdvanceTest extends BaseTest {
         FunctionManager fm = configuration.getFunctionManager();
         fm.register(new DateFormatFunctionProvider("format"));
 
-        DefaultObjectPath op = DefaultObjectPath.builder()
+        ObjectPath op = ObjectPath.builder()
                 .config(configuration)
                 .build();
         long now = System.currentTimeMillis();
@@ -52,7 +52,7 @@ public class AdvanceTest extends BaseTest {
 
         configuration.getScriptExecutorManager().addExecutor("js",new JavaScriptExecutor());
 
-        DefaultObjectPath op = DefaultObjectPath.builder()
+        ObjectPath op = ObjectPath.builder()
                 .config(configuration)
                 .build();
         Map<String,String> map=new HashMap<>();
