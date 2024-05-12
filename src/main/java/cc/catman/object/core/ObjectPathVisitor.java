@@ -110,6 +110,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * 另一种是直接访问当前上下文的子对象,即ID模式
      *
      * @param ctx the parse tree
+     * @return the result of the visit
      */
     public ObjectPathParserContext switchContextWithExpr(ObjectPathParser.ExprContext ctx) {
         if (Optional.ofNullable(ctx.location()).isPresent()) {
@@ -209,15 +210,20 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     }
 
     /**
+     * <pre>
      * 递归下降,获取所有匹配的子元素,并将子元素的筛选结果作为一个新的集合返回
-     * 递归下降的操作本质上是通过子表达式筛选出符合条件的元素,然后将这些元素作为一个新的集合返回.
-     * 他的实现和通配符访问类似,都需要中断后续子表达式的自动执行,并将其作为筛选条件来处理
-     * 比如,$..name,本质上是递归获取所有元素的name属性,然后将这些name属性作为一个新的集合返回
-     * 再比如$..book[?(@.price<10)],本质上是递归获取所有价格小于10的书籍,然后将这些书籍作为一个新的集合返回
-     * 其有一个隐藏的filter操作,即对父元素筛选持有某一个属性的元素
+
+     * </pre>
+     * @param ctx the parse tree
+     * @return the result of the visit
      */
     @Override
     public Object visitRECURSIVE_CHILD(ObjectPathParser.RECURSIVE_CHILDContext ctx) {
+        // 递归下降的操作本质上是通过子表达式筛选出符合条件的元素,然后将这些元素作为一个新的集合返回.
+        // 他的实现和通配符访问类似,都需要中断后续子表达式的自动执行,并将其作为筛选条件来处理
+        // 比如,$..name,本质上是递归获取所有元素的name属性,然后将这些name属性作为一个新的集合返回
+        // 再比如$..book[?(@.price<10)],本质上是递归获取所有价格小于10的书籍,然后将这些书籍作为一个新的集合返回
+        // 其有一个隐藏的filter操作,即对父元素筛选持有某一个属性的元素
         // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
         // 遍历操作由上下文对象完成,注意此时,上下文产生了分值,在通配符后的所有选择器都会在子上下文中执行
         ParserRuleContext parent = ctx.getParent();

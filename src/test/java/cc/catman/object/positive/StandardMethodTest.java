@@ -23,28 +23,28 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void min() {
-        Object root = objectPath.parse("$.store.book.min(@.price)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.min(@.price)").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).min(Double::compareTo).ifPresent(o -> Assert.assertEquals(o, root));
     }
 
     @Test
     public void max() {
-        Object root = objectPath.parse("$.store.book.max(@.price)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.max(@.price)").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).max(Double::compareTo).ifPresent(o -> Assert.assertEquals(o, root));
     }
 
     @Test
     public void sum() {
-        Object root = objectPath.parse("$.store.book.sum(@.price)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.sum(@.price)").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).reduce(Double::sum).ifPresent(o -> Assert.assertEquals(o, root));
     }
 
     @Test
     public void avg() {
-        Object root = objectPath.parse("$.store.book.avg(@.price)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.avg(@.price)").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).reduce(Double::sum)
                 .ifPresent(o -> Assert.assertEquals(o / ROOT.getStore().getBook().size(), root)
@@ -53,35 +53,35 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void size() {
-        Object root = objectPath.parse("$.store.book.size()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.size()").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         Assert.assertEquals(ROOT.getStore().getBook().size(), root);
     }
 
     @Test
     public void isEmpty() {
-        Object root = objectPath.parse("$.store.book.isEmpty()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.isEmpty()").eval(ROOT);
         Assert.assertTrue(root instanceof Boolean);
         Assert.assertEquals(ROOT.getStore().getBook().isEmpty(), root);
     }
 
     @Test
     public void length() {
-        Object root = objectPath.parse("$.store.book.length()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.length()").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         Assert.assertEquals(ROOT.getStore().getBook().size(), root);
     }
 
     @Test
     public void strLength() {
-        Object root = objectPath.parse("$.store.book[0].title.length()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book[0].title.length()").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         Assert.assertEquals(ROOT.getStore().getBook().get(0).getTitle().length(), root);
     }
 
     @Test
     public void keys() {
-        Object root = objectPath.parse("$.store.book.keys()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.keys()").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -93,7 +93,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void values() {
-        Object root = objectPath.parse("$.store.book.values()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.values()").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -105,7 +105,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void reverse() {
-        Object root = objectPath.parse("$.store.book.reverse()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.reverse()").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -119,7 +119,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void sort() {
-        Object root = objectPath.parse("$.store.book.sort(@.price,@.title)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.sort(@.price,@.title)").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -137,7 +137,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void rsort() {
-        Object root = objectPath.parse("$.store.book.rsort(@.price,@.title)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.rsort(@.price,@.title)").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -155,7 +155,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void reverseSort() {
-        Object root = objectPath.parse("$.store.book.sort(@.price,@.title).reverse()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.sort(@.price,@.title).reverse()").eval(ROOT);
         assert root instanceof Iterable;
         assert root instanceof List;
         List<?> list = (List<?>) root;
@@ -173,13 +173,13 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void groupBy() {
-        Object root = objectPath.parse("$.store.book.groupBy(@.category)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.groupBy(@.category)").eval(ROOT);
         assert root instanceof Map;
     }
 
     @Test
     public void join() {
-        Object root = objectPath.parse("$.store.book[*].price|@.join(10086D)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book[*].price|@.join(10086D)").eval(ROOT);
         assert root instanceof List;
         List<?> list = (List<?>) root;
         assert list.size() == ROOT.getStore().getBook().size() + 1;
@@ -187,13 +187,13 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void split() {
-        Object root = objectPath.parse("$.store.book[35].author.split('·')").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book[35].author.split('·')").eval(ROOT);
         assert root instanceof List;
     }
 
     @Test
     public void distinct() {
-        Object root = objectPath.parse("$.store.book.distinct()").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.distinct()").eval(ROOT);
         assert root instanceof List;
         List<?> list = (List<?>) root;
         assert list.size() == ROOT.getStore().getBook().stream().distinct().count();
@@ -201,7 +201,7 @@ public class StandardMethodTest extends BaseTest {
 
     @Test
     public void distinctWithFilter() {
-        Object root = objectPath.parse("$.store.book.distinct(@.category)").eval(ROOT);
+        Object root = IObjectPath.parse("$.store.book.distinct(@.category)").eval(ROOT);
         assert root instanceof List;
         List<?> list = (List<?>) root;
         assert list.size() == ROOT.getStore().getBook().stream().map(Book::getCategory).distinct().count();
