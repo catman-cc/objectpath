@@ -19,6 +19,11 @@ jobs:
       - name: Reversion the project
         run: |
           mvn versions:set -DnewVersion=${GITHUB_REF#refs/tags/v}
+      - name: Debug
+        run: |
+          echo `pwd`
+          ls
+          mvn help:system
       - name: Deploy To Nexus
         env:
          mvn_gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
