@@ -6,7 +6,7 @@
 
     <groupId>cc.catman.jsonpath</groupId>
     <artifactId>catman-jsonpath</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <name>object path</name>
     <url>https://github.com/catman-cc/objectpath</url>
@@ -14,36 +14,6 @@
         ObjectPath is a path parser for accessing Java objects, similar to jsonpath,
         but ObjectPath is used for accessing Java objects rather than JSON objects.
     </description>
-
-    <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://github.com/catman-cc/objectpath</url>
-        </repository>
-    </repositories>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <scm>
-        <connection>
-            scm:git:git@github.com:catman-cc/objectpath.git
-        </connection>
-        <developerConnection>
-            scm:git:git@github.com:catman-cc/objectpath.git
-        </developerConnection>
-        <url>
-            https://github.com/catman-cc/objectpath.git
-        </url>
-        <tag>
-            HEAD
-        </tag>
-    </scm>
 
     <developers>
         <developer>
@@ -55,6 +25,48 @@
             </roles>
         </developer>
     </developers>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>
+            scm:git:git://github.com:catman-cc/objectpath.git
+        </connection>
+        <developerConnection>
+            scm:git:git://github.com:catman-cc/objectpath.git
+        </developerConnection>
+        <url>
+            https://github.com/catman-cc/objectpath.git
+        </url>
+        <tag>
+            HEAD
+        </tag>
+    </scm>
+
+    <issueManagement>
+        <system>GITHUB</system>
+        <url>https://github.com/catman-cc/objectpath/issues</url>
+    </issueManagement>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://github.com/catman-cc/objectpath</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://central.sonatype.com</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
         <org.antlr.version>4.13.1</org.antlr.version>
@@ -71,6 +83,7 @@
         <org.maven.javadoc.version>3.6.3</org.maven.javadoc.version>
         <org.maven.gpg.version>3.2.4</org.maven.gpg.version>
         <org.sonatype.nexus.staging.maven.plugin.version>1.6.13</org.sonatype.nexus.staging.maven.plugin.version>
+        <org.sonatype.central.publishing.maven.plugin.version>0.4.0</org.sonatype.central.publishing.maven.plugin.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -194,6 +207,11 @@
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>${org.sonatype.nexus.staging.maven.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${org.sonatype.central.publishing.maven.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -204,6 +222,7 @@
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
@@ -211,6 +230,7 @@
                     <generateBackupPoms>false</generateBackupPoms>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -234,6 +254,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -246,7 +267,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludeResources>true</excludeResources>
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -260,6 +286,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -281,23 +308,17 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

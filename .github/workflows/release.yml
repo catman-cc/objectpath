@@ -10,23 +10,20 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
-      - name: 配置maven
+      - name: Init Runtime Environment
         uses: actions/setup-java@v4.2.1
         with:
           java-version: '8'
           distribution: 'adopt'
           java-package: 'jdk'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v5
-        with:
-          maven-version: 3.8.2
       - name: Reversion the project
         run: |
           mvn versions:set -DnewVersion=${GITHUB_REF#refs/tags/v}
-      - name: Release Maven package
-        uses: samuelmeuli/action-maven-publish@v1
-        with:
-          gpg_private_key: ${{ secrets.GPG_SECRET }}
-          gpg_passphrase: ${{ secrets.GPG_PASSWORD }}
-          nexus_username: ${{ secrets.NEXUS_USERNAME }}
-          nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Deploy To Nexus
+        env:
+         mvn_gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+         mvn_gpg_passphrase:  ${{ secrets.GPG_PASSPHRASE }}
+         mvn_nexus_username: ${{ secrets.NEXUS_USERNAME }}
+         mvn_nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mvn clean deploy --batch-mode --activate-profiles deploy --settings `pwd`/settings.xml 
