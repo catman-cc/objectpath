@@ -16,19 +16,11 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
           java-package: 'jdk'
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Reversion the project
         run: |
           mvn versions:set -DnewVersion=${GITHUB_REF#refs/tags/v}
-      - name: Debug
-        env:
-          mvn_gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          mvn_gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          mvn_nexus_username: ${{ secrets.NEXUS_USERNAME }}
-          mvn_nexus_password: ${{ secrets.NEXUS_PASSWORD }}
-        run: |
-          echo `pwd`
-          ls
-          mvn help:system
       - name: Deploy To Nexus
         env:
          mvn_gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
