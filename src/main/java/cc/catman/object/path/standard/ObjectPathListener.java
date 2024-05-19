@@ -19,15 +19,65 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitObjectPath(ObjectPathParser.ObjectPathContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ObjectPathParser#expr}.
+	 * Enter a parse tree produced by the {@code GROUP_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(ObjectPathParser.ExprContext ctx);
+	void enterGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link ObjectPathParser#expr}.
+	 * Exit a parse tree produced by the {@code GROUP_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(ObjectPathParser.ExprContext ctx);
+	void exitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code DEFAULT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DEFAULT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code PATH_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code PATH_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.
@@ -882,6 +932,16 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitComplexValue(ObjectPathParser.ComplexValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#calcValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterCalcValue(ObjectPathParser.CalcValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#calcValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitCalcValue(ObjectPathParser.CalcValueContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#value}.
 	 * @param ctx the parse tree

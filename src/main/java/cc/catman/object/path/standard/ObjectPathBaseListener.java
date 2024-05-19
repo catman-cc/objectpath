@@ -29,13 +29,61 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpr(ObjectPathParser.ExprContext ctx) { }
+	@Override public void enterGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpr(ObjectPathParser.ExprContext ctx) { }
+	@Override public void exitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -912,6 +960,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitComplexValue(ObjectPathParser.ComplexValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCalcValue(ObjectPathParser.CalcValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCalcValue(ObjectPathParser.CalcValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

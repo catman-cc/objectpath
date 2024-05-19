@@ -26,7 +26,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readRoot() {
-        Object root = IObjectPath.parse("$").eval(ROOT);
+        Object root = objectPath.parse("$").eval(ROOT);
         assert root.equals(ROOT);
     }
 
@@ -35,7 +35,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readByDotAndName() {
-        Object root = IObjectPath.parse("$.store").eval(ROOT);
+        Object root = objectPath.parse("$.store").eval(ROOT);
         assert root.equals(ROOT.getStore());
     }
 
@@ -44,7 +44,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readByIndex() {
-        Object root = IObjectPath.parse("$.store.book[0]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[0]").eval(ROOT);
         assert root.equals(ROOT.getStore().getBook().get(0));
     }
 
@@ -53,7 +53,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAllFromArray() {
-        Object root = IObjectPath.parse("$.store.book[*]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[*]").eval(ROOT);
         assert root.equals(ROOT.getStore().getBook());
     }
 
@@ -62,7 +62,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readByName() {
-        Object root = IObjectPath.parse("$.store.book[0].author").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[0].author").eval(ROOT);
         assert root.equals(ROOT.getStore().getBook().get(0).getAuthor());
     }
 
@@ -71,7 +71,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readBySlice() {
-        Object root = IObjectPath.parse("$.store.book[0:2]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[0:2]").eval(ROOT);
         assert root.equals(ROOT.getStore().getBook().subList(0,2));
     }
 
@@ -80,7 +80,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAllAuthors() {
-        Object root = IObjectPath.parse("$.store.book[*].author").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[*].author").eval(ROOT);
         List<String> want = ROOT.getStore().getBook().stream()
                 .map(Book::getAuthor)
                 .collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readPriceLessThan10() {
-        Object root = IObjectPath.parse("$.store.book[?(@.price < 10)]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[?(@.price < 10)]").eval(ROOT);
         List<Book> want = ROOT.getStore().getBook().stream()
                 .filter(book -> book.getPrice() < 10)
                 .collect(Collectors.toList());
@@ -120,7 +120,7 @@ public class StandardTest extends BaseTest {
     public void readPriceLessThanExpensive() {
         // 注意这里没有用到.号
         Stream.of("expensive", "'expensive'","\"expensive\"").forEach(expensive -> {
-            Object root = IObjectPath.parse("$.store.book[?(@.price <= $" + expensive + ")]").eval(ROOT);
+            Object root = objectPath.parse("$.store.book[?(@.price <= $" + expensive + ")]").eval(ROOT);
             List<Book> want = ROOT.getStore().getBook().stream()
                     .filter(book -> book.getPrice() <= ROOT.getExpensive())
                     .collect(Collectors.toList());
@@ -133,7 +133,7 @@ public class StandardTest extends BaseTest {
         });
         // 测试包裹在中括号中的变量
         Stream.of("expensive", "'expensive'","\"expensive\"").forEach(expensive -> {
-            Object root = IObjectPath.parse("$.store.book[?(@.price <= $[" + expensive + "])]").eval(ROOT);
+            Object root = objectPath.parse("$.store.book[?(@.price <= $[" + expensive + "])]").eval(ROOT);
             List<Book> want = ROOT.getStore().getBook().stream()
                     .filter(book -> book.getPrice() <= ROOT.getExpensive())
                     .collect(Collectors.toList());
@@ -147,7 +147,7 @@ public class StandardTest extends BaseTest {
 
         // 测试添加了.号的变量
         Stream.of("expensive", "'expensive'","\"expensive\"").forEach(expensive -> {
-            Object root = IObjectPath.parse("$.store.book[?(@.price <= $." + expensive + ")]").eval(ROOT);
+            Object root = objectPath.parse("$.store.book[?(@.price <= $." + expensive + ")]").eval(ROOT);
             List<Book> want = ROOT.getStore().getBook().stream()
                     .filter(book -> book.getPrice() <= ROOT.getExpensive())
                     .collect(Collectors.toList());
@@ -167,7 +167,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAuthorRRegx() {
-        Object root = IObjectPath.parse("$.store.book[?(@.author =~ /.*杜/i)]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[?(@.author =~ /.*杜/i)]").eval(ROOT);
         List<Book> want = ROOT.getStore().getBook().stream()
                 .filter(book -> book.getAuthor().matches(".*杜.*"))
                 .collect(Collectors.toList());
@@ -186,7 +186,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAuthorLRegx() {
-        Object root = IObjectPath.parse("$.store.book[?( /.*杜/i ~= @.author)]").eval(ROOT);
+        Object root = objectPath.parse("$.store.book[?( /.*杜/i ~= @.author)]").eval(ROOT);
         List<Book> want = ROOT.getStore().getBook().stream()
                 .filter(book -> book.getAuthor().matches(".*杜.*"))
                 .collect(Collectors.toList());
@@ -203,7 +203,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAllAuthorsRecursively() {
-        Object root = IObjectPath.parse("$.store..author").eval(ROOT);
+        Object root = objectPath.parse("$.store..author").eval(ROOT);
         List<String> want = ROOT.getStore().getBook().stream()
                 .map(Book::getAuthor)
                 .collect(Collectors.toList());
@@ -222,7 +222,7 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAllChildren() {
-        Object root = IObjectPath.parse("$.*").eval(ROOT);
+        Object root = objectPath.parse("$.*").eval(ROOT);
         List<Object> want = Arrays.asList(ROOT.getStore(), ROOT.getExpensive());
         assert root instanceof List;
         List<?> list = (List<?>) root;

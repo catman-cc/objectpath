@@ -18,11 +18,40 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitObjectPath(ObjectPathParser.ObjectPathContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link ObjectPathParser#expr}.
+	 * Visit a parse tree produced by the {@code GROUP_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(ObjectPathParser.ExprContext ctx);
+	T visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DEFAULT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code PATH_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.
@@ -523,6 +552,12 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitComplexValue(ObjectPathParser.ComplexValueContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#calcValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCalcValue(ObjectPathParser.CalcValueContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ObjectPathParser#value}.
 	 * @param ctx the parse tree
