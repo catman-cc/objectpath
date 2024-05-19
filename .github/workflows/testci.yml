@@ -15,8 +15,8 @@ jobs:
           distribution: 'adopt'
           java-package: 'jdk'
           server-id: 'ossrh'
-          server-username: ${{ secrets.NEXUS_USERNAME }}
-          server-password: ${{ secrets.NEXUS_PASSWORD }}
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Reversion the project
@@ -25,7 +25,7 @@ jobs:
       - name: Deploy To Nexus
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.NEXUS_PASSWORD }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn clean deploy --batch-mode -Dgpg.skip=false
