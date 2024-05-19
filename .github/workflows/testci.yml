@@ -25,7 +25,7 @@ jobs:
       - name: Deploy To Nexus
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.NEXUS_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn clean deploy --batch-mode
+          mvn clean deploy --batch-mode -Dgpg.skip=false
