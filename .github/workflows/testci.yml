@@ -1,0 +1,31 @@
+name: Release
+on:
+  push:
+    branches: [ "feature/ci*" ]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+      - name: Init Runtime Environment
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          java-package: 'jdk'
+          server-id: 'ossrh'
+          server-username: ${{ secrets.NEXUS_USERNAME }}
+          server-password: ${{ secrets.NEXUS_PASSWORD }}
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Reversion the project
+        run: |
+          mvn versions:set -DnewVersion=0.0.2
+      - name: Deploy To Nexus
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          mvn clean deploy --batch-mode
