@@ -76,7 +76,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return 表达式的执行结果
      */
     @Override
-    public Object visitExpr(ObjectPathParser.ExprContext ctx) {
+    public Object visitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx) {
         // 切换上下文
         ObjectPathParserContext nc = switchContextWithExpr(ctx);
         // 持有新上下文的访问器
@@ -100,8 +100,113 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             childVisitor.context.updateCurrent(childVisitor.context.currentValue());
             childVisitor.context.updateCurrent(result);
         }
+
         // 当表达式退出时,需要将上下文重置为之前的上下文,即退出当前上下文
         return result;
+    }
+
+    @Override
+    public Object visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) {
+        String text = ctx.getChild(1).getText();
+        Object left = visit(ctx.expr(0));
+        Object right = visit(ctx.expr(1));
+        if (left instanceof Number && right instanceof Number) {
+            Number l = (Number) left;
+            Number r = (Number) right;
+            if ("+".equals(text)) {
+                return l.doubleValue() + r.doubleValue();
+            }
+            if ("-".equals(text)) {
+                return l.doubleValue() - r.doubleValue();
+            }
+            if ("*".equals(text)) {
+                return l.doubleValue() * r.doubleValue();
+            }
+            if ("/".equals(text)) {
+                return l.doubleValue() / r.doubleValue();
+            }
+            if ("%".equals(text)) {
+                return l.doubleValue() % r.doubleValue();
+            }
+        }
+        if (this.config.isEnableFeature(Features.CONNECT_STRING_USE_PLUS_SIGN)
+            && ("+".equals(text))) {
+                return left.toString() + right.toString();
+
+        }
+        return null;
+    }
+
+    /**
+     * 访问分组
+     * @param ctx the parse tree
+     */
+    @Override
+    public Object visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) {
+        return visit(ctx.expr());
+    }
+
+    /**
+     * 获取字面量值
+     * @param ctx the parse tree
+     * @return 字面量
+     */
+    @Override
+    public Object visitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) {
+        if (Optional.ofNullable(ctx.DOUBLE()).isPresent()) {
+            return Double.parseDouble(ctx.DOUBLE().getText());
+        }
+        if (Optional.ofNullable(ctx.NUMBER()).isPresent()) {
+            String text = ctx.NUMBER().getText();
+            if (text.endsWith("l")||text.endsWith("L")){
+                return Long.parseLong(text.substring(0,text.length()-1));
+            }
+            return Integer.parseInt(text);
+        }
+        if (Optional.ofNullable(ctx.STRING()).isPresent()) {
+            return ctx.STRING().getText();
+        }
+        if (Optional.ofNullable(ctx.BOOL()).isPresent()) {
+            return Boolean.parseBoolean(ctx.BOOL().getText());
+        }
+        return null;
+    }
+
+    /**
+     * 一个允许拥有默认值的表达式
+     * @param ctx the parse tree
+     */
+    @Override
+    public Object visitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) {
+        ObjectPathParser.ExprContext value = ctx.expr(0);
+        ObjectPathParser.ExprContext defaultValue = ctx.expr(1);
+        Object v = visit(value);
+        ObjectPathParser.FilterExprContext fe = ctx.filterExpr();
+        if (Optional.ofNullable(fe).isPresent()) {
+            // 如果存在过滤器,则需要判断过滤器是否通过,此时需要创建一个子上下文
+            // 切换上下文
+            ObjectPathParserContext nc = this.context.createChild(v);
+            // 持有新上下文的访问器
+            ObjectPathVisitor childVisitor = new ObjectPathVisitor(nc);
+            Object filterValue = childVisitor.visit(fe);
+            // 理论上filterValue必须是boolean类型,但是为了减少可能出现的问题,允许为null.
+            Boolean effective = Optional.ofNullable(filterValue).map(fv -> {
+                if (fv instanceof Boolean) {
+                    return (Boolean) fv;
+                }
+                if (fv instanceof String) {
+                    return Boolean.parseBoolean((String) fv);
+                }
+                return false;
+            }).orElse(false);
+
+            if(Boolean.TRUE.equals(effective)){
+                return v;
+            }
+            return visit(defaultValue);
+        }
+        // 直接进行null判断
+        return v==null?visit(defaultValue):v;
     }
 
     /**
@@ -112,11 +217,12 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @param ctx the parse tree
      * @return the result of the visit
      */
-    public ObjectPathParserContext switchContextWithExpr(ObjectPathParser.ExprContext ctx) {
+    public ObjectPathParserContext switchContextWithExpr(ObjectPathParser.PATH_EXPRContext ctx) {
         if (Optional.ofNullable(ctx.location()).isPresent()) {
             ELocation l = ELocation.fromLocation(ctx.location().getText());
             return this.context.createChildContext(l);
         }
+
         if (Optional.ofNullable(ctx.ID()).isPresent()) {
             String id = ctx.ID().getText();
             return this.context.createChild(this.context.eval(id));

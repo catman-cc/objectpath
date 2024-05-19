@@ -1,8 +1,16 @@
 grammar ObjectPath;
 objectPath: expr (pipe)*;
 /* 扩展jsonpath,在未显式提供$/@前导符号时,默认为@,表示当前对象本身 */
-expr: (location|ID)? selector* ;
-location: '$'                                      #ROOT_NODE
+/* 新增计算方法后,表达式,就变成了两部分,计算表达式和标准表达式 */
+expr:
+(location|ID)? selector*                #PATH_EXPR
+|(DOUBLE|NUMBER|STRING|BOOL)            #VALUE_EXPR
+| expr ('+'|'-'|'*'|'/'|'%') expr       #CALCULATE_EXPR
+|'(' expr ')'                           #GROUP_EXPR
+|expr ('?'|filterExpr) ':' expr         #DEFAULT_EXPR
+;
+
+location: '$'                                       #ROOT_NODE
 | '@'                                               #CURRENT_NODE
 |'@@'                                               #PARENT_NODE
 ;
@@ -21,6 +29,7 @@ ID                                  #CHILD
 |'.*'                               #ALL
 ;
 
+/* 管道表达式 */
 pipe: '|'expr ;
 
 /* 过滤表达式 */
@@ -49,6 +58,8 @@ comparExpr: (expr|value) '=='  (expr|value) #EQ
 ;
 
 reverseComparExpr: '!' comparExpr;
+
+
 
 func: '.' ID '(' (args|) ')'                   #METHOD_CALL
 |'.' 'min' '(' (expr|) (',' (DOUBLE|NUMBER))? ')'                     #MIN
@@ -92,6 +103,7 @@ namedArg: ID '=' arg;
 args: arg (',' arg)*;
 arg:  value|complexValue| expr;
 complexValue: value|json;
+calcValue: expr|DOUBLE|NUMBER;
 value:STRING|NUMBER|DOUBLE|BOOL|ID;
 json: object|array;
 object: '{' pair (',' pair)* '}';
@@ -102,7 +114,7 @@ SCRIPT_CONTENT: '>' (~[<])* '</';
 BOOL: 'true' | 'false'|'TRUE'|'FALSE';
 NUMBER: DIGIT+ ('l'|'L')?;
 DOUBLE: (NUMBER ( '.' NUMBER)('d'|'D')?|NUMBER ('d'|'D')?) ;
-
+CACLUATE: '+'|'-'|'*'|'/'|'%';
 ID: [a-zA-Z_][a-zA-Z_0-9]*|STRING;
 STRING: '"' (.*?) '"'
 | '\'' .*? '\''

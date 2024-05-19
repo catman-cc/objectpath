@@ -1,5 +1,6 @@
 package cc.catman.object;
 
+import cc.catman.object.core.Features;
 import cc.catman.object.core.accessor.ObjectAccessor;
 import cc.catman.object.core.function.FunctionManager;
 import cc.catman.object.core.json.JsonCoder;
@@ -7,6 +8,9 @@ import cc.catman.object.core.rewrite.ObjectRewrite;
 import cc.catman.object.core.script.ScriptExecutorManager;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.EnumMap;
+
 /**
  * 配置对象
  * @author jpanda
@@ -27,6 +31,12 @@ public class ObjectPathConfiguration {
      */
     @Builder.Default
     private boolean autoCreateCollectionWhenInvokeMethod=false;
+
+    /**
+     * 一些特性方法
+     */
+    @Builder.Default
+    private EnumMap<Features,Boolean> features=new EnumMap<>(Features.class);
     /**
      * json解析器
      */
@@ -39,5 +49,9 @@ public class ObjectPathConfiguration {
     private ObjectRewrite objectRewrite;
 
     private ScriptExecutorManager scriptExecutorManager;
+
+    public boolean isEnableFeature(Features feature){
+        return features.getOrDefault(feature,false);
+    }
 
 }
