@@ -3,7 +3,7 @@ objectPath: expr (pipe)*;
 /* 扩展jsonpath,在未显式提供$/@前导符号时,默认为@,表示当前对象本身 */
 /* 新增计算方法后,表达式,就变成了两部分,计算表达式和标准表达式 */
 expr:
-(location|ID)? selector*                #PATH_EXPR
+(location|ID|selector) selector*        #PATH_EXPR
 |(DOUBLE|NUMBER|STRING|BOOL)            #VALUE_EXPR
 | expr ('+'|'-'|'*'|'/'|'%') expr       #CALCULATE_EXPR
 |'(' expr ')'                           #GROUP_EXPR

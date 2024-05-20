@@ -1,9 +1,11 @@
 package cc.catman.object;
 
+import cc.catman.object.core.error.StandardErrorListener;
 import cc.catman.object.path.standard.ObjectPathLexer;
 import cc.catman.object.path.standard.ObjectPathParser;
 import lombok.Builder;
 import lombok.Data;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,7 +37,13 @@ public class ObjectPath implements IObjectPath {
     public ObjectPathAccessor parse(String path) {
         CodePointCharStream stream = CharStreams.fromString(path);
         ObjectPathLexer lexer = new ObjectPathLexer(stream);
+        lexer.addErrorListener(new StandardErrorListener(this.config));
         ObjectPathParser opp = new ObjectPathParser(new CommonTokenStream(lexer));
+        opp.removeErrorListeners();
+        opp.addErrorListener(new StandardErrorListener(this.config));
+        if (this.config.isSyntaxErrorStop()){
+            opp.setErrorHandler(new BailErrorStrategy());
+        }
         return new DefaultObjectPathAccessor(opp,config);
     }
 }

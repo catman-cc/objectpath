@@ -33,6 +33,19 @@ public class ObjectPathConfiguration {
     private boolean autoCreateCollectionWhenInvokeMethod=false;
 
     /**
+     * 当发生语法错误时,抑制异常,并将其记录到错误日志
+     * 该值为false时,将显式抛出异常信息
+     */
+    @Builder.Default
+    private boolean preventSyntaxErrorAndSendToErrorLog=false;
+
+    /**
+     * 当发生语法错误时,是否停止解析
+     */
+    @Builder.Default
+    private boolean syntaxErrorStop=true;
+
+    /**
      * 一些特性方法
      */
     @Builder.Default
