@@ -105,14 +105,18 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         return result;
     }
 
+    @SuppressWarnings("java:S3776")
     @Override
     public Object visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) {
         String text = ctx.getChild(1).getText();
         Object left = visit(ctx.expr(0));
         Object right = visit(ctx.expr(1));
-        if (left instanceof Number && right instanceof Number) {
-            Number l = (Number) left;
-            Number r = (Number) right;
+        boolean isNumber = config.isUseZeroForNull()
+                ? (left instanceof Number || right instanceof Number)
+                : (left instanceof Number && right instanceof Number);
+        if (isNumber) {
+            Number l = Optional.ofNullable(left).map(Number.class::cast).orElse(0);
+            Number r = Optional.ofNullable(right).map(Number.class::cast).orElse(0);
             if ("+".equals(text)) {
                 return l.doubleValue() + r.doubleValue();
             }
@@ -129,9 +133,15 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 return l.doubleValue() % r.doubleValue();
             }
         }
+
         if (this.config.isEnableFeature(Features.CONNECT_STRING_USE_PLUS_SIGN)
             && ("+".equals(text))) {
-                return left.toString() + right.toString();
+            if (config.isUseZeroForNull()) {
+                return Optional.ofNullable(left).map(Object::toString).orElse("")
+                       + Optional.ofNullable(right).map(Object::toString).orElse("");
+            }
+            return Optional.ofNullable(left).map(Object::toString).orElse("null")
+                   + Optional.ofNullable(right).map(Object::toString).orElse("null");
 
         }
         return null;
@@ -139,6 +149,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     /**
      * 访问分组
+     *
      * @param ctx the parse tree
      */
     @Override
@@ -148,6 +159,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     /**
      * 获取字面量值
+     *
      * @param ctx the parse tree
      * @return 字面量
      */
@@ -158,8 +170,8 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         }
         if (Optional.ofNullable(ctx.NUMBER()).isPresent()) {
             String text = ctx.NUMBER().getText();
-            if (text.endsWith("l")||text.endsWith("L")){
-                return Long.parseLong(text.substring(0,text.length()-1));
+            if (text.endsWith("l") || text.endsWith("L")) {
+                return Long.parseLong(text.substring(0, text.length() - 1));
             }
             return Integer.parseInt(text);
         }
@@ -174,6 +186,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     /**
      * 一个允许拥有默认值的表达式
+     *
      * @param ctx the parse tree
      */
     @Override
@@ -200,13 +213,13 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 return false;
             }).orElse(false);
 
-            if(Boolean.TRUE.equals(effective)){
+            if (Boolean.TRUE.equals(effective)) {
                 return v;
             }
             return visit(defaultValue);
         }
         // 直接进行null判断
-        return v==null?visit(defaultValue):v;
+        return v == null ? visit(defaultValue) : v;
     }
 
     /**
@@ -264,6 +277,24 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         return obj;
     }
 
+    /**
+     * 访问子对象,此时目标对象可以是数组,集合,Map,对象,只要不是基本类型即可
+     * 此处会根据表达式中的name,提取出对应的对象,然后返回一个map
+     * @param ctx the parse tree
+     * @return
+     */
+    @Override
+    public Object visitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) {
+        List<TerminalNode> ids = ctx.ID();
+        Map<Object,Object> map=new HashMap<>(ids.size());
+        for (TerminalNode id : ids) {
+            Object obj = this.context.eval(id.getText());
+            map.put(id.getText(),obj);
+        }
+        this.context=this.context.createChild(map);
+        return map;
+    }
+
     @Override
     public Object visitCHILD(ObjectPathParser.CHILDContext ctx) {
         String id = ctx.ID().getText();
@@ -318,8 +349,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     /**
      * <pre>
      * 递归下降,获取所有匹配的子元素,并将子元素的筛选结果作为一个新的集合返回
-
+     *
      * </pre>
+     *
      * @param ctx the parse tree
      * @return the result of the visit
      */
@@ -437,6 +469,40 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             end = old.size();
         }
         return old.subList(start, end);
+    }
+
+    /**
+     * 这是一种比较特殊的切片操作,通过传入多个使用逗号分隔的数值,来读取集合中的元素
+     */
+    @Override
+    public Object visitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx) {
+        // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
+        List<Object> old = Optional.ofNullable(this.context.covertToList())
+                .orElseGet(()-> this.config.isAutoCreateCollectionWhenInvokeMethod()
+                        ? new ArrayList<>()
+                        : null);
+
+        if (old == null){
+            throw new IllegalArgumentException("The current object is not a collection or the collection is empty.");
+        }
+
+        List<TerminalNode> index = ctx.NUMBER();
+        List<Object> newList=new ArrayList<>(index.size());
+        for (TerminalNode terminalNode : index) {
+            int indexValue = Integer.parseInt(terminalNode.getText());
+            if (indexValue < 0) {
+                // 当索引为负数时,表示倒数第几个元素,需要将索引转换为正数
+                indexValue =  old.size() + indexValue;
+            }
+            if (indexValue<0||indexValue>= old.size()
+                              && (this.config.isSkipOutOfRangeIndexForList())
+            ){
+                    continue;
+
+            }
+            newList.add(old.get(indexValue));
+        }
+        return newList;
     }
 
     /**

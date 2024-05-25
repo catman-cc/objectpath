@@ -6,7 +6,7 @@
 
 > ObjectPath是一个用于访问java对象的路径解析器,类似于jsonpath,但是ObjectPath用于访问java对象,而不是json对象.
 
-[中文文档](docs/README-zh.md) | [English Document](README.md)
+[中文文档](./README-zh.md) | [English Document](../README.md)
 
 ---
 ## 快速开始

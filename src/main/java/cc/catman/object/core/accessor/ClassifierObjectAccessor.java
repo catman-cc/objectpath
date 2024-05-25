@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 0.0.1
  */
-public class ClassifierObjectAccessor implements ObjectAccessor {
+public class ClassifierObjectAccessor extends AbstractObjectAccessor {
     /**
      * 对象分类器
      */

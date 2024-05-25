@@ -95,6 +95,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitINDEX_OR_NAME(ObjectPathParser.INDEX_OR_NAMEContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code INDEX_OR_NAME_LIST}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code INDEX}
 	 * labeled alternative in {@link ObjectPathParser#selector}.
 	 * @param ctx the parse tree
@@ -115,6 +122,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSLICE(ObjectPathParser.SLICEContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code SLICE_PICK}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code FILTER}
 	 * labeled alternative in {@link ObjectPathParser#selector}.

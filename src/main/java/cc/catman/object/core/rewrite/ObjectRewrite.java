@@ -6,7 +6,7 @@ package cc.catman.object.core.rewrite;
  * @since 0.0.1
  */
 @FunctionalInterface
-public interface ObjectRewrite {
+public interface ObjectRewrite{
 
     /**
      * 重写对象

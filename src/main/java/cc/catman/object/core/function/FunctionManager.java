@@ -1,5 +1,7 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.core.ConfigurationAccessor;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  * @author jpanda
  * @since 0.0.1
  */
-public interface FunctionManager {
+public interface FunctionManager extends ConfigurationAccessor {
     /**
      * 注册函数提供者
      * @param provider 函数提供者

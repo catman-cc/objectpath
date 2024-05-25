@@ -6,6 +6,7 @@ import cc.catman.object.core.accessor.matcher.IClassMatcher;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
  * @author jpanda
  * @since 0.0.1
  */
-public class BasicObjectAccessor implements ObjectAccessor {
+public class BasicObjectAccessor extends AbstractObjectAccessor {
     /**
      * 匹配器
      */
@@ -101,13 +102,16 @@ public class BasicObjectAccessor implements ObjectAccessor {
 
     @Override
     public String covertToString(Object object) {
-        return object == null ? null : object.toString();
+        if (Objects.isNull(object)){
+            return configuration.isUseZeroForNull() ? "0" : null;
+        }
+        return  object.toString();
     }
 
     @Override
     public Number covertToNumber(Object object) {
         if (object == null) {
-            return null;
+            return configuration.isUseZeroForNull() ? 0 : null;
         }
         if (object instanceof Number) {
             return (Number) object;

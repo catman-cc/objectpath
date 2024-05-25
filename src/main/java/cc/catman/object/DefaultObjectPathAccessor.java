@@ -3,6 +3,9 @@ package cc.catman.object;
 import cc.catman.object.core.DefaultObjectPathParserContext;
 import cc.catman.object.core.ObjectPathVisitor;
 import cc.catman.object.path.standard.ObjectPathParser;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 默认ObjectPath实现
  * @author jpanda
@@ -13,6 +16,8 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
      * 解析器
      */
     private final ObjectPathParser parser;
+
+    private AtomicBoolean needReset=new AtomicBoolean(false);
     /**
      * 配置
      */
@@ -26,6 +31,10 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
     @Override
     @SuppressWarnings("unchecked")
     public <T> T eval(Object object, Class<T> clazz) {
+        if (needReset.get()){
+            this.parser.reset();
+        }
+        this.needReset.set(true);
         DefaultObjectPathParserContext ctx = createContext(object);
         ObjectPathVisitor visitor = new ObjectPathVisitor(ctx);
         Object result = parser.objectPath().accept(visitor);

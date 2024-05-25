@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * @since 2024-04-23
  */
 @Slf4j
-public class ArrayObjectAccessor implements ObjectAccessor {
+public class ArrayObjectAccessor extends AbstractObjectAccessor {
     /**
      * 对象验证器
      */
@@ -36,11 +36,10 @@ public class ArrayObjectAccessor implements ObjectAccessor {
     }
 
 
-
     @Override
-    public boolean isSupport(Object object, Object key,EAccessorKind kind) {
-        if (kind==EAccessorKind.GET){
-            return validaKey(object, key)&& validaObject(object);
+    public boolean isSupport(Object object, Object key, EAccessorKind kind) {
+        if (kind == EAccessorKind.GET) {
+            return validaKey(object, key) && validaObject(object);
         }
         return validaObject(object);
     }
@@ -48,10 +47,16 @@ public class ArrayObjectAccessor implements ObjectAccessor {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> covertToList(Object object) {
-        if (object instanceof List){
+        if (object == null) {
+            return  configuration.isUseZeroForNull()
+                    ?new ArrayList<>()
+                    :null;
+
+        }
+        if (object instanceof List) {
             return (List<Object>) object;
         }
-        if (object.getClass().isArray()){
+        if (object.getClass().isArray()) {
             // 如果是基本类型数组,需要特殊处理,可以通过Arrays.asList方法转换
             Object[] objects = this.convertObjectArray(object);
             return Arrays.asList(objects);
@@ -73,13 +78,20 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
 
     @Override
-    public Object filter(Object object,  Predicate<Object> filter) {
+    public Object filter(Object object, Predicate<Object> filter) {
         List<Object> objects = this.covertToList(object);
+        if (Objects.isNull(object)){
+            return null;
+        }
         return objects.stream().filter(filter).collect(Collectors.toList());
     }
 
     @Override
     public Object get(Object object, Object key) {
+        if (object == null) {
+            return null;
+
+        }
         // 获取key值,key值一定是数字
         int index = getIndex(key);
         // 尝试获取元素集合,进行迭代
@@ -97,6 +109,10 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     @Override
     public void eachKey(Object object, Consumer<Object> consumer) {
+        if (object == null) {
+            return;
+        }
+
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (int i = 0; i < array.length; i++) {
@@ -125,6 +141,9 @@ public class ArrayObjectAccessor implements ObjectAccessor {
      */
     @Override
     public void eachValue(Object object, Consumer<Object> consumer) {
+        if (object == null) {
+            return;
+        }
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (Object o : array) {
@@ -141,22 +160,26 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     @Override
     public void eachEntry(Object object, Consumer<Entity> consumer) {
-        if (object instanceof Object[]){
+        if ((object == null)
+        ) {
+            return;
+        }
+        if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (int i = 0; i < array.length; i++) {
                 consumer.accept(Entity.builder().index(i).value(array[i]).build());
             }
-        }else if (object instanceof Collection){
+        } else if (object instanceof Collection) {
             Collection<?> collection = (Collection<?>) object;
             int i = 0;
             for (Object o : collection) {
                 consumer.accept(Entity.builder().index(i).value(o).build());
                 i++;
             }
-        }else if (object instanceof Iterator){
+        } else if (object instanceof Iterator) {
             Iterator<?> iterator = (Iterator<?>) object;
             int i = 0;
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 consumer.accept(Entity.builder().index(i).value(iterator.next()).build());
                 i++;
             }
@@ -165,12 +188,16 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     /**
      * 支持通过mapper函数进行映射
+     *
      * @param object 对象
      * @param mapper 映射函数
      * @return 映射后的对象
      */
     @Override
     public Object map(Object object, Function<Object, Object> mapper) {
+        if (object == null) {
+            return null;
+        }
         // 将对象转换为流
         Stream<?> stream = toStream(object);
         // 映射
@@ -179,7 +206,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     private void addCollectionVerifications() {
         objectVerifications.add((object, key) -> {
-            if (object.getClass().isArray()){
+            if (object.getClass().isArray()) {
                 return ObjectAccessorVerificationResult.PASS;
             }
             if (Stream.of(Object[].class, Collection.class, Iterator.class).anyMatch(clazz -> clazz.isAssignableFrom(object.getClass()))) {
@@ -266,7 +293,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
             if (!(key instanceof Number)) {
                 return ObjectAccessorVerificationResult.UNKNOWN;
             }
-            double v =((Number) key).doubleValue();
+            double v = ((Number) key).doubleValue();
             // 如果超出int范围,直接返回失败
             if (v < Integer.MIN_VALUE || v > Integer.MAX_VALUE) {
                 return ObjectAccessorVerificationResult.FAIL;
@@ -278,9 +305,6 @@ public class ArrayObjectAccessor implements ObjectAccessor {
             return ObjectAccessorVerificationResult.PASS;
         });
     }
-
-
-
 
 
     private boolean validaKey(Object object, Object key) {
@@ -315,6 +339,9 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     @SuppressWarnings("unchecked")
     protected Stream<Object> toStream(Object object) {
+        if (object == null) {
+            return Stream.empty();
+        }
         if (object instanceof Object[]) {
             return Arrays.stream((Object[]) object);
         }
@@ -334,10 +361,13 @@ public class ArrayObjectAccessor implements ObjectAccessor {
     }
 
     private Optional<Object> readFromArray(Object object, int index) {
+        if (object == null) {
+            return Optional.empty();
+        }
         if (object.getClass().isArray()) {
-           // 必须特殊处理,因为像int[]这种数组直接转换为Object[]会失败,但是可以通过Array.get方法获取
-            if (object instanceof int[]){
-                return Optional.ofNullable(Array.get(object,index));
+            // 必须特殊处理,因为像int[]这种数组直接转换为Object[]会失败,但是可以通过Array.get方法获取
+            if (object instanceof int[]) {
+                return Optional.ofNullable(Array.get(object, index));
             }
             return Optional.ofNullable(((Object[]) object)[index]);
 
@@ -353,6 +383,9 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     @SuppressWarnings("unchecked")
     private Optional<Object> readFromCollection(Object object, int index) {
+        if ((object == null)) {
+            return Optional.empty();
+        }
         if (object instanceof Collection) {
             Collection<Object> collection = (Collection<Object>) object;
             if (index >= 0 && index < collection.size()) {
@@ -364,6 +397,9 @@ public class ArrayObjectAccessor implements ObjectAccessor {
 
     @SuppressWarnings("unchecked")
     private Optional<Object> readFromIterator(Object object, int index) {
+        if (object == null) {
+            return Optional.empty();
+        }
         if (object instanceof Iterator) {
             Iterator<Object> iterator = (Iterator<Object>) object;
             int i = 0;
@@ -415,14 +451,21 @@ public class ArrayObjectAccessor implements ObjectAccessor {
             throw new IllegalArgumentException("key is not a number, key:" + value);
         }
     }
-    @SuppressWarnings({"java:S3776","java:S6541","java:S3012"})
+
+    @SuppressWarnings({"java:S3776", "java:S6541", "java:S3012"})
     protected Object[] convertObjectArray(Object object) {
+        if ((object == null)) {
+            return configuration.isUseZeroForNull()
+                    ?new Object[]{}
+                    :null;
+        }
+
         if (object instanceof Object[]) {
             return (Object[]) object;
         }
-        if(object.getClass().isArray()){
+        if (object.getClass().isArray()) {
             // 如果是基本类型数组,需要特殊处理,直接转换为Object[]会导致失败
-            if (object instanceof int[]){
+            if (object instanceof int[]) {
                 int[] array = (int[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -430,7 +473,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof long[]){
+            if (object instanceof long[]) {
                 long[] array = (long[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -438,7 +481,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof double[]){
+            if (object instanceof double[]) {
                 double[] array = (double[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -446,7 +489,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof float[]){
+            if (object instanceof float[]) {
                 float[] array = (float[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -454,7 +497,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof short[]){
+            if (object instanceof short[]) {
                 short[] array = (short[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -462,7 +505,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof byte[]){
+            if (object instanceof byte[]) {
                 byte[] array = (byte[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -470,7 +513,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof char[]){
+            if (object instanceof char[]) {
                 char[] array = (char[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {
@@ -478,7 +521,7 @@ public class ArrayObjectAccessor implements ObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof boolean[]){
+            if (object instanceof boolean[]) {
                 boolean[] array = (boolean[]) object;
                 Object[] objects = new Object[array.length];
                 for (int i = 0; i < array.length; i++) {

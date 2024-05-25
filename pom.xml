@@ -8,7 +8,7 @@
     <artifactId>catman-jsonpath</artifactId>
     <version>0.0.1</version>
 
-    <name>object path</name>
+    <name>object-path</name>
     <url>https://github.com/catman-cc/objectpath</url>
     <description>
         ObjectPath is a path parser for accessing Java objects, similar to jsonpath,

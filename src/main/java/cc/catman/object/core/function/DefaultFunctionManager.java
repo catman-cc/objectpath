@@ -1,5 +1,7 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.ObjectPathConfiguration;
+
 import java.util.*;
 
 /**
@@ -13,6 +15,8 @@ public class DefaultFunctionManager implements FunctionManager{
      */
     private final Map<String,List<FunctionProvider>> providers;
 
+    private ObjectPathConfiguration configuration;
+
     public DefaultFunctionManager() {
         this(new HashMap<>());
     }
@@ -23,6 +27,7 @@ public class DefaultFunctionManager implements FunctionManager{
 
     @Override
     public void register(FunctionProvider provider) {
+        Optional.ofNullable(this.configuration).ifPresent(c->c.inject(provider));
         List<FunctionProvider> functionProviders = providers.computeIfAbsent(provider.name(), k -> new ArrayList<>());
         functionProviders.add(provider);
     }
@@ -59,5 +64,15 @@ public class DefaultFunctionManager implements FunctionManager{
     @Override
     public List<String> names() {
         return new ArrayList<>(providers.keySet());
+    }
+
+    @Override
+    public void injectConfiguration(ObjectPathConfiguration configuration) {
+        this.configuration=configuration;
+        this.providers.forEach((k,v)-> Optional.ofNullable(v)
+                        .ifPresent(ps-> ps
+                                .forEach(p->this.configuration.inject(v))
+                        )
+                );
     }
 }

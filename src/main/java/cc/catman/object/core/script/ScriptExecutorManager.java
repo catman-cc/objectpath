@@ -1,5 +1,7 @@
 package cc.catman.object.core.script;
 
+import cc.catman.object.core.ConfigurationAccessor;
+
 import java.util.Map;
 
 /**
@@ -7,7 +9,7 @@ import java.util.Map;
  * @author jpanda
  * @since 0.0.1
  */
-public interface ScriptExecutorManager {
+public interface ScriptExecutorManager extends ConfigurationAccessor {
      /**
       * 获取所有的执行器
       * @return 执行器

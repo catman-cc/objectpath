@@ -5,13 +5,17 @@ import java.util.UUID;
 
 public class OrderMock {
 
-    public static Order mockOrder(){
+    public static Order mockOrder(int size){
         String id = UUID.randomUUID().toString();
         Order order = Order.builder().id(id).build();
-        for (int i = 0; i < randomInt(100); i++) {
+        for (int i = 0; i < randomInt(size); i++) {
             order.getItems().add(mockItem());
         }
         return order;
+    }
+
+    public static Order mockOrder(){
+        return mockOrder(100);
     }
 
     public static OrderItem mockItem(){
@@ -27,7 +31,8 @@ public class OrderMock {
      * 随机生成价格,最大100
      */
     private static int randomInt(int bound){
-        return new Random().nextInt(bound);
+        int abs = Math.abs(new Random().nextInt(bound));
+        return abs==0?1:abs;
     }
 
     /**

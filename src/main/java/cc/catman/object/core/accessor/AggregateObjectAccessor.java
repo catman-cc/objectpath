@@ -1,9 +1,11 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,7 +14,7 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 0.0.1
  */
-public class AggregateObjectAccessor implements ObjectAccessor {
+public class AggregateObjectAccessor extends AbstractObjectAccessor {
 
     /**
      * 访问器
@@ -20,10 +22,17 @@ public class AggregateObjectAccessor implements ObjectAccessor {
     private final List<ObjectAccessor> accessors=new ArrayList<>();
 
     public AggregateObjectAccessor add(ObjectAccessor accessor){
+        Optional.ofNullable(this.configuration).ifPresent(c-> c.inject(accessor));
         this.accessors.add(accessor);
         return this;
     }
+
     @Override
+    public void injectConfiguration(ObjectPathConfiguration configuration) {
+        super.injectConfiguration(configuration);
+        this.accessors.forEach(a->a.injectConfiguration(configuration));
+    }
+
     public boolean isSupport(Object object, Object key, EAccessorKind kind) {
         return this.accessors.stream().anyMatch(accessor -> accessor.isSupport(object, key, kind));
     }
