@@ -1,5 +1,7 @@
 package cc.catman.object.core.json;
 
+import cc.catman.object.ObjectPathConfiguration;
+
 /**
  * JSON编码器
  *
@@ -24,4 +26,10 @@ public interface JsonCoder {
      * @return 对象
      */
     <T> T decode(String json, Class<T> clazz);
+
+    /**
+     * 当该编码器被配置时调用
+     * @param configuration 所属的配置
+     */
+    default void init(ObjectPathConfiguration configuration){}
 }

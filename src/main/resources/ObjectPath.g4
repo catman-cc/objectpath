@@ -19,9 +19,11 @@ ID                                  #CHILD
 |'.' ID                             #CHILD
 | '..' ID                           #RECURSIVE_CHILD
 | '[' ID ']'                        #INDEX_OR_NAME
+| '[' ID (','ID)+ ']'               #INDEX_OR_NAME_LIST   // 逗号分隔的多个id标志,该操作会从当前节点中提取对应的属性,并将其转换为map对象
 | '[' NUMBER ']'                    #INDEX
 | '[' '*'? ']'                      #WILDCARD_ALL
 | '[' NUMBER ':' NUMBER ']'         #SLICE
+| '[' NUMBER (',' NUMBER )* ']'     #SLICE_PICK
 |filterExpr                         #FILTER
 |func                               #METHOD
 |'.' scripts                        #SCRIPT

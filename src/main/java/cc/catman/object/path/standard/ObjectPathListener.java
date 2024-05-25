@@ -151,6 +151,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitINDEX_OR_NAME(ObjectPathParser.INDEX_OR_NAMEContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code INDEX_OR_NAME_LIST}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void enterINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code INDEX_OR_NAME_LIST}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void exitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code INDEX}
 	 * labeled alternative in {@link ObjectPathParser#selector}.
 	 * @param ctx the parse tree
@@ -186,6 +198,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSLICE(ObjectPathParser.SLICEContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code SLICE_PICK}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void enterSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code SLICE_PICK}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void exitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code FILTER}
 	 * labeled alternative in {@link ObjectPathParser#selector}.

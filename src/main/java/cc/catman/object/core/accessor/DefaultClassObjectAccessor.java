@@ -1,6 +1,8 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.Entity;
+import cc.catman.object.core.accessor.invoke.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -10,16 +12,18 @@ import java.util.function.Consumer;
  * 默认的对象访问器,其会基于反射的方式去访问对象的属性,这种方式是最通用的,但是也是最慢的
  * 为了提高性能,我们应该尽量避免使用该访问器,我们应该尽量使用更加高效的访问器,比如,针对特定的对象,提供特定的访问器
  * 但是,对于一些特殊的对象,比如Date,我们不应该去访问其属性,而是应该将其视为一个时间戳或者字符串
+ *
  * @author jpanda
  * @since 2021-04-23
  */
 @Slf4j
-public class DefaultClassObjectAccessor implements ObjectAccessor {
+public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
 
     /**
      * 读取方法查找器
      */
-    private final ReadInvokeFinder finder;
+    private ReadInvokeFinder finder;
+
 
     public DefaultClassObjectAccessor() {
         this(new StandardReadInvokeFinder());
@@ -30,6 +34,17 @@ public class DefaultClassObjectAccessor implements ObjectAccessor {
     }
 
     @Override
+    public void injectConfiguration(ObjectPathConfiguration configuration) {
+        super.injectConfiguration(configuration);
+        if (configuration.isUseCacheForReflect()
+            && (this.finder.getClass().equals(StandardReadInvokeFinder.class))
+        ) {
+            log.debug("Using cached reflect finder.");
+            this.finder = new CachedReadInvokeFinder(this.finder);
+        }
+    }
+
+    @Override
     public boolean isSupport(Object object, Object key, EAccessorKind kind) {
         if (object == null) {
             return false;
@@ -37,7 +52,7 @@ public class DefaultClassObjectAccessor implements ObjectAccessor {
         if (kind != EAccessorKind.GET) {
             return true;
         }
-        return null!=key;
+        return null != key;
     }
 
     @Override
@@ -56,7 +71,7 @@ public class DefaultClassObjectAccessor implements ObjectAccessor {
         // 5. 如果都不存在,则返回null
         Class<?> clazz = object.getClass();
         String keyString = key.toString();
-        Invoke invoke =finder.find(clazz,keyString);
+        Invoke invoke = finder.find(clazz, keyString);
         if (invoke != null) {
             return invoke.invoke(object);
         }
@@ -69,7 +84,7 @@ public class DefaultClassObjectAccessor implements ObjectAccessor {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
-            FieldInvoke i = FieldInvoke.of(f);
+            Invoke i = finder.find(clazz, f.getName(), () -> FieldInvoke.of(f));
             Object value = i.invoke(object);
             consumer.accept(value);
         }
@@ -81,7 +96,7 @@ public class DefaultClassObjectAccessor implements ObjectAccessor {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
-            FieldInvoke i = FieldInvoke.of(f);
+            Invoke i = finder.find(clazz, f.getName(), () -> FieldInvoke.of(f));
             Object value = i.invoke(object);
             consumer.accept(Entity.builder()
                     .key(f.getName())

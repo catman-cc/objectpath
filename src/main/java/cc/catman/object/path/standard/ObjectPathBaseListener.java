@@ -161,6 +161,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterINDEX(ObjectPathParser.INDEXContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -192,6 +204,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSLICE(ObjectPathParser.SLICEContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

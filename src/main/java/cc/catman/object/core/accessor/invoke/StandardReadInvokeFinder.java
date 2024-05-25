@@ -1,4 +1,4 @@
-package cc.catman.object.core.accessor;
+package cc.catman.object.core.accessor.invoke;
 /**
  * 标准读取调用器查找器
  * @author jpanda

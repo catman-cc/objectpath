@@ -48,7 +48,7 @@ public class AdvanceTest extends BaseTest {
                 .objectAccessor(ClassifierObjectAccessor.defaultAccessor())
                 .objectRewrite(new AggregationObjectRewrite())
                 .scriptExecutorManager(new DefaultScriptExecutorManager())
-                .build();
+                .build().inject();
 
         configuration.getScriptExecutorManager().addExecutor("js",new JavaScriptExecutor());
 

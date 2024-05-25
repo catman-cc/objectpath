@@ -1,4 +1,4 @@
-package cc.catman.object.core.accessor;
+package cc.catman.object.core.accessor.invoke;
 
 import cc.catman.object.core.exception.ReflectionRuntimeException;
 import lombok.Getter;

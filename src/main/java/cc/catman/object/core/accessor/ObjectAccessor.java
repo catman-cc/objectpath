@@ -1,5 +1,6 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.core.ConfigurationAccessor;
 import cc.catman.object.core.Entity;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 0.0.1
  */
-public interface ObjectAccessor {
+public interface ObjectAccessor extends ConfigurationAccessor {
     /**
      * 是否支持访问
      *
@@ -55,16 +56,6 @@ public interface ObjectAccessor {
      * @return 属性值
      */
     Object get(Object object, Object key);
-
-    /**
-     * 判断指定对象是否可以被拆分,比如List,Map等是可以被拆分的,但是Date,Number等是不可以被拆分的
-     *
-     * @param object 对象
-     * @return 是否可以被拆分
-     */
-    default boolean canBeSplit(Object object) {
-        return true;
-    }
 
     /**
      * 获取对象的属性

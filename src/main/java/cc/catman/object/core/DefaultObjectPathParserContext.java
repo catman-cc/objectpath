@@ -153,31 +153,45 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
 
     @Override
     public void eachKey(ObjectPathParserContext context, Consumer<Object> consumer) {
+        if (Objects.isNull(cv)){
+            return;
+        }
         objectAccessor.eachKey(cv,consumer);
     }
 
     @Override
     public void each(ObjectPathParserContext context, Consumer<Entity> consumer) {
+        if (Objects.isNull(cv)){
+            return;
+        }
         objectAccessor.eachEntry(cv,consumer);
     }
 
     @Override
     public void eachValue(ObjectPathParserContext context, Consumer<Object> consumer) {
+        if (Objects.isNull(cv)){
+            return;
+        }
         objectAccessor.eachValue(cv,consumer);
     }
 
     @Override
     public Object map(ObjectPathParserContext context, Function<Object, Object> mapper) {
+        // 此处不可直接返回null
         return objectAccessor.map(cv,mapper);
     }
 
     @Override
     public Object filter(ObjectPathParserContext context, Predicate<Object> filter) {
+        // 此处不可直接返回null
         return objectAccessor.filter(cv,filter);
     }
 
     @Override
     public int size() {
+        if (Objects.isNull(cv)){
+            return 0;
+        }
         return objectAccessor.size(cv);
     }
 
@@ -198,22 +212,24 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
 
     @Override
     public List<Object> covertToList() {
-        if (cv==null && (configuration.isAutoCreateCollectionWhenInvokeMethod())){
-               return objectAccessor.covertToList(new ArrayList<>());
-
+        if (Objects.isNull(cv)){
+            return configuration.isUseZeroForNull()?Collections.emptyList():null;
         }
         return objectAccessor.covertToList(cv);
     }
 
     @Override
     public String covertToString(Object object) {
+        if (Objects.isNull(object)){
+            return configuration.isUseZeroForNull()?"":null;
+        }
         return objectAccessor.covertToString(object);
     }
 
     @Override
     public Number covertToNumber(Object object) {
         if (object==null){
-            return null;
+            return configuration.isUseZeroForNull()?0:null;
         }
         if (object instanceof Number){
             return (Number) object;

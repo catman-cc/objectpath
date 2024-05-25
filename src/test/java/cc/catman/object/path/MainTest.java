@@ -98,6 +98,8 @@ public class MainTest {
                 .scriptExecutorManager(new DefaultScriptExecutorManager())
                 .build();
 
+        config.inject();
+
         return new DefaultObjectPathParserContext(root,config);
     }
 

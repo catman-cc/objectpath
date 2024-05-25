@@ -4,6 +4,7 @@ import cc.catman.object.core.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -12,14 +13,14 @@ import java.util.function.Predicate;
  * @author jpanda
  * @since 2021-04-23
  */
-public class MapObjectAccessor implements ObjectAccessor {
+public class MapObjectAccessor  extends AbstractObjectAccessor {
     /**
      * 要求object必须是Map类型,我们常见的一些对象其实也是Map类型,比如Properties/Hashtable等
      * key值理论上可以是任意类型,所以不会对key值进行验证
      */
     @Override
     public boolean isSupport(Object object, Object key, EAccessorKind kind) {
-        return object instanceof Map;
+        return Objects.nonNull(object)&&object instanceof Map;
     }
 
     @Override
