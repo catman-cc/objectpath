@@ -71,6 +71,8 @@
     <properties>
         <org.antlr.version>4.13.1</org.antlr.version>
         <com.google.code.gson.version>2.10.1</com.google.code.gson.version>
+        <com.alibaba.fastjson2.version>2.0.52</com.alibaba.fastjson2.version>
+        <com.jayway.jsonpath.json-path.version>2.9.0</com.jayway.jsonpath.json-path.version>
         <junit.version>4.13.2</junit.version>
         <org.projectlombok.version>1.18.30</org.projectlombok.version>
         <org.slf4j.version>2.0.12</org.slf4j.version>
@@ -145,6 +147,18 @@
                 <version>${ch.qos.logback.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${com.alibaba.fastjson2.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${com.jayway.jsonpath.json-path.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -172,6 +186,14 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -1,11 +1,13 @@
 package cc.catman.object.core.accessor.invoke;
 
+import cc.catman.object.core.util.ReflectionHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,15 +34,7 @@ public final class JavaBeanInvokeFinder {
      * @return 方法调用器
      */
     public static Invoke findInvoke(Class<?> clazz, String name) {
-        String keyString = name;
-        // 这里需要注意,keyString可能被包裹在了引号中,我们需要去掉引号
-        if (keyString.startsWith("\"") && keyString.endsWith("\"")) {
-            keyString = keyString.substring(1, keyString.length() - 1);
-        }
-        // 去除单引号
-        if (keyString.startsWith("'") && keyString.endsWith("'")) {
-            keyString = keyString.substring(1, keyString.length() - 1);
-        }
+        String keyString = parseKeyName(name);
         Optional<Method> methodOpt = tryGetMethodAccessor(clazz, keyString);
         if (methodOpt.isPresent()) {
             return MethodInvoke.of(methodOpt.get());
@@ -52,6 +46,55 @@ public final class JavaBeanInvokeFinder {
 
         Optional<Method> simpleMethodOpt = getMethod(clazz, keyString);
         return simpleMethodOpt.map(MethodInvoke::of).orElse(null);
+    }
+
+
+
+    /**
+     * 根据类和属性名查找属性
+     * @param clazz 类
+     * @param name 属性名
+     * @param valueType 属性值类型
+     * @return 属性访问器
+     */
+    public static Invoke findWriteInvoke(Class<?> clazz, String name, Class<?> valueType){
+        String keyString = parseKeyName(name);
+        Optional<Field> fieldOpt = tryGetFieldAccessor(clazz,keyString);
+        if (fieldOpt.isPresent()) {
+            Field field = fieldOpt.get();
+            if (Objects.isNull(valueType)){
+                return FieldInvoke.of(field);
+            }
+            if(ReflectionHelper.isAssignableFrom(field.getType(),valueType)){
+                return FieldInvoke.of(field);
+            }
+        }
+        // 如果找不到属性,则尝试寻找set方法
+        return tryGetMethodAccessor(clazz,setMethodName(keyString))
+                .filter(method -> {
+                        Class<?>[] parameterTypes = method.getParameterTypes();
+                        return parameterTypes.length == 1 && ReflectionHelper.isAssignableFrom(parameterTypes[0],valueType);
+                })
+                .map(MethodInvoke::of)
+                .orElseThrow(()->new IllegalArgumentException("can not find write accessor for "+name));
+    }
+
+    /**
+     * 解析关键字,主要是处理双引号和单引号
+     * @param name 关键字
+     * @return 关键字
+     */
+    private static String parseKeyName(String name) {
+        String keyString = name;
+        // 这里需要注意,keyString可能被包裹在了引号中,我们需要去掉引号
+        if (keyString.startsWith("\"") && keyString.endsWith("\"")) {
+            keyString = keyString.substring(1, keyString.length() - 1);
+        }
+        // 去除单引号
+        if (keyString.startsWith("'") && keyString.endsWith("'")) {
+            keyString = keyString.substring(1, keyString.length() - 1);
+        }
+        return keyString;
     }
 
     private static Optional<Method> tryGetMethodAccessor(Class<?> clazz, String name){
@@ -93,4 +136,9 @@ public final class JavaBeanInvokeFinder {
     private static String isMethodName(String key) {
         return "is" + key.substring(0, 1).toUpperCase() + key.substring(1);
     }
+
+    private static String setMethodName(String key) {
+        return "set" + key.substring(0, 1).toUpperCase() + key.substring(1);
+    }
+
 }

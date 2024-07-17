@@ -5,11 +5,7 @@ import cc.catman.object.Mock;
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.DefaultObjectPathParserContext;
 import cc.catman.object.core.ObjectPathVisitor;
-import cc.catman.object.core.accessor.*;
-import cc.catman.object.core.accessor.matcher.DefaultClassNameMatcher;
-import cc.catman.object.core.function.DefaultFunctionManager;
-import cc.catman.object.core.rewrite.AggregationObjectRewrite;
-import cc.catman.object.core.script.DefaultScriptExecutorManager;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 import cc.catman.object.path.standard.ObjectPathLexer;
 import cc.catman.object.path.standard.ObjectPathParser;
 import cc.catman.object.cases.circle.Library;
@@ -30,8 +26,8 @@ public class MainTest {
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(library));
         String first="$.name";
-        Object res = createParser(first).objectPath().accept(visitor);
-        assertEquals(library.getName(),res);
+        PropertyWrapper res = createParser(first).objectPath().accept(visitor);
+        assertEquals(library.getName(),res.read());
     }
 
     @Test
@@ -40,8 +36,8 @@ public class MainTest {
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(library));
         String first="$.books[*].authors|[^]|[0].name";
-        Object res = createParser(first).objectPath().accept(visitor);
-        assertEquals(library.getBooks().get(0).getAuthors().get(0).getName(),res);
+        PropertyWrapper res = createParser(first).objectPath().accept(visitor);
+        assertEquals(library.getBooks().get(0).getAuthors().get(0).getName(),res.read());
     }
 
     @Test
@@ -50,7 +46,7 @@ public class MainTest {
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(library));
         String first="$.books[*].authors|[^]|[1:3]";
-        Object res = createParser(first).objectPath().accept(visitor);
+        Object res = createParser(first).objectPath().accept(visitor).read();
         assertEquals(library.getBooks().get(0).getAuthors().subList(1,3),res);
     }
 
@@ -72,35 +68,18 @@ public class MainTest {
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(list));
         String first="$[0].a";
-        Object res = createParser(first).objectPath().accept(visitor);
+        Object res = createParser(first).objectPath().accept(visitor).read();
         assertEquals(1,res);
         String second="$[?(a==1)]";
-        Object res2 = createParser(second).objectPath().accept(visitor);
+        Object res2 = createParser(second).objectPath().accept(visitor).read();
         assertEquals(list.get(0),((List<?>)res2).get(0));
     }
     
     public DefaultObjectPathParserContext createContext(Object root){
-        AggregateObjectAccessor aoa = new AggregateObjectAccessor()
-                .add(new BasicObjectAccessor(Collections.singletonList(new DefaultClassNameMatcher()
-                        .addPackage(Integer.class.getPackage())
-                        .addClasses(int.class, Integer.class, Double.class, Float.class, Long.class, Short.class, Byte.class, Character.class, Boolean.class, String.class)
-                )))
-                .add(new ArrayObjectAccessor())
-                .add(new MapObjectAccessor())
-                .add(new DefaultClassObjectAccessor());
-
         GsonCoder gsonCoder = new GsonCoder();
-        ObjectPathConfiguration config = ObjectPathConfiguration.builder()
-                .objectAccessor(aoa)
-                .jsonCoder(gsonCoder)
-                .objectRewrite(new AggregationObjectRewrite())
-                .functionManager(new DefaultFunctionManager())
-                .scriptExecutorManager(new DefaultScriptExecutorManager())
-                .build();
+        ObjectPathConfiguration config = ObjectPathConfiguration.create(gsonCoder);
 
-        config.inject();
-
-        return new DefaultObjectPathParserContext(root,config);
+        return new DefaultObjectPathParserContext(config.getWrapperFactory().create(root),config);
     }
 
 

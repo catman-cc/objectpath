@@ -54,21 +54,14 @@ public class DefaultClassNameMatcher implements IClassNameMatcher {
         return this;
     }
 
-    public DefaultClassNameMatcher addClasses(String ... classNames) {
+    public void addClasses(String ... classNames) {
         for (String c : classNames) {
             if (!this.classes.contains(c)) {
                 this.classes.add(c);
             }
         }
-        return this;
     }
 
-    protected DefaultClassNameMatcher addRegexes(String... regexes) {
-        for (String r : regexes) {
-            this.regexes.computeIfAbsent(r, k -> Pattern.compile(r));
-        }
-        return this;
-    }
 
     @Override
     public boolean match(String className) {

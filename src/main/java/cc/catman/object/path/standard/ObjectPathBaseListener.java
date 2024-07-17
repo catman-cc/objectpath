@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * which can be extended to create a listener which only needs to handle a subset
  * of the available methods.
  */
-@SuppressWarnings("all")
+@SuppressWarnings("CheckReturnValue")
 public class ObjectPathBaseListener implements ObjectPathListener {
 	/**
 	 * {@inheritDoc}
@@ -888,6 +888,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitINDEXOF(ObjectPathParser.INDEXOFContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMAP(ObjectPathParser.MAPContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMAP(ObjectPathParser.MAPContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

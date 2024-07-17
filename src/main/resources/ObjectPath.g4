@@ -92,6 +92,7 @@ func: '.' ID '(' (args|) ')'                   #METHOD_CALL
 |'.' 'first' '(' ')'                         #FIRST
 |'.' 'last' '(' ')'                          #LAST
 |'.' 'indexOf' '(' NUMBER ')'                #INDEXOF
+|'.' 'map' '(' expr ')'                      #MAP
 ;
 
 /* 扩展脚本支持,其中ID表示脚本语言 */

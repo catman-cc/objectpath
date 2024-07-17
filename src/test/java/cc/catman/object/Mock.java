@@ -24,8 +24,7 @@ public class Mock {
     public static void RandomBookAndAuthor(List<Book> books, List<Author> authors) {
         for (Book book : books) {
             for (Author value : authors) {
-                if (Math.random() > 0.5) {
-                    if (!book.getAuthors().contains(value)) {
+                if (Math.random() > 0.5 && !book.getAuthors().contains(value)) {
                         book.getAuthors().add(value);
                         if (value.getBooks() == null) {
                             value.setBooks(new ArrayList<>());
@@ -34,7 +33,7 @@ public class Mock {
                             value.getBooks().add(book);
                         }
                     }
-                }
+
             }
         }
     }

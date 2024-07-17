@@ -1,5 +1,6 @@
 package cc.catman.object.core;
 
+
 /**
  * 数字比较
  * @author jpanda

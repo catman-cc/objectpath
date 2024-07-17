@@ -26,6 +26,10 @@ public class FieldInvoke implements Invoke{
     @SuppressWarnings("java:S3011")
     public Object invoke(Object object, Object... args) {
         try {
+            if (args == null || args.length == 0){
+                return field.get(object);
+            }
+            field.set(object,args[0]);
             return field.get(object);
         } catch (IllegalAccessException e) {
             throw new ReflectionRuntimeException(e);

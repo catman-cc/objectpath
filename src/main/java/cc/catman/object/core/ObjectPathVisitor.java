@@ -2,6 +2,8 @@ package cc.catman.object.core;
 
 
 import cc.catman.object.ObjectPathConfiguration;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.util.ReflectionHelper;
 import cc.catman.object.path.standard.ObjectPathBaseVisitor;
 import cc.catman.object.path.standard.ObjectPathParser;
 import lombok.Getter;
@@ -20,7 +22,7 @@ import java.util.stream.IntStream;
  * @author jpanda
  * @since 0.0.1
  */
-public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
+public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     /**
      * 解析器上下文,该上下文会存放当前正在解析的对象
      */
@@ -41,10 +43,10 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitObjectPath(ObjectPathParser.ObjectPathContext ctx) {
+    public PropertyWrapper visitObjectPath(ObjectPathParser.ObjectPathContext ctx) {
         // 需要为每一个通道创建一个新的上下文
         //  获取表达式结果
-        Object res = visit(ctx.expr());
+        PropertyWrapper res = visit(ctx.expr());
         this.context.updateParent();
         this.context.updateCurrent(res);
         // 开始遍历通道
@@ -56,16 +58,13 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitPipe(ObjectPathParser.PipeContext ctx) {
+    public PropertyWrapper visitPipe(ObjectPathParser.PipeContext ctx) {
         // 创建新的上下文,需要注意的是,在通道中,上下文是独立的,不会相互影响
-        Object cv = this.context.currentValue();
+        PropertyWrapper cv = this.context.currentValue();
         this.context = this.context.createContext(cv, null, cv);
         // 创建新的访问器
         // 访问通道,获取值
-        cv = this.visit(ctx.expr());
-        // 更新上下文
-        // 更新当前上下文
-        return cv;
+        return this.visit(ctx.expr());
     }
 
     /**
@@ -76,7 +75,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return 表达式的执行结果
      */
     @Override
-    public Object visitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx) {
+    public PropertyWrapper visitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx) {
         // 切换上下文
         ObjectPathParserContext nc = switchContextWithExpr(ctx);
         // 持有新上下文的访问器
@@ -84,13 +83,12 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         // 上下文切换完成后,访问选择器,选择器将会切换当前上下文对象
         List<ObjectPathParser.SelectorContext> selector = ctx.selector();
         // 遍历选择器,每次遍历都会切换上下文
-        Object result = nc.currentValue();
+        PropertyWrapper result = nc.currentValue();
 
         for (ObjectPathParser.SelectorContext s : selector) {
             // 遇到null值,是否停止解析
             if (config.isStopParseWhenNull() && (result == null)) {
-                return null;
-
+                return wrapper(null);
             }
             if (childVisitor.stop) {
                 return result;
@@ -107,44 +105,57 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
     @SuppressWarnings("java:S3776")
     @Override
-    public Object visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) {
+    public PropertyWrapper visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) {
         String text = ctx.getChild(1).getText();
-        Object left = visit(ctx.expr(0));
-        Object right = visit(ctx.expr(1));
-        boolean isNumber = config.isUseZeroForNull()
-                ? (left instanceof Number || right instanceof Number)
-                : (left instanceof Number && right instanceof Number);
+        PropertyWrapper left = visit(ctx.expr(0));
+        PropertyWrapper right = visit(ctx.expr(1));
+
+        boolean isNumber = (left.isInstanceOf(Number.class) && right.isInstanceOf(Number.class));
         if (isNumber) {
-            Number l = Optional.ofNullable(left).map(Number.class::cast).orElse(0);
-            Number r = Optional.ofNullable(right).map(Number.class::cast).orElse(0);
+            Number l = Optional.ofNullable(left.read(Number.class)).orElse(0);
+            Number r = Optional.ofNullable(right.read(Number.class)).orElse(0);
             if ("+".equals(text)) {
-                return l.doubleValue() + r.doubleValue();
+                return wrapper(l.doubleValue() + r.doubleValue());
             }
             if ("-".equals(text)) {
-                return l.doubleValue() - r.doubleValue();
+                return wrapper(l.doubleValue() - r.doubleValue());
             }
             if ("*".equals(text)) {
-                return l.doubleValue() * r.doubleValue();
+                return wrapper(l.doubleValue() * r.doubleValue());
             }
             if ("/".equals(text)) {
-                return l.doubleValue() / r.doubleValue();
+                return wrapper(l.doubleValue() / r.doubleValue());
             }
             if ("%".equals(text)) {
-                return l.doubleValue() % r.doubleValue();
+                return wrapper(l.doubleValue() % r.doubleValue());
             }
         }
 
         if (this.config.isEnableFeature(Features.CONNECT_STRING_USE_PLUS_SIGN)
-            && ("+".equals(text))) {
-            if (config.isUseZeroForNull()) {
-                return Optional.ofNullable(left).map(Object::toString).orElse("")
-                       + Optional.ofNullable(right).map(Object::toString).orElse("");
+            && ("+".equals(text)))
+        {
+            String leftText = ctx.expr(0).getText();
+            String rightText = ctx.expr(1).getText();
+            if (left.isNull()){
+                if (leftText.startsWith("\"")||leftText.startsWith("'")){
+                    left=wrapper(unquote(leftText));
+                }
             }
-            return Optional.ofNullable(left).map(Object::toString).orElse("null")
-                   + Optional.ofNullable(right).map(Object::toString).orElse("null");
+            if (right.isNull()){
+                if (rightText.startsWith("\"")||rightText.startsWith("'")){
+                    right=wrapper(unquote(rightText));
+                }
+            }
+
+            if (config.isUseZeroForNull()) {
+                return wrapper(Optional.ofNullable(left.read()).map(Object::toString).orElse("")
+                               + Optional.ofNullable(right.read()).map(Object::toString).orElse(""));
+            }
+            return wrapper(Optional.ofNullable(left.read()).map(Object::toString).orElse("null")
+                           + Optional.ofNullable(right.read()).map(Object::toString).orElse("null"));
 
         }
-        return null;
+        return wrapper(null);
     }
 
     /**
@@ -153,7 +164,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @param ctx the parse tree
      */
     @Override
-    public Object visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) {
+    public PropertyWrapper visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) {
         return visit(ctx.expr());
     }
 
@@ -164,22 +175,22 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return 字面量
      */
     @Override
-    public Object visitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) {
+    public PropertyWrapper visitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) {
         if (Optional.ofNullable(ctx.DOUBLE()).isPresent()) {
-            return Double.parseDouble(ctx.DOUBLE().getText());
+            return wrapper(Double.parseDouble(ctx.DOUBLE().getText()));
         }
         if (Optional.ofNullable(ctx.NUMBER()).isPresent()) {
             String text = ctx.NUMBER().getText();
             if (text.endsWith("l") || text.endsWith("L")) {
-                return Long.parseLong(text.substring(0, text.length() - 1));
+                return wrapper(Long.parseLong(text.substring(0, text.length() - 1)));
             }
-            return Integer.parseInt(text);
+            return wrapper(Integer.parseInt(text));
         }
         if (Optional.ofNullable(ctx.STRING()).isPresent()) {
-            return ctx.STRING().getText();
+            return wrapper(ctx.STRING().getText());
         }
         if (Optional.ofNullable(ctx.BOOL()).isPresent()) {
-            return Boolean.parseBoolean(ctx.BOOL().getText());
+            return wrapper(Boolean.parseBoolean(ctx.BOOL().getText()));
         }
         return null;
     }
@@ -190,10 +201,10 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @param ctx the parse tree
      */
     @Override
-    public Object visitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) {
+    public PropertyWrapper visitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) {
         ObjectPathParser.ExprContext value = ctx.expr(0);
         ObjectPathParser.ExprContext defaultValue = ctx.expr(1);
-        Object v = visit(value);
+        PropertyWrapper v = visit(value);
         ObjectPathParser.FilterExprContext fe = ctx.filterExpr();
         if (Optional.ofNullable(fe).isPresent()) {
             // 如果存在过滤器,则需要判断过滤器是否通过,此时需要创建一个子上下文
@@ -201,25 +212,26 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             ObjectPathParserContext nc = this.context.createChild(v);
             // 持有新上下文的访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(nc);
-            Object filterValue = childVisitor.visit(fe);
+            PropertyWrapper filterValue = childVisitor.visit(fe);
             // 理论上filterValue必须是boolean类型,但是为了减少可能出现的问题,允许为null.
             Boolean effective = Optional.ofNullable(filterValue).map(fv -> {
-                if (fv instanceof Boolean) {
-                    return (Boolean) fv;
+                Class<?> vt = fv.readType();
+                if (Objects.equals(vt, Boolean.class) || Objects.equals(vt, boolean.class)) {
+                    return (Boolean) fv.read();
                 }
-                if (fv instanceof String) {
-                    return Boolean.parseBoolean((String) fv);
+                if (Objects.equals(vt, String.class)) {
+                    return Boolean.parseBoolean((String) fv.read());
                 }
                 return false;
             }).orElse(false);
 
             if (Boolean.TRUE.equals(effective)) {
-                return v;
+                return wrapper(v);
             }
             return visit(defaultValue);
         }
         // 直接进行null判断
-        return v == null ? visit(defaultValue) : v;
+        return v == null ? visit(defaultValue) : wrapper(v);
     }
 
     /**
@@ -252,7 +264,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitINDEX(ObjectPathParser.INDEXContext ctx) {
+    public PropertyWrapper visitINDEX(ObjectPathParser.INDEXContext ctx) {
         // 获取待访问的索引值
         TerminalNode index = ctx.NUMBER();
         // 访问索引,获取索引对应的对象
@@ -267,11 +279,11 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitINDEX_OR_NAME(ObjectPathParser.INDEX_OR_NAMEContext ctx) {
+    public PropertyWrapper visitINDEX_OR_NAME(ObjectPathParser.INDEX_OR_NAMEContext ctx) {
         // 获取待访问的索引值
         TerminalNode index = ctx.ID();
         // 访问索引,获取索引对应的对象
-        Object obj = this.context.eval(index.getText());
+        PropertyWrapper obj = this.context.eval(index.getText());
         // 切换上下文
         this.context = this.context.createChild(obj);
         return obj;
@@ -280,25 +292,26 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     /**
      * 访问子对象,此时目标对象可以是数组,集合,Map,对象,只要不是基本类型即可
      * 此处会根据表达式中的name,提取出对应的对象,然后返回一个map
+     *
      * @param ctx the parse tree
-     * @return
+     * @return 属性包装器
      */
     @Override
-    public Object visitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) {
+    public PropertyWrapper visitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) {
         List<TerminalNode> ids = ctx.ID();
-        Map<Object,Object> map=new HashMap<>(ids.size());
+        Map<Object, Object> map = new HashMap<>(ids.size());
         for (TerminalNode id : ids) {
             Object obj = this.context.eval(id.getText());
-            map.put(id.getText(),obj);
+            map.put(id.getText(), obj);
         }
-        this.context=this.context.createChild(map);
-        return map;
+        this.context = this.context.createChild(map);
+        return wrapper(map);
     }
 
     @Override
-    public Object visitCHILD(ObjectPathParser.CHILDContext ctx) {
+    public PropertyWrapper visitCHILD(ObjectPathParser.CHILDContext ctx) {
         String id = ctx.ID().getText();
-        Object obj = this.context.eval(id);
+        PropertyWrapper obj = this.context.eval(id);
         this.context = this.context.createChild(obj);
         return obj;
     }
@@ -312,7 +325,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitWILDCARD_ALL(ObjectPathParser.WILDCARD_ALLContext ctx) {
+    public PropertyWrapper visitWILDCARD_ALL(ObjectPathParser.WILDCARD_ALLContext ctx) {
         this.stop = true;
         // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
         // 遍历操作由上下文对象完成,注意此时,上下文产生了分值,在通配符后的所有选择器都会在子上下文中执行
@@ -326,14 +339,15 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         }
         List<ParseTree> children = parent.children;
         // 遍历当前对象,执行后续操作
-        return this.context.map(obj -> {
+        Object res = this.context.map(obj -> {
             // 创建子上下文
             ObjectPathParserContext child = this.context.createContext(this.context.rootValue(), this.context.currentValue(), obj);
             // 创建子访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
             // 然后使用子访问器访问后续操作
             // 提取后续操作
-            Object result = childVisitor.context.currentValue();
+            PropertyWrapper result = childVisitor.context.currentValue();
+
             for (int i = index + 1; i < cc; i++) {
                 ParseTree parseTree = children.get(i);
                 result = childVisitor.visit(parseTree);
@@ -342,8 +356,10 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                     childVisitor = new ObjectPathVisitor(childVisitor.context.createContext(childVisitor.context.rootValue(), childVisitor.context.currentValue(), result));
                 }
             }
-            return result;
+            return this.context.getMod().isReadOnly()?result.read():result;
         });
+        // 聚合型方法需要特殊处理
+        return wrapper(res);
     }
 
     /**
@@ -356,7 +372,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitRECURSIVE_CHILD(ObjectPathParser.RECURSIVE_CHILDContext ctx) {
+    public PropertyWrapper visitRECURSIVE_CHILD(ObjectPathParser.RECURSIVE_CHILDContext ctx) {
         // 递归下降的操作本质上是通过子表达式筛选出符合条件的元素,然后将这些元素作为一个新的集合返回.
         // 他的实现和通配符访问类似,都需要中断后续子表达式的自动执行,并将其作为筛选条件来处理
         // 比如,$..name,本质上是递归获取所有元素的name属性,然后将这些name属性作为一个新的集合返回
@@ -377,7 +393,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         // 递归获取所有子元素
         recursiveChild(this.context.currentValue(), id, nextChildren, objects);
         this.context.updateCurrent(objects);
-        return objects;
+        return wrapper(objects);
     }
 
     /**
@@ -389,11 +405,11 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitALL(ObjectPathParser.ALLContext ctx) {
+    public PropertyWrapper visitALL(ObjectPathParser.ALLContext ctx) {
         List<Object> list = new ArrayList<>();
         this.context.eachValue(list::add);
         this.context.updateCurrent(list);
-        return list;
+        return wrapper(list);
     }
 
     public void recursiveChild(final Object obj, String id, List<ParseTree> nextChildren, List<Object> objects) {
@@ -424,19 +440,28 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * 调用方法
      */
     @Override
-    public Object visitMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx) {
+    public PropertyWrapper visitMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx) {
         String functionName = unquote(ctx.ID().getText());
         List<Object> params = new ArrayList<>();
         Optional.ofNullable(ctx.args())
                 .ifPresent(args -> {
-                    Object res = this.visit(args);
-                    if (res instanceof List) {
-                        params.addAll((List<?>) res);
-                    } else {
-                        params.add(res);
+                    PropertyWrapper res = this.visit(args);
+                    if (res.isInstanceOf(List.class)){
+                        params.addAll(res.read(List.class));
+                    }else {
+                        params.add(res.read());
                     }
                 });
         return this.context.invokeMethod(functionName, params);
+    }
+
+    /**
+     * 获取当前元素的索引或者名称
+     */
+    @Override
+    public PropertyWrapper visitMETHOD_INDEX(ObjectPathParser.METHOD_INDEXContext ctx) {
+        PropertyWrapper cv = this.context.currentValue();
+        return this.context.updateCurrent(cv.getIndexOrKey());
     }
 
     /**
@@ -447,7 +472,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitSLICE(ObjectPathParser.SLICEContext ctx) {
+    public PropertyWrapper visitSLICE(ObjectPathParser.SLICEContext ctx) {
         // 获取切片的起始位置和结束位置
         List<TerminalNode> numbers = ctx.NUMBER();
         int start = Integer.parseInt(numbers.get(0).getText());
@@ -468,41 +493,41 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         if (end > old.size()) {
             end = old.size();
         }
-        return old.subList(start, end);
+        return wrapper(old.subList(start, end));
     }
 
     /**
      * 这是一种比较特殊的切片操作,通过传入多个使用逗号分隔的数值,来读取集合中的元素
      */
     @Override
-    public Object visitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx) {
+    public PropertyWrapper visitSLICE_PICK(ObjectPathParser.SLICE_PICKContext ctx) {
         // 获取当前对象,此时需要判断当前对象是否为集合,如果不是集合,则抛出异常
         List<Object> old = Optional.ofNullable(this.context.covertToList())
-                .orElseGet(()-> this.config.isAutoCreateCollectionWhenInvokeMethod()
+                .orElseGet(() -> this.config.isAutoCreateCollectionWhenInvokeMethod()
                         ? new ArrayList<>()
                         : null);
 
-        if (old == null){
+        if (old == null) {
             throw new IllegalArgumentException("The current object is not a collection or the collection is empty.");
         }
 
         List<TerminalNode> index = ctx.NUMBER();
-        List<Object> newList=new ArrayList<>(index.size());
+        List<Object> newList = new ArrayList<>(index.size());
         for (TerminalNode terminalNode : index) {
             int indexValue = Integer.parseInt(terminalNode.getText());
             if (indexValue < 0) {
                 // 当索引为负数时,表示倒数第几个元素,需要将索引转换为正数
-                indexValue =  old.size() + indexValue;
+                indexValue = old.size() + indexValue;
             }
-            if (indexValue<0||indexValue>= old.size()
-                              && (this.config.isSkipOutOfRangeIndexForList())
-            ){
-                    continue;
+            if (indexValue < 0 || indexValue >= old.size()
+                                  && (this.config.isSkipOutOfRangeIndexForList())
+            ) {
+                continue;
 
             }
             newList.add(old.get(indexValue));
         }
-        return newList;
+        return wrapper(newList);
     }
 
     /**
@@ -514,16 +539,16 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitFILTER(ObjectPathParser.FILTERContext ctx) {
+    public PropertyWrapper visitFILTER(ObjectPathParser.FILTERContext ctx) {
         // 获取过滤条件
         ObjectPathParser.FilterExprContext f = ctx.filterExpr();
         Object res = this.visit(f);
         this.context.updateCurrent(res);
-        return res;
+        return wrapper(res);
     }
 
     @Override
-    public Object visitFilterExpr(ObjectPathParser.FilterExprContext ctx) {
+    public PropertyWrapper visitFilterExpr(ObjectPathParser.FilterExprContext ctx) {
         if (this.config.isAutoCreateCollectionWhenInvokeMethod()
             && (!Optional.ofNullable(this.context.currentValue()).isPresent())) {
             this.context.updateCurrent(new ArrayList<>());
@@ -535,7 +560,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             // 创建子访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
 
-            Object match = false;
+            PropertyWrapper match = wrapper(false);
             if (Optional.ofNullable(ctx.comparExpr()).isPresent()) {
                 match = childVisitor.visit(ctx.comparExpr());
             } else if (Optional.ofNullable(ctx.reverseComparExpr()).isPresent()) {
@@ -543,10 +568,10 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             } else if (Optional.ofNullable(ctx.scripts()).isPresent()) {
                 match = childVisitor.visit(ctx.scripts());
             }
-            return match instanceof Boolean && (Boolean) match;
+            return match.read(Boolean.class);
         }));
         this.context.updateCurrent(res);
-        return res;
+        return wrapper(res);
     }
 
     /**
@@ -558,72 +583,77 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitEQ(ObjectPathParser.EQContext ctx) {
-        Object left = visit(ctx.getChild(0));
-        Object right = visit(ctx.getChild(2));
-        if (left == null) {
-            return right == null;
+    public PropertyWrapper visitEQ(ObjectPathParser.EQContext ctx) {
+        PropertyWrapper left = visit(ctx.getChild(0));
+        PropertyWrapper right = visit(ctx.getChild(2));
+        if (left.isNull()) {
+            return wrapper(right == null);
         }
-        if (right == null) {
-            return false;
+        if (right.isNull()) {
+            return wrapper(false);
         }
         // 尝试将二者转换为数字进行比较
         Number ln = context.covertToNumber(left);
         Number rn = context.covertToNumber(right);
         if (ln != null && rn != null) {
-            return ln.doubleValue() == rn.doubleValue();
+            return wrapper(ln.doubleValue() == rn.doubleValue());
         }
         // 转换为字符串进行比较
         String ls = left.toString();
         String rs = right.toString();
-        return ls.equals(rs);
+        return wrapper(ls.equals(rs));
     }
 
     @Override
-    public Object visitNEQ(ObjectPathParser.NEQContext ctx) {
-        Object left = visit(ctx.getChild(0));
-        Object right = visit(ctx.getChild(2));
-        if (left == null) {
-            return right != null;
+    public PropertyWrapper visitNEQ(ObjectPathParser.NEQContext ctx) {
+        PropertyWrapper left = visit(ctx.getChild(0));
+        PropertyWrapper right = visit(ctx.getChild(2));
+        if (left.isNull()) {
+            return wrapper(right != null);
         }
-        if (right == null) {
-            return false;
+        if (right.isNull()) {
+            return wrapper(false);
         }
-        if (left instanceof Number && right instanceof Number) {
-            return ((Number) left).doubleValue() != ((Number) right).doubleValue();
+        if (ReflectionHelper.isAssignableFrom(Number.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Number.class, right.readType())
+        ) {
+            return wrapper(((Number) left).doubleValue() != ((Number) right).doubleValue());
         }
-        if (left instanceof String && right instanceof String) {
-            return !left.equals(right);
+        if (ReflectionHelper.isAssignableFrom(String.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(String.class, right.readType())) {
+            return wrapper(!left.equals(right));
         }
-        if (left instanceof Boolean && right instanceof Boolean) {
-            return !left.equals(right);
+        if (ReflectionHelper.isAssignableFrom(Boolean.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Boolean.class, right.readType())
+        ) {
+            return wrapper(!Objects.equals(left.read(), right.read()));
         }
-        return !left.equals(right);
+        return wrapper(!Objects.equals(left.read(), right.read()));
     }
 
     @Override
-    public Object visitLT(ObjectPathParser.LTContext ctx) {
-        return compareNumber(ctx, (l, r) -> l.doubleValue() < r.doubleValue());
+    public PropertyWrapper visitLT(ObjectPathParser.LTContext ctx) {
+        return wrapper(compareNumber(ctx, (l, r) -> l.doubleValue() < r.doubleValue()));
     }
 
     @Override
-    public Object visitLE(ObjectPathParser.LEContext ctx) {
-        return compareNumber(ctx, (l, r) -> l.doubleValue() <= r.doubleValue());
+    public PropertyWrapper visitLE(ObjectPathParser.LEContext ctx) {
+        return wrapper(compareNumber(ctx, (l, r) -> l.doubleValue() <= r.doubleValue()));
     }
 
     @Override
-    public Object visitGT(ObjectPathParser.GTContext ctx) {
-        return compareNumber(ctx, (l, r) -> l.doubleValue() > r.doubleValue());
+    public PropertyWrapper visitGT(ObjectPathParser.GTContext ctx) {
+        return wrapper(compareNumber(ctx, (l, r) -> l.doubleValue() > r.doubleValue()));
     }
 
     @Override
-    public Object visitGE(ObjectPathParser.GEContext ctx) {
-        return compareNumber(ctx, (l, r) -> l.doubleValue() >= r.doubleValue());
+    public PropertyWrapper visitGE(ObjectPathParser.GEContext ctx) {
+        return wrapper(compareNumber(ctx, (l, r) -> l.doubleValue() >= r.doubleValue()));
     }
 
     protected boolean compareNumber(ObjectPathParser.ComparExprContext ctx, NumberCompare compare) {
-        Object left = visit(ctx.getChild(0));
-        Object right = visit(ctx.getChild(2));
+        PropertyWrapper left = visit(ctx.getChild(0));
+        PropertyWrapper right = visit(ctx.getChild(2));
         Number l = context.covertToNumber(left);
         Number r = context.covertToNumber(right);
         if (l == null || r == null) {
@@ -639,14 +669,14 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return the result of the visit
      */
     @Override
-    public Object visitUP(ObjectPathParser.UPContext ctx) {
+    public PropertyWrapper visitUP(ObjectPathParser.UPContext ctx) {
         Integer number = Optional.ofNullable(ctx.NUMBER()).map(ParseTree::getText).map(Integer::parseInt).orElse(-1);
         // 获取当前对象,要求当前对象必须是一个集合
         // 然后开始降低数组维度
         List<Object> objects = up(context.covertToList(), number);
         this.context.updateParent();
         this.context.updateCurrent(objects);
-        return objects;
+        return wrapper(objects);
     }
 
     protected List<Object> up(List<?> objects, int number) {
@@ -668,28 +698,28 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
 
     @Override
-    public Object visitISNULL(ObjectPathParser.ISNULLContext ctx) {
-        return visit(ctx.getChild(0)) == null;
+    public PropertyWrapper visitISNULL(ObjectPathParser.ISNULLContext ctx) {
+        return wrapper(visit(ctx.getChild(0)) == null);
     }
 
     @Override
-    public Object visitLREGEX(ObjectPathParser.LREGEXContext ctx) {
+    public PropertyWrapper visitLREGEX(ObjectPathParser.LREGEXContext ctx) {
         String regex = ctx.getChild(0).getText();
-        Object str = visit(ctx.getChild(2));
-        if (str == null || regex == null) {
-            return false;
+        PropertyWrapper str = visit(ctx.getChild(2));
+        if (str.isNull() || regex == null) {
+            return wrapper(false);
         }
-        return useRegexTest(regex, str);
+        return wrapper(useRegexTest(regex, str.read()));
     }
 
     @Override
-    public Object visitRREGEX(ObjectPathParser.RREGEXContext ctx) {
-        Object str = visit(ctx.getChild(0));
+    public PropertyWrapper visitRREGEX(ObjectPathParser.RREGEXContext ctx) {
+        PropertyWrapper str = visit(ctx.getChild(0));
         String regex = ctx.getChild(2).getText();
-        if (str == null || regex == null) {
-            return false;
+        if (str.isNull() || regex == null) {
+            return wrapper(false);
         }
-        return useRegexTest(regex, str);
+        return wrapper(useRegexTest(regex, str.read()));
     }
 
     /**
@@ -725,40 +755,40 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitBETWEEN(ObjectPathParser.BETWEENContext ctx) {
+    public PropertyWrapper visitBETWEEN(ObjectPathParser.BETWEENContext ctx) {
         ObjectPathParser.ExprContext expr = ctx.expr();
-        Object target = visit(expr);
+        PropertyWrapper target = visit(expr);
 
         List<TerminalNode> number = ctx.NUMBER();
-        Object left = visit(number.get(0));
-        Object right = visit(number.get(1));
-        if (target == null || left == null || right == null) {
-            return false;
+        PropertyWrapper left = visit(number.get(0));
+        PropertyWrapper right = visit(number.get(1));
+        if (target.isNull() || left.isNull() || right.isNull()) {
+            return wrapper(false);
         }
         Number l = context.covertToNumber(left);
         Number r = context.covertToNumber(right);
         Number t = context.covertToNumber(target);
         if (l == null || r == null || t == null) {
-            return false;
+            return wrapper(false);
         }
-        return l.doubleValue() <= t.doubleValue() && t.doubleValue() <= r.doubleValue();
+        return wrapper(l.doubleValue() <= t.doubleValue() && t.doubleValue() <= r.doubleValue());
     }
 
     @Override
-    public Object visitLIKE(ObjectPathParser.LIKEContext ctx) {
+    public PropertyWrapper visitLIKE(ObjectPathParser.LIKEContext ctx) {
         ObjectPathParser.ExprContext expr = ctx.expr();
-        Object target = visit(expr);
+        PropertyWrapper target = visit(expr);
         String likeStr = unquote(ctx.ID().getText());
         if (likeStr.startsWith("%") && likeStr.endsWith("%")) {
-            return target.toString().contains(likeStr.substring(1, likeStr.length() - 1));
+            return wrapper(target.read().toString().contains(likeStr.substring(1, likeStr.length() - 1)));
         }
         if (likeStr.startsWith("%")) {
-            return target.toString().endsWith(likeStr.substring(1));
+            return wrapper(target.read().toString().endsWith(likeStr.substring(1)));
         }
         if (likeStr.endsWith("%")) {
-            return target.toString().startsWith(likeStr.substring(0, likeStr.length() - 1));
+            return wrapper(target.read().toString().startsWith(likeStr.substring(0, likeStr.length() - 1)));
         }
-        return false;
+        return wrapper(false);
     }
 
     protected String unquote(String str) {
@@ -772,129 +802,136 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitIN(ObjectPathParser.INContext ctx) {
+    public PropertyWrapper visitIN(ObjectPathParser.INContext ctx) {
         ObjectPathParser.ArgsContext args = ctx.args();
-        Object list = visit(args);
-        Object target = visit(ctx.expr());
-        if (list == null || target == null) {
-            return false;
+        PropertyWrapper list = visit(args);
+        PropertyWrapper target = visit(ctx.expr());
+        if (list.isNull() || target.isNull()) {
+            return wrapper(false);
         }
-        if (list instanceof List) {
-            return ((List<?>) list).contains(target);
+        if (ReflectionHelper.isAssignableFrom(List.class, list.readType())) {
+            return wrapper(((List<?>) list).contains(target));
         }
-        return false;
+        return wrapper(false);
     }
 
     @Override
-    public Object visitNOTIN(ObjectPathParser.NOTINContext ctx) {
+    public PropertyWrapper visitNOTIN(ObjectPathParser.NOTINContext ctx) {
         ObjectPathParser.ArgsContext args = ctx.args();
-        Object list = visit(args);
-        Object target = visit(ctx.expr());
-        if (list == null || target == null) {
-            return false;
+        PropertyWrapper list = visit(args);
+        PropertyWrapper target = visit(ctx.expr());
+        if (list.isNull() || target.isNull()) {
+            return wrapper(false);
         }
-        if (list instanceof List) {
-            return !((List<?>) list).contains(target);
+        if (ReflectionHelper.isAssignableFrom(List.class, list.readType())) {
+            return wrapper(!((List<?>) list).contains(target));
         }
-        return true;
+        return wrapper(true);
     }
 
     @Override
-    public Object visitCONTAINS(ObjectPathParser.CONTAINSContext ctx) {
+    public PropertyWrapper visitCONTAINS(ObjectPathParser.CONTAINSContext ctx) {
         ObjectPathParser.ArgsContext args = ctx.args();
-        Object list = visit(args);
-        Object target = visit(ctx.expr());
-        if (list == null || target == null) {
-            return false;
+        PropertyWrapper list = visit(args);
+        PropertyWrapper target = visit(ctx.expr());
+        if (list.isNull() || target.isNull()) {
+            return wrapper(false);
         }
-        if (list instanceof List) {
-            return ((List<?>) list).contains(target);
+        if (ReflectionHelper.isAssignableFrom(List.class, list.readType())) {
+            return wrapper(((List<?>) list).contains(target));
         }
-        return false;
+        return wrapper(false);
     }
 
     @Override
-    public Object visitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) {
-        Object target = visit(ctx.expr());
-        Object prefix = visit(ctx.getChild(2));
-        if (target == null || prefix == null) {
-            return false;
+    public PropertyWrapper visitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) {
+        PropertyWrapper target = visit(ctx.expr());
+        PropertyWrapper prefix = visit(ctx.getChild(2));
+        if (target.isNull() || prefix.isNull()) {
+            return wrapper(false);
         }
-        return target.toString().startsWith(prefix.toString());
+        return wrapper(target.read().toString().startsWith(prefix.read().toString()));
     }
 
     @Override
-    public Object visitENDSWITH(ObjectPathParser.ENDSWITHContext ctx) {
-        Object target = visit(ctx.expr());
-        Object suffix = visit(ctx.getChild(2));
-        if (target == null || suffix == null) {
-            return false;
+    public PropertyWrapper visitENDSWITH(ObjectPathParser.ENDSWITHContext ctx) {
+        PropertyWrapper target = visit(ctx.expr());
+        PropertyWrapper suffix = visit(ctx.getChild(2));
+        if (target.isNull() || suffix.isNull()) {
+            return wrapper(false);
         }
-        return target.toString().endsWith(suffix.toString());
+        return wrapper(target.read().toString().endsWith(suffix.read().toString()));
     }
 
     @Override
-    public Object visitMATCHES(ObjectPathParser.MATCHESContext ctx) {
-        Object target = visit(ctx.expr());
-        Object regex = visit(ctx.getChild(2));
-        if (target == null || regex == null) {
-            return false;
+    public PropertyWrapper visitMATCHES(ObjectPathParser.MATCHESContext ctx) {
+        PropertyWrapper target = visit(ctx.expr());
+        PropertyWrapper regex = visit(ctx.getChild(2));
+        if (target.isNull() || regex.isNull()) {
+            return wrapper(false);
         }
-        return target.toString().matches(regex.toString());
+        return wrapper(target.read().toString().matches(regex.read().toString()));
     }
 
     @Override
-    public Object visitAND(ObjectPathParser.ANDContext ctx) {
-        Object left = visit(ctx.getChild(0));
-        Object right = visit(ctx.getChild(2));
-        if (left == null || right == null) {
-            return false;
+    public PropertyWrapper visitAND(ObjectPathParser.ANDContext ctx) {
+        PropertyWrapper left = visit(ctx.getChild(0));
+        PropertyWrapper right = visit(ctx.getChild(2));
+        if (left.isNull() || right.isNull()) {
+            return wrapper(false);
         }
-        if (left instanceof Boolean && right instanceof Boolean) {
-            return (Boolean) left && (Boolean) right;
+        if (ReflectionHelper.isAssignableFrom(Boolean.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Boolean.class, right.readType())
+        ) {
+            return wrapper(((Boolean) left.read()) && ((Boolean) right.read()));
         }
-        if (left instanceof Number && right instanceof Number) {
-            return ((Number) left).doubleValue() != 0 && ((Number) right).doubleValue() != 0;
+        if (ReflectionHelper.isAssignableFrom(Number.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Number.class, right.readType())) {
+            return wrapper(((Number) left.read()).doubleValue() != 0 && ((Number) right.read()).doubleValue() != 0);
         }
-        if (left instanceof String && right instanceof String) {
-            return "TRUE".equalsIgnoreCase((String) left) && "TRUE".equalsIgnoreCase((String) right);
+        if (ReflectionHelper.isAssignableFrom(String.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(String.class, right.readType())) {
+            return wrapper("TRUE".equalsIgnoreCase(left.read().toString()) && "TRUE".equalsIgnoreCase(right.read().toString()));
         }
-        return false;
+        return wrapper(false);
     }
 
     @Override
-    public Object visitOR(ObjectPathParser.ORContext ctx) {
-        Object left = visit(ctx.getChild(0));
-        Object right = visit(ctx.getChild(2));
-        if (left == null || right == null) {
-            return false;
+    public PropertyWrapper visitOR(ObjectPathParser.ORContext ctx) {
+        PropertyWrapper left = visit(ctx.getChild(0));
+        PropertyWrapper right = visit(ctx.getChild(2));
+        if (left.isNull() || right.isNull()) {
+            return wrapper(false);
         }
-        if (left instanceof Boolean && right instanceof Boolean) {
-            return (Boolean) left || (Boolean) right;
+        if (ReflectionHelper.isAssignableFrom(Boolean.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Boolean.class, right.readType())) {
+            return wrapper((Boolean) left.read() || ((Boolean) right.read()));
         }
-        if (left instanceof Number && right instanceof Number) {
-            return ((Number) left).doubleValue() != 0 || ((Number) right).doubleValue() != 0;
+        if (ReflectionHelper.isAssignableFrom(Number.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(Number.class, right.readType())) {
+            return wrapper(((Number) left.read()).doubleValue() != 0 || ((Number) right.read()).doubleValue() != 0);
         }
-        if (left instanceof String && right instanceof String) {
-            return "TRUE".equalsIgnoreCase((String) left) || "TRUE".equalsIgnoreCase((String) right);
+        if (ReflectionHelper.isAssignableFrom(String.class, left.readType())
+            && ReflectionHelper.isAssignableFrom(String.class, right.readType())) {
+            return wrapper("TRUE".equalsIgnoreCase(left.read().toString()) || "TRUE".equalsIgnoreCase(right.read().toString()));
         }
-        return false;
+        return wrapper(false);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object visitMIN(ObjectPathParser.MINContext ctx) {
+    public PropertyWrapper visitMIN(ObjectPathParser.MINContext ctx) {
         // 获取集合中的最小值,其要求当前元素必须是一个集合
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             Optional<Double> dOpt = Optional.ofNullable(ctx.DOUBLE()).map(ParseTree::getText).map(Double::parseDouble);
             if (dOpt.isPresent()) {
                 this.context.updateCurrent(dOpt.get());
-                return dOpt.get();
+                return wrapper(dOpt.get());
             }
             Integer v = Optional.ofNullable(ctx.NUMBER()).map(ParseTree::getText).map(Integer::parseInt).orElse(null);
             this.context.updateCurrent(v);
-            return v;
+            return wrapper(v);
         }
         // 此时需要对集合中的元素进行比较,找到最小值
         // 此时会有两个分支,一个是提供了筛选表达式,一个是没有提供筛选表达式
@@ -902,20 +939,24 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         if (Optional.ofNullable(expr).isPresent()) {
             // 提供了筛选表达式,则需要先筛选元素,然后再比较元素的大小
             // 这里的表达式访问的是集合中的每一个元素
-            Object res = objects.stream().map(o -> {
+            Object res = objects.stream().min((o1,o2) -> {
                 // 创建子上下文
-                ObjectPathParserContext child = this.context.createChild(o);
+                ObjectPathParserContext child1 = this.context.createChild(o1);
+                ObjectPathParserContext child2 = this.context.createChild(o2);
+
                 // 创建子访问器
-                ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
-                return childVisitor.visit(expr);
-            }).min((o1, o2) -> {
-                if (o1 instanceof Comparable && o2 instanceof Comparable) {
-                    return ((Comparable<Object>) o1).compareTo(o2);
+                ObjectPathVisitor childVisitor1 = new ObjectPathVisitor(child1);
+                ObjectPathVisitor childVisitor2 = new ObjectPathVisitor(child2);
+
+                PropertyWrapper o1Pw = childVisitor1.visit(expr);
+                PropertyWrapper o2Pw = childVisitor2.visit(expr);
+                if (o1Pw.isInstanceOf(Comparable.class)&&o2Pw.isInstanceOf(Comparable.class)){
+                    return ((Comparable<Object>) o1Pw.read()).compareTo(o2Pw.read());
                 }
                 return 0;
             }).orElse(null);
             this.context.updateCurrent(res);
-            return res;
+            return wrapper(res);
         }
         // 没有提供筛选表达式,则直接比较元素的大小,找到最小值,这要求元素必须是可比较的,即实现了Comparable接口
         Object res = objects.stream().min((o1, o2) -> {
@@ -925,23 +966,23 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             return 0;
         }).orElse(null);
         this.context.updateCurrent(res);
-        return res;
+        return wrapper(res);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object visitMAX(ObjectPathParser.MAXContext ctx) {
+    public PropertyWrapper visitMAX(ObjectPathParser.MAXContext ctx) {
         // 获取集合中的最大值,其要求当前元素必须是一个集合
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             Optional<Double> dOpt = Optional.ofNullable(ctx.DOUBLE()).map(ParseTree::getText).map(Double::parseDouble);
             if (dOpt.isPresent()) {
                 this.context.updateCurrent(dOpt.get());
-                return dOpt.get();
+                return wrapper(dOpt.get());
             }
             Integer v = Optional.ofNullable(ctx.NUMBER()).map(ParseTree::getText).map(Integer::parseInt).orElse(null);
             this.context.updateCurrent(v);
-            return v;
+            return wrapper(v);
         }
         // 此时需要对集合中的元素进行比较,找到最大值
         // 此时会有两个分支,一个是提供了筛选表达式,一个是没有提供筛选表达式
@@ -949,20 +990,24 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
         if (Optional.ofNullable(expr).isPresent()) {
             // 提供了筛选表达式,则需要先筛选元素,然后再比较元素的大小
             // 这里的表达式访问的是集合中的每一个元素
-            Object res = objects.stream().map(o -> {
+            Object res = objects.stream().max((o1,o2) -> {
                 // 创建子上下文
-                ObjectPathParserContext child = this.context.createChild(o);
+                ObjectPathParserContext child1 = this.context.createChild(o1);
+                ObjectPathParserContext child2 = this.context.createChild(o2);
+
                 // 创建子访问器
-                ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
-                return childVisitor.visit(expr);
-            }).max((o1, o2) -> {
-                if (o1 instanceof Comparable && o2 instanceof Comparable) {
-                    return ((Comparable<Object>) o1).compareTo(o2);
+                ObjectPathVisitor childVisitor1 = new ObjectPathVisitor(child1);
+                ObjectPathVisitor childVisitor2 = new ObjectPathVisitor(child2);
+
+                PropertyWrapper o1Pw = childVisitor1.visit(expr);
+                PropertyWrapper o2Pw = childVisitor2.visit(expr);
+                if (o1Pw.isInstanceOf(Comparable.class)&&o2Pw.isInstanceOf(Comparable.class)){
+                    return ((Comparable<Object>) o1Pw.read()).compareTo(o2Pw.read());
                 }
                 return 0;
             }).orElse(null);
             this.context.updateCurrent(res);
-            return res;
+            return wrapper(res);
         }
         // 没有提供筛选表达式,则直接比较元素的大小,找到最大值,这要求元素必须是可比较的,即实现了Comparable接口
         Object res = objects.stream().max((o1, o2) -> {
@@ -972,21 +1017,21 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             return 0;
         }).orElse(null);
         this.context.updateCurrent(res);
-        return res;
+        return wrapper(res);
     }
 
     @Override
-    public Object visitAVG(ObjectPathParser.AVGContext ctx) {
+    public PropertyWrapper visitAVG(ObjectPathParser.AVGContext ctx) {
         List<?> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             Optional<Double> dOpt = Optional.ofNullable(ctx.DOUBLE()).map(ParseTree::getText).map(Double::parseDouble);
             if (dOpt.isPresent()) {
                 this.context.updateCurrent(dOpt.get());
-                return dOpt.get();
+                return wrapper(dOpt.get());
             }
             Integer v = Optional.ofNullable(ctx.NUMBER()).map(ParseTree::getText).map(Integer::parseInt).orElse(null);
             this.context.updateCurrent(v);
-            return v;
+            return wrapper(v);
         }
         // 计算平均值,要求元素必须是数字
         double avg = objects.stream().map(o -> Optional.ofNullable(ctx.expr()).map(e -> {
@@ -995,23 +1040,23 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             // 创建子访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
             return childVisitor.visit(e);
-        }).orElse(o)).mapToDouble(o -> this.context.covertToNumber(o).doubleValue()).average().orElse(0);
+        }).orElse(wrapper(o))).mapToDouble(o -> this.context.covertToNumber(o).doubleValue()).average().orElse(0);
         this.context.updateCurrent(avg);
-        return avg;
+        return wrapper(avg);
     }
 
     @Override
-    public Object visitSUM(ObjectPathParser.SUMContext ctx) {
+    public PropertyWrapper visitSUM(ObjectPathParser.SUMContext ctx) {
         List<?> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             Optional<Double> dOpt = Optional.ofNullable(ctx.DOUBLE()).map(ParseTree::getText).map(Double::parseDouble);
             if (dOpt.isPresent()) {
                 this.context.updateCurrent(dOpt.get());
-                return dOpt.get();
+                return wrapper(dOpt.get());
             }
             Integer v = Optional.ofNullable(ctx.NUMBER()).map(ParseTree::getText).map(Integer::parseInt).orElse(null);
             this.context.updateCurrent(v);
-            return v;
+            return wrapper(v);
         }
         // 计算和,要求元素必须是数字
         double sum = objects.stream().map(o -> Optional.ofNullable(ctx.expr()).map(e -> {
@@ -1020,45 +1065,45 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             // 创建子访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
             return childVisitor.visit(e);
-        }).orElse(o)).mapToDouble(o -> this.context.covertToNumber(o).doubleValue()).sum();
+        }).orElse(wrapper(o))).mapToDouble(o -> this.context.covertToNumber(o).doubleValue()).sum();
         this.context.updateCurrent(sum);
-        return sum;
+        return wrapper(sum);
     }
 
     @Override
-    public Object visitSIZE(ObjectPathParser.SIZEContext ctx) {
+    public PropertyWrapper visitSIZE(ObjectPathParser.SIZEContext ctx) {
         List<?> objects = this.context.covertToList();
         int size = objects.size();
         this.context.updateCurrent(size);
-        return size;
+        return wrapper(size);
     }
 
     @Override
-    public Object visitISEMPTY(ObjectPathParser.ISEMPTYContext ctx) {
+    public PropertyWrapper visitISEMPTY(ObjectPathParser.ISEMPTYContext ctx) {
         List<?> objects = this.context.covertToList();
         boolean empty = objects.isEmpty();
         this.context.updateCurrent(empty);
-        return empty;
+        return wrapper(empty);
     }
 
     @Override
-    public Object visitLENGTH(ObjectPathParser.LENGTHContext ctx) {
+    public PropertyWrapper visitLENGTH(ObjectPathParser.LENGTHContext ctx) {
         // 字符串,数组,集合,Map的长度
-        Object obj = this.context.currentValue();
-        if (obj instanceof String) {
-            int length = ((String) obj).length();
+        PropertyWrapper obj = this.context.currentValue();
+        if (ReflectionHelper.isAssignableFrom(String.class, obj.readType())) {
+            int length = obj.read().toString().length();
             this.context.updateCurrent(length);
-            return length;
+            return wrapper(length);
         }
         if (obj instanceof Map) {
             int length = ((Map<?, ?>) obj).size();
             this.context.updateCurrent(length);
-            return length;
+            return wrapper(length);
         }
         List<Object> objects = this.context.covertToList();
         int length = objects.size();
         this.context.updateCurrent(length);
-        return length;
+        return wrapper(length);
     }
 
     /**
@@ -1068,36 +1113,31 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
      * @return 集合
      */
     @Override
-    public Object visitKEYS(ObjectPathParser.KEYSContext ctx) {
+    public PropertyWrapper visitKEYS(ObjectPathParser.KEYSContext ctx) {
         List<Object> keys = new ArrayList<>();
         this.context.eachKey(keys::add);
-        this.context.updateCurrent(keys);
-        return keys;
+        return this.context.updateCurrent(keys);
     }
 
     @Override
-    public Object visitVALUES(ObjectPathParser.VALUESContext ctx) {
+    public PropertyWrapper visitVALUES(ObjectPathParser.VALUESContext ctx) {
         List<Object> values = new ArrayList<>();
         this.context.eachValue(values::add);
-        this.context.updateCurrent(values);
-        return values;
+        return this.context.updateCurrent(values);
     }
 
     @Override
-    public Object visitREVERSE(ObjectPathParser.REVERSEContext ctx) {
+    public PropertyWrapper visitREVERSE(ObjectPathParser.REVERSEContext ctx) {
         List<Object> objects = this.context.covertToList();
         Collections.reverse(objects);
-        this.context.updateCurrent(objects);
-        return objects;
+        return this.context.updateCurrent(objects);
     }
 
     @Override
-    public Object visitSORT(ObjectPathParser.SORTContext ctx) {
+    public PropertyWrapper visitSORT(ObjectPathParser.SORTContext ctx) {
         List<ObjectPathParser.ExprContext> exprs = ctx.expr();
         List<?> sorted = sortByExprs(exprs);
-        this.context.updateCurrent(sorted);
-
-        return sorted;
+        return this.context.updateCurrent(sorted);
     }
 
     @SuppressWarnings("all")
@@ -1112,12 +1152,12 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 // 创建子访问器
                 ObjectPathVisitor o1v = new ObjectPathVisitor(this.context.createChild(o1));
                 ObjectPathVisitor o2v = new ObjectPathVisitor(this.context.createChild(o2));
-                int i = ((Comparable<Object>) o1v.visit(expr)).compareTo(o2v.visit(expr));
+                int i = ((Comparable<Object>) o1v.visit(expr).read()).compareTo(o2v.visit(expr).read());
                 if (i == 0) {
                     // 如果两个元素的排序值相同,则继续使用后续的排序表达式进行计算
                     for (int j = 1; j < exprs.size(); j++) {
                         ObjectPathParser.ExprContext e = exprs.get(j);
-                        i = ((Comparable<Object>) o1v.visit(e)).compareTo(o2v.visit(e));
+                        i = ((Comparable<Object>) o1v.visit(e).read()).compareTo(o2v.visit(e).read());
                         if (i != 0) {
                             return i;
                         }
@@ -1133,22 +1173,21 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
 
 
     @Override
-    public Object visitRSORT(ObjectPathParser.RSORTContext ctx) {
+    public PropertyWrapper visitRSORT(ObjectPathParser.RSORTContext ctx) {
         List<ObjectPathParser.ExprContext> exprs = ctx.expr();
         List<?> sorted = sortByExprs(exprs);
         Collections.reverse(sorted);
-        this.context.updateCurrent(sorted);
-        return sorted;
+        return this.context.updateCurrent(sorted);
     }
 
     /**
      * 对集合进行分组,分组操作将会将集合中的元素按照指定的表达式进行分组
      */
     @Override
-    public Object visitGROUPBY(ObjectPathParser.GROUPBYContext ctx) {
+    public PropertyWrapper visitGROUPBY(ObjectPathParser.GROUPBYContext ctx) {
         List<?> objects = this.context.covertToList();
         if (objects.isEmpty()) {
-            return objects;
+            return wrapper(objects);
         }
         ObjectPathParser.ExprContext expr = ctx.expr();
         Map<Object, List<Object>> groups = objects.stream().collect(Collectors.groupingBy(o -> {
@@ -1159,19 +1198,18 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             return childVisitor.visit(expr);
         }));
         this.context.updateCurrent(groups);
-        return groups;
+        return wrapper(groups);
     }
 
     @Override
-    public Object visitDISTINCT(ObjectPathParser.DISTINCTContext ctx) {
+    public PropertyWrapper visitDISTINCT(ObjectPathParser.DISTINCTContext ctx) {
         List<?> objects = this.context.covertToList();
         if (objects.isEmpty()) {
-            return objects;
+            return wrapper(objects);
         }
         if (!Optional.ofNullable(ctx.expr()).isPresent()) {
             List<Object> distinct = objects.stream().distinct().collect(Collectors.toList());
-            this.context.updateCurrent(distinct);
-            return distinct;
+            return this.context.updateCurrent(distinct);
         }
         // 如果提供了表达式,则需要根据表达式进行去重
         ObjectPathParser.ExprContext expr = ctx.expr();
@@ -1181,20 +1219,20 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             ObjectPathParserContext child = this.context.createChild(o);
             // 创建子访问器
             ObjectPathVisitor childVisitor = new ObjectPathVisitor(child);
-            Object res = childVisitor.visit(expr);
-            if (distinctCache.contains(res)) {
+            PropertyWrapper res = childVisitor.visit(expr);
+            Object obj = res.read();
+            if (distinctCache.contains(obj)) {
                 return false;
             }
-            distinctCache.add(res);
+            distinctCache.add(obj);
             return true;
         }).distinct().collect(Collectors.toList());
-        this.context.updateCurrent(distinct);
-        return distinct;
+        return this.context.updateCurrent(distinct);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object visitJOIN(ObjectPathParser.JOINContext ctx) {
+    public PropertyWrapper visitJOIN(ObjectPathParser.JOINContext ctx) {
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             objects = new ArrayList<>();
@@ -1208,39 +1246,36 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 objects.add(obj);
             }
         }
-        this.context.updateCurrent(objects);
-        return objects;
+        return this.context.updateCurrent(objects);
     }
 
     @Override
-    public Object visitFIRST(ObjectPathParser.FIRSTContext ctx) {
+    public PropertyWrapper visitFIRST(ObjectPathParser.FIRSTContext ctx) {
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
-            return null;
+            return wrapper(null);
         }
         Object first = objects.get(0);
-        this.context.updateCurrent(first);
-        return first;
+        return this.context.updateCurrent(first);
     }
 
     @Override
-    public Object visitLAST(ObjectPathParser.LASTContext ctx) {
+    public PropertyWrapper visitLAST(ObjectPathParser.LASTContext ctx) {
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
-            return null;
+            return wrapper(null);
         }
         Object last = objects.get(objects.size() - 1);
-        this.context.updateCurrent(last);
-        return last;
+        return this.context.updateCurrent(last);
     }
 
     @Override
-    public Object visitINDEXOF(ObjectPathParser.INDEXOFContext ctx) {
+    public PropertyWrapper visitINDEXOF(ObjectPathParser.INDEXOFContext ctx) {
         List<Object> objects = this.context.covertToList();
         if (objects.isEmpty()) {
             return null;
         }
-        Number index = this.context.covertToNumber(ctx.NUMBER().getText());
+        Number index = this.context.covertToNumber(wrapper(ctx.NUMBER().getText()));
         if (index == null) {
             return null;
         }
@@ -1253,96 +1288,97 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             return null;
         }
         Object obj = objects.get(i);
-        this.context.updateCurrent(obj);
-        return obj;
+        return this.context.updateCurrent(obj);
+    }
+
+    /**
+     * 映射方法,将当前对象映射为另一个对象
+     */
+    @Override
+    public PropertyWrapper visitMAP(ObjectPathParser.MAPContext ctx) {
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        // 创建子上下文?解析表达式,获取结果,然后更新当前值
+        PropertyWrapper pw = visit(expr);
+        return this.context.updateCurrent(pw);
     }
 
     /**
      * 对字符串进行分割操作
      */
     @Override
-    public Object visitSPLIT(ObjectPathParser.SPLITContext ctx) {
+    public PropertyWrapper visitSPLIT(ObjectPathParser.SPLITContext ctx) {
         String s = this.context.covertToString();
         String split = unquote(ctx.ID().getText());
         // 移除开头和结尾的引号
         String[] splitStr = s.split(split);
-        this.context.updateCurrent(Arrays.asList(splitStr));
-        return Arrays.asList(splitStr);
+        return this.context.updateCurrent(Arrays.asList(splitStr));
     }
 
     @Override
-    public Object visitREPLACE(ObjectPathParser.REPLACEContext ctx) {
+    public PropertyWrapper visitREPLACE(ObjectPathParser.REPLACEContext ctx) {
         String old = unquote(ctx.ID(0).getText());
         String want = unquote(ctx.ID(1).getText());
         String s = this.context.covertToString();
         String replace = s.replace(old, want);
-        this.context.updateCurrent(replace);
-        return replace;
+        return this.context.updateCurrent(replace);
     }
 
     @Override
-    public Object visitTOUPPER(ObjectPathParser.TOUPPERContext ctx) {
+    public PropertyWrapper visitTOUPPER(ObjectPathParser.TOUPPERContext ctx) {
         String upperCase = this.context.covertToString().toUpperCase();
-        this.context.updateCurrent(upperCase);
-        return upperCase;
+        return this.context.updateCurrent(upperCase);
     }
 
     @Override
-    public Object visitTOLOWER(ObjectPathParser.TOLOWERContext ctx) {
+    public PropertyWrapper visitTOLOWER(ObjectPathParser.TOLOWERContext ctx) {
         String lowerCase = this.context.covertToString().toLowerCase();
-        this.context.updateCurrent(lowerCase);
-        return lowerCase;
+        return this.context.updateCurrent(lowerCase);
     }
 
     @Override
-    public Object visitSUBSTRING(ObjectPathParser.SUBSTRINGContext ctx) {
+    public PropertyWrapper visitSUBSTRING(ObjectPathParser.SUBSTRINGContext ctx) {
         String s = this.context.covertToString();
         int start = Integer.parseInt(Optional.ofNullable(ctx.NUMBER(0)).map(ParseTree::getText).orElse("0"));
         int end = Integer.parseInt(Optional.ofNullable(ctx.NUMBER(1)).map(ParseTree::getText).orElse(String.valueOf(s.length())));
         String substring = s.substring(start, end);
-        this.context.updateCurrent(substring);
-        return substring;
+        return this.context.updateCurrent(substring);
     }
 
     @Override
-    public Object visitLTRIM(ObjectPathParser.LTRIMContext ctx) {
+    public PropertyWrapper visitLTRIM(ObjectPathParser.LTRIMContext ctx) {
         String s = this.context.covertToString();
         String trim = s.replaceAll("^\\s+", "");
-        this.context.updateCurrent(trim);
-        return trim;
+        return this.context.updateCurrent(trim);
     }
 
     @Override
-    public Object visitRTRIM(ObjectPathParser.RTRIMContext ctx) {
+    public PropertyWrapper visitRTRIM(ObjectPathParser.RTRIMContext ctx) {
         String s = this.context.covertToString();
         String trim = s.replaceAll("\\s+$", "");
-        this.context.updateCurrent(trim);
-        return trim;
+        return this.context.updateCurrent(trim);
     }
 
     @Override
-    public Object visitTRIM(ObjectPathParser.TRIMContext ctx) {
+    public PropertyWrapper visitTRIM(ObjectPathParser.TRIMContext ctx) {
         String s = this.context.covertToString();
         String trim = s.trim();
-        this.context.updateCurrent(trim);
-        return trim;
+        return this.context.updateCurrent(trim);
     }
 
     @Override
-    public Object visitCONCAT(ObjectPathParser.CONCATContext ctx) {
+    public PropertyWrapper visitCONCAT(ObjectPathParser.CONCATContext ctx) {
         String s = this.context.covertToString();
         String cs = unquote(ctx.ID().getText());
         String concat = s.concat(cs);
-        this.context.updateCurrent(concat);
-        return concat;
+        return this.context.updateCurrent(concat);
     }
 
     @Override
-    public Object visitScripts(ObjectPathParser.ScriptsContext ctx) {
+    public PropertyWrapper visitScripts(ObjectPathParser.ScriptsContext ctx) {
         ObjectPathParser.Scripts_startContext ssc = ctx.scripts_start();
         String scriptName = ssc.ID().getText();
         ObjectPathParser.NamedArgsContext namedArgsContext = ssc.namedArgs();
-        Object nas = visit(namedArgsContext);
+        PropertyWrapper nas = visit(namedArgsContext);
         String text = ctx.SCRIPT_CONTENT().getText();
         // 移除脚本中前置的>以及后置</
         if (text.startsWith(">")) {
@@ -1352,72 +1388,71 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
             text = text.substring(0, text.length() - 2);
         }
         // 此处时就获取了完整的脚本数据,脚本类型,脚本参数,脚本内容
-        Object res = this.context.executeScript(scriptName, nas, text);
-        this.context.updateCurrent(res);
-        return res;
+        Object res = this.context.executeScript(scriptName, nas.read(), text);
+        return this.context.updateCurrent(res);
     }
 
     @Override
-    public Object visitNamedArgs(ObjectPathParser.NamedArgsContext ctx) {
+    public PropertyWrapper visitNamedArgs(ObjectPathParser.NamedArgsContext ctx) {
         Map<Object, Object> namedArgs = new HashMap<>();
         List<ObjectPathParser.NamedArgContext> namedArg = ctx.namedArg();
         for (ObjectPathParser.NamedArgContext nac : namedArg) {
             String name = nac.ID().getText();
-            Object obj = visit(nac.arg());
-            namedArgs.put(name, obj);
+            PropertyWrapper obj = visit(nac.arg());
+            namedArgs.put(name, obj.read());
         }
-        return namedArgs;
+        return wrapper(namedArgs);
     }
 
     @Override
-    public Object visitReverseComparExpr(ObjectPathParser.ReverseComparExprContext ctx) {
+    public PropertyWrapper visitReverseComparExpr(ObjectPathParser.ReverseComparExprContext ctx) {
         ObjectPathParser.ComparExprContext comparExprContext = ctx.comparExpr();
-        Object result = visit(comparExprContext);
-        return !(Boolean) result;
+        PropertyWrapper result = visit(comparExprContext);
+        return wrapper(!(Boolean)result.read());
     }
 
     @Override
-    public Object visitArgs(ObjectPathParser.ArgsContext ctx) {
+    public PropertyWrapper visitArgs(ObjectPathParser.ArgsContext ctx) {
         List<Object> args = new ArrayList<>();
         List<ObjectPathParser.ArgContext> arg = ctx.arg();
         for (ObjectPathParser.ArgContext a : arg) {
-            args.add(visit(a));
+            args.add(visit(a).read());
         }
-        return args;
+        return wrapper(args);
     }
 
     @Override
-    public Object visitArg(ObjectPathParser.ArgContext ctx) {
+    public PropertyWrapper visitArg(ObjectPathParser.ArgContext ctx) {
         return visit(ctx.getChild(0));
     }
 
     @Override
-    public Object visitComplexValue(ObjectPathParser.ComplexValueContext ctx) {
+    public PropertyWrapper visitComplexValue(ObjectPathParser.ComplexValueContext ctx) {
         return visit(ctx.getChild(0));
     }
 
     @Override
-    public Object visitJson(ObjectPathParser.JsonContext ctx) {
+    public PropertyWrapper visitJson(ObjectPathParser.JsonContext ctx) {
         return visit(ctx.getChild(0));
     }
 
     @Override
-    public Object visitObject(ObjectPathParser.ObjectContext ctx) {
+    public PropertyWrapper visitObject(ObjectPathParser.ObjectContext ctx) {
         return this.context.parseJson(ctx.getText());
     }
 
     @Override
-    public Object visitArray(ObjectPathParser.ArrayContext ctx) {
+    public PropertyWrapper visitArray(ObjectPathParser.ArrayContext ctx) {
         return this.context.parseJson(ctx.getText());
     }
 
     @Override
-    public Object visitValue(ObjectPathParser.ValueContext ctx) {
+    public PropertyWrapper visitValue(ObjectPathParser.ValueContext ctx) {
         if (Optional.ofNullable(ctx.ID()).isPresent()) {
             String id = ctx.ID().getText();
             id = unquote(id);
             this.context = this.context.createChild(id);
-            return id;
+            return wrapper(id);
         }
         if (Optional.ofNullable(ctx.NUMBER()).isPresent()) {
             String number = ctx.NUMBER().getText();
@@ -1425,40 +1460,44 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<Object> {
                 number = number.substring(0, number.length() - 1);
                 long l = Long.parseLong(number);
                 this.context = this.context.createChild(l);
-                return l;
+                return wrapper(l);
             }
             if (number.contains(".")) {
                 double d = Double.parseDouble(number);
                 this.context = this.context.createChild(d);
-                return d;
+                return wrapper(d);
             }
             if (number.endsWith("d") || number.endsWith("D")) {
                 number = number.substring(0, number.length() - 1);
                 double d = Double.parseDouble(number);
                 this.context = this.context.createChild(d);
-                return d;
+                return wrapper(d);
             }
             Integer i = Integer.parseInt(number);
             this.context = this.context.createChild(i);
-            return i;
+            return wrapper(i);
         }
         if (Optional.ofNullable(ctx.STRING()).isPresent()) {
             String string = ctx.STRING().getText();
             this.context = this.context.createChild(this.context.eval(string));
-            return string;
+            return wrapper(string);
         }
         if (Optional.ofNullable(ctx.DOUBLE()).isPresent()) {
             String doubleStr = ctx.DOUBLE().getText();
             double d = Double.parseDouble(doubleStr);
             this.context = this.context.createChild(d);
-            return d;
+            return wrapper(d);
         }
         if (Optional.ofNullable(ctx.BOOL()).isPresent()) {
             String boolStr = ctx.BOOL().getText();
             boolean b = Boolean.parseBoolean(boolStr);
             this.context = this.context.createChild(b);
-            return b;
+            return wrapper(b);
         }
-        return null;
+        return wrapper(null);
+    }
+
+    protected PropertyWrapper wrapper(Object object) {
+        return this.config.getWrapperFactory().create(object);
     }
 }

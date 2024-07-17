@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  * This interface defines a complete listener for a parse tree produced by
  * {@link ObjectPathParser}.
  */
-@SuppressWarnings("all")
 public interface ObjectPathListener extends ParseTreeListener {
 	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#objectPath}.
@@ -876,6 +875,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitINDEXOF(ObjectPathParser.INDEXOFContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code MAP}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterMAP(ObjectPathParser.MAPContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code MAP}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitMAP(ObjectPathParser.MAPContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#scripts}.
 	 * @param ctx the parse tree

@@ -4,8 +4,17 @@ import cc.catman.object.core.ConfigurationAccessor;
 import cc.catman.object.core.Features;
 import cc.catman.object.core.accessor.ClassifierObjectAccessor;
 import cc.catman.object.core.accessor.ObjectAccessor;
+import cc.catman.object.core.accessor.property.DefaultPropertyAccessorCache;
+import cc.catman.object.core.accessor.property.DiscardPropertyAccessorCache;
+import cc.catman.object.core.accessor.property.PropertyAccessorCache;
+import cc.catman.object.core.accessor.property.accessor.DefaultPropertyAccessorFactory;
+import cc.catman.object.core.accessor.property.accessor.PropertyAccessorFactory;
+import cc.catman.object.core.accessor.property.wrapper.DefaultPropertyWrapperFactory;
+import cc.catman.object.core.accessor.property.wrapper.PropertyWrapperFactory;
 import cc.catman.object.core.function.DefaultFunctionManager;
 import cc.catman.object.core.function.FunctionManager;
+import cc.catman.object.core.instance.DefaultInstanceFactory;
+import cc.catman.object.core.instance.InstanceFactory;
 import cc.catman.object.core.json.NoneJsonCoder;
 import cc.catman.object.core.json.JsonCoder;
 import cc.catman.object.core.rewrite.AggregationObjectRewrite;
@@ -32,7 +41,7 @@ public class ObjectPathConfiguration {
      * @return 配置对象
      */
     public static ObjectPathConfiguration create(){
-        return ObjectPathConfiguration.crate(new NoneJsonCoder());
+        return ObjectPathConfiguration.create(new NoneJsonCoder());
     }
 
     /**
@@ -40,7 +49,7 @@ public class ObjectPathConfiguration {
      * @param jsonCoder JSON编码器
      * @return 配置对象
      */
-    public static ObjectPathConfiguration crate(JsonCoder jsonCoder){
+    public static ObjectPathConfiguration create(JsonCoder jsonCoder){
         ObjectPathConfiguration opc = ObjectPathConfiguration.builder()
                 .jsonCoder(jsonCoder)
                 .disableJsonParse(jsonCoder instanceof NoneJsonCoder)
@@ -48,7 +57,14 @@ public class ObjectPathConfiguration {
                 .objectAccessor(ClassifierObjectAccessor.defaultAccessor())
                 .objectRewrite(new AggregationObjectRewrite())
                 .scriptExecutorManager(DefaultScriptExecutorManager.defaultScriptExecutorManager())
+                .instanceFactory(DefaultInstanceFactory.defaultInstance())
+                .propertyAccessorCache(new DefaultPropertyAccessorCache())
+                .propertyAccessorFactory(DefaultPropertyAccessorFactory.create())
+                .wrapperFactory(new DefaultPropertyWrapperFactory())
+                .syntaxErrorStop(true)
+                .preventSyntaxErrorAndSendToErrorLog(true)
                 .build();
+        opc.getFeatures().put(Features.CONNECT_STRING_USE_PLUS_SIGN,true);
         return opc.inject();
     }
 
@@ -119,6 +135,12 @@ public class ObjectPathConfiguration {
     private boolean skipOutOfRangeIndexForList=true;
 
     /**
+     * 是否允许对set进行写操作,set集合在修改时,将会动态修改其访问器的index
+     */
+    @Builder.Default
+    private boolean allowWriteForSet=false;
+
+    /**
      * 一些特性方法
      */
     @Builder.Default
@@ -135,6 +157,14 @@ public class ObjectPathConfiguration {
     private ObjectRewrite objectRewrite;
 
     private ScriptExecutorManager scriptExecutorManager;
+
+    private InstanceFactory instanceFactory;
+
+    private PropertyWrapperFactory wrapperFactory;
+
+    private PropertyAccessorCache propertyAccessorCache;
+
+    private PropertyAccessorFactory propertyAccessorFactory;
 
     public boolean isEnableFeature(Features feature){
         return features.getOrDefault(feature,false);
@@ -156,6 +186,10 @@ public class ObjectPathConfiguration {
         this.inject(this.getObjectAccessor());
         this.inject(this.getFunctionManager());
         this.inject(this.getScriptExecutorManager());
+        this.inject(this.getInstanceFactory());
+        this.inject(this.getWrapperFactory());
+        this.inject(this.getPropertyAccessorFactory());
+        this.inject(this.getPropertyAccessorCache());
         return this;
     }
 

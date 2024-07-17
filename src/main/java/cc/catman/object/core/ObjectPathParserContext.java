@@ -1,6 +1,7 @@
 package cc.catman.object.core;
 
 import cc.catman.object.ObjectPathConfiguration;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -27,21 +28,21 @@ public interface ObjectPathParserContext {
      *
      * @return 根对象
      */
-    Object rootValue();
+    PropertyWrapper rootValue();
 
     /**
      * 获取父对象
      *
      * @return 父对象
      */
-    Object parentValue();
+    PropertyWrapper parentValue();
 
     /**
      * 获取当前对象
      *
      * @return 当前对象
      */
-    Object currentValue();
+    PropertyWrapper currentValue();
 
     /**
      * 获取配置
@@ -50,7 +51,7 @@ public interface ObjectPathParserContext {
      */
     ObjectPathConfiguration getConfiguration();
 
-    void updateCurrent(Object current);
+    PropertyWrapper updateCurrent(Object current);
 
     default void updateParent() {
         updateParent(currentValue());
@@ -90,7 +91,7 @@ public interface ObjectPathParserContext {
      * @param path 表达式
      * @return 解析结果
      */
-    Object eval(String path);
+    PropertyWrapper eval(String path);
 
     /**
      * 在当前上下文中获取当前对象的属性,并将属性名传递给消费者
@@ -226,7 +227,7 @@ public interface ObjectPathParserContext {
      * @param object 对象
      * @return 字符串
      */
-    String covertToString(Object object);
+    String covertToString(PropertyWrapper object);
 
     default String covertToString() {
         return covertToString(currentValue());
@@ -237,7 +238,7 @@ public interface ObjectPathParserContext {
      * @param object 对象
      * @return 数值
      */
-    Number covertToNumber(Object object);
+    Number covertToNumber(PropertyWrapper object);
 
     /**
      * 将字符串转换为对象
@@ -245,7 +246,7 @@ public interface ObjectPathParserContext {
      * @param json 字符串
      * @return 对象
      */
-    Object parseJson(String json);
+    PropertyWrapper parseJson(String json);
 
     /**
      * 重写对象
@@ -253,9 +254,18 @@ public interface ObjectPathParserContext {
      * @param object 对象
      * @return 重写对象
      */
-    Object rewrite(Object object);
+    PropertyWrapper rewrite(Object object);
 
-    Object invokeMethod(String functionName, List<Object> params);
+    PropertyWrapper invokeMethod(String functionName, List<Object> params);
 
-    Object executeScript(String scriptName, Object nas, String text);
+    PropertyWrapper executeScript(String scriptName, Object nas, String text);
+
+    /**
+     * 当前模式是否是只读的
+     */
+    EContextMod  getMod();
+
+    void setMod(EContextMod mod);
+
+    boolean readOnly();
 }

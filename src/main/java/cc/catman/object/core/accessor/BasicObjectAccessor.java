@@ -2,11 +2,11 @@ package cc.catman.object.core.accessor;
 
 import cc.catman.object.core.Entity;
 import cc.catman.object.core.accessor.matcher.IClassMatcher;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -56,24 +56,23 @@ public class BasicObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
-    public boolean isSupport(Object object, Object key, EAccessorKind kind) {
-        if (object == null) {
+    public boolean isSupport(PropertyWrapper pw, Object key, EAccessorKind kind) {
+        if (pw.isNull()) {
             return true;
         }
-
         if (!EAccessorKind.COVERT_TO_STRING.equals(kind)) {
             return false;
         }
 
         // 排除匹配
         for (IClassMatcher matcher : excludeMatchers) {
-            if (matcher.match(object.getClass())) {
+            if (matcher.match(pw.readType())) {
                 return false;
             }
         }
 
         for (IClassMatcher matcher : matchers) {
-            if (matcher.match(object.getClass())) {
+            if (matcher.match(pw.readType())) {
                 return true;
             }
         }
@@ -81,40 +80,40 @@ public class BasicObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
-    public Object get(Object object, Object key) {
+    public PropertyWrapper get(PropertyWrapper object, Object key) {
         throw new UnsupportedOperationException("基础类型不支持get操作");
     }
 
     @Override
-    public void eachKey(Object object, Consumer<Object> consumer) {
+    public void eachKey(PropertyWrapper object, Consumer<Object> consumer) {
         throw new UnsupportedOperationException("基础类型不支持eachKey操作");
     }
 
     @Override
-    public void eachValue(Object object, Consumer<Object> consumer) {
+    public void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
         throw  new UnsupportedOperationException("基础类型不支持eachValue操作");
     }
     
     @Override
-    public void eachEntry(Object object, Consumer<Entity> consumer) {
+    public void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
         throw new UnsupportedOperationException("基础类型不支持eachEntry操作");
     }
 
     @Override
-    public String covertToString(Object object) {
-        if (Objects.isNull(object)){
+    public String covertToString(PropertyWrapper object) {
+        if (object.isNull()){
             return configuration.isUseZeroForNull() ? "0" : null;
         }
-        return  object.toString();
+        return  object.read().toString();
     }
 
     @Override
-    public Number covertToNumber(Object object) {
-        if (object == null) {
+    public Number covertToNumber(PropertyWrapper object) {
+        if (object .isNull()) {
             return configuration.isUseZeroForNull() ? 0 : null;
         }
-        if (object instanceof Number) {
-            return (Number) object;
+        if (object.isInstanceOf(Number.class)) {
+            return object.read(Number.class);
         }
         String s = this.covertToString(object);
         if (s == null) {

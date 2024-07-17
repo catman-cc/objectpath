@@ -2,6 +2,9 @@ package cc.catman.object.core.accessor;
 
 
 import cc.catman.object.core.Entity;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.util.ArrayHelper;
+import cc.catman.object.core.util.PropertyWrapperHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
@@ -10,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -37,38 +41,41 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
 
 
     @Override
-    public boolean isSupport(Object object, Object key, EAccessorKind kind) {
+    public boolean isSupport(PropertyWrapper object, Object key, EAccessorKind kind) {
+        Object obj = object.read();
         if (kind == EAccessorKind.GET) {
-            return validaKey(object, key) && validaObject(object);
+            return validaKey(obj, key) && validaObject(obj);
         }
-        return validaObject(object);
+        return validaObject(obj);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<Object> covertToList(Object object) {
-        if (object == null) {
+    @SuppressWarnings({"unchecked","java:S2293"})
+    public List<Object> covertToList(PropertyWrapper object) {
+        if (object.isNull()) {
             return  configuration.isUseZeroForNull()
                     ?new ArrayList<>()
                     :null;
 
         }
-        if (object instanceof List) {
-            return (List<Object>) object;
+        if (object.isInstanceOf(List.class)) {
+            return object.read(List.class);
         }
-        if (object.getClass().isArray()) {
-            // 如果是基本类型数组,需要特殊处理,可以通过Arrays.asList方法转换
-            Object[] objects = this.convertObjectArray(object);
-            return Arrays.asList(objects);
+        Class<?> ot = object.readType();
+        if (Objects.nonNull(ot) && ot.isArray()) {
+                // 如果是基本类型数组,需要特殊处理,可以通过Arrays.asList方法转换
+                Object[] objects = this.convertObjectArray(object.read());
+                return Arrays.asList(objects);
+            }
+
+        if (object.isInstanceOf(Object[].class)) {
+            return Arrays.asList(object.read(Object[].class));
         }
-        if (object instanceof Object[]) {
-            return Arrays.asList((Object[]) object);
+        if (object.isInstanceOf(Collection.class)) {
+            return new ArrayList<Object>(object.read(Collection.class));
         }
-        if (object instanceof Collection) {
-            return new ArrayList<>((Collection<?>) object);
-        }
-        if (object instanceof Iterator) {
-            Iterator<?> iterator = (Iterator<?>) object;
+        if (object.isInstanceOf(Iterator.class)) {
+            Iterator<?> iterator = object.read(Iterator.class);
             List<Object> list = new ArrayList<>();
             iterator.forEachRemaining(list::add);
             return list;
@@ -78,41 +85,41 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
 
 
     @Override
-    public Object filter(Object object, Predicate<Object> filter) {
+    public PropertyWrapper filter(PropertyWrapper object, Predicate<Object> filter) {
         List<Object> objects = this.covertToList(object);
-        if (Objects.isNull(object)){
+        if (object.isNull()){
             return null;
         }
-        return objects.stream().filter(filter).collect(Collectors.toList());
+        return object.wrapper(objects.stream().filter(filter).collect(Collectors.toList()));
     }
 
     @Override
-    public Object get(Object object, Object key) {
-        if (object == null) {
-            return null;
-
+    public PropertyWrapper get(PropertyWrapper pw, Object key) {
+        if (pw.isNull()) {
+            return pw.wrapper(null);
         }
+        Object object=pw.read();
         // 获取key值,key值一定是数字
         int index = getIndex(key);
         // 尝试获取元素集合,进行迭代
         Optional<Object> fromArray = readFromArray(object, index);
         if (fromArray.isPresent()) {
-            return fromArray.get();
+            return pw.wrapper(fromArray.get());
         }
         Optional<Object> fromCollection = readFromCollection(object, index);
         if (fromCollection.isPresent()) {
-            return fromCollection.get();
+            return pw.wrapper(fromCollection.get());
         }
         Optional<Object> fromIterator = readFromIterator(object, index);
-        return fromIterator.orElse(null);
+        return pw.wrapper(fromIterator.orElse(null));
     }
 
     @Override
-    public void eachKey(Object object, Consumer<Object> consumer) {
-        if (object == null) {
+    public void eachKey(PropertyWrapper pw, Consumer<Object> consumer) {
+        if (pw.isNull()) {
             return;
         }
-
+        Object object=pw.read();
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (int i = 0; i < array.length; i++) {
@@ -136,14 +143,15 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
     /**
      * 遍历对象
      *
-     * @param object   对象
+     * @param pw   对象
      * @param consumer 消费者
      */
     @Override
-    public void eachValue(Object object, Consumer<Object> consumer) {
-        if (object == null) {
+    public void eachValue(PropertyWrapper pw, Consumer<Object> consumer) {
+        if (pw.isNull()) {
             return;
         }
+        Object object=pw.read();
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (Object o : array) {
@@ -159,11 +167,11 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
-    public void eachEntry(Object object, Consumer<Entity> consumer) {
-        if ((object == null)
-        ) {
+    public void eachEntry(PropertyWrapper pw, Consumer<Entity> consumer) {
+        if ((pw.isNull())) {
             return;
         }
+        Object object=pw.read();
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
             for (int i = 0; i < array.length; i++) {
@@ -189,19 +197,27 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
     /**
      * 支持通过mapper函数进行映射
      *
-     * @param object 对象
+     * @param pw 对象
      * @param mapper 映射函数
      * @return 映射后的对象
      */
     @Override
-    public Object map(Object object, Function<Object, Object> mapper) {
-        if (object == null) {
+    public PropertyWrapper map(PropertyWrapper pw, Function<Object, Object> mapper) {
+        if (pw.isNull()) {
             return null;
         }
+        Object object = pw.read();
         // 将对象转换为流
-        Stream<?> stream = toStream(object);
-        // 映射
-        return stream.map(mapper).collect(Collectors.toList());
+        int size = size(object);
+        List<Object> list = IntStream.range(0, size)
+                .mapToObj(pw::read)
+                .map(mapper)
+                .map(PropertyWrapperHelper::unWrapper)
+                .collect(Collectors.toList());
+        return pw.wrapper(list);
+//        Stream<?> stream = toStream(object);
+//        // 映射
+//        return pw.wrapper(stream.map(mapper).collect(Collectors.toList()));
     }
 
     private void addCollectionVerifications() {
@@ -336,7 +352,27 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
         return false;
     }
 
-
+    private int size(Object o){
+        if (Objects.isNull(o)){
+            return 0;
+        }
+        if (o instanceof Object[]){
+            return ((Object[]) o).length;
+        }
+        if (o instanceof Collection){
+            return ((Collection<?>) o).size();
+        }
+        if (o instanceof Iterator){
+            Iterator<?> iter = (Iterator<?>) o;
+            int size=0;
+            while (iter.hasNext()){
+                iter.next();
+                size++;
+            }
+            return size;
+        }
+        return 0;
+    }
     @SuppressWarnings("unchecked")
     protected Stream<Object> toStream(Object object) {
         if (object == null) {
@@ -473,63 +509,11 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
                 }
                 return objects;
             }
-            if (object instanceof long[]) {
-                long[] array = (long[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof double[]) {
-                double[] array = (double[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof float[]) {
-                float[] array = (float[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof short[]) {
-                short[] array = (short[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof byte[]) {
-                byte[] array = (byte[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof char[]) {
-                char[] array = (char[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
-            if (object instanceof boolean[]) {
-                boolean[] array = (boolean[]) object;
-                Object[] objects = new Object[array.length];
-                for (int i = 0; i < array.length; i++) {
-                    objects[i] = array[i];
-                }
-                return objects;
-            }
+            Object[] objects = ArrayHelper.convertToArray(object);
+            if (objects != null){ return objects;}
         }
         throw new IllegalArgumentException("object is not a array, object:" + object);
     }
+
+
 }

@@ -529,6 +529,13 @@ public class ObjectPathBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitMAP(ObjectPathParser.MAPContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitScripts(ObjectPathParser.ScriptsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

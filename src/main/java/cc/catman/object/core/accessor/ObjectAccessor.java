@@ -2,6 +2,7 @@ package cc.catman.object.core.accessor;
 
 import cc.catman.object.core.ConfigurationAccessor;
 import cc.catman.object.core.Entity;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,7 +24,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param key    属性
      * @return 是否支持
      */
-    default boolean isSupport(Object object, Object key) {
+    default boolean isSupport(PropertyWrapper object, Object key) {
         return isSupport(object, key, EAccessorKind.GET);
     }
 
@@ -34,7 +35,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param kind   访问类型
      * @return 是否支持
      */
-    default boolean isSupport(Object object, EAccessorKind kind) {
+    default boolean isSupport(PropertyWrapper object, EAccessorKind kind) {
         return isSupport(object, null, kind);
     }
 
@@ -46,7 +47,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param kind   访问类型
      * @return 是否支持
      */
-    boolean isSupport(Object object, Object key, EAccessorKind kind);
+    boolean isSupport(PropertyWrapper object, Object key, EAccessorKind kind);
 
     /**
      * 获取对象的属性
@@ -55,7 +56,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param key    属性
      * @return 属性值
      */
-    Object get(Object object, Object key);
+    PropertyWrapper get(PropertyWrapper object, Object key);
 
     /**
      * 获取对象的属性
@@ -63,7 +64,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object   对象
      * @param consumer 消费者
      */
-    default void eachValue(Object object, Consumer<Object> consumer) {
+    default void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
         throw new UnsupportedOperationException("不支持eachValue操作");
     }
 
@@ -73,7 +74,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object   对象
      * @param consumer 消费者
      */
-    default void eachKey(Object object, Consumer<Object> consumer) {
+    default void eachKey(PropertyWrapper object, Consumer<Object> consumer) {
         throw new UnsupportedOperationException("不支持eachKey操作");
     }
 
@@ -83,7 +84,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object   对象
      * @param consumer 消费者
      */
-    default void eachEntry(Object object, Consumer<Entity> consumer) {
+    default void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
         throw new UnsupportedOperationException("不支持eachEntry操作");
     }
 
@@ -94,7 +95,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @return 映射后的对象
      */
     @SuppressWarnings("all")
-    default Object map(Object object, Function<Object, Object> mapper) {
+    default PropertyWrapper map(PropertyWrapper object, Function<Object, Object> mapper) {
         throw new UnsupportedOperationException("不支持map操作");
     }
 
@@ -105,7 +106,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param filter 过滤器
      * @return 过滤后的对象
      */
-    default Object filter(Object object, Predicate<Object> filter) {
+    default PropertyWrapper filter(PropertyWrapper object, Predicate<Object> filter) {
         throw new UnsupportedOperationException("不支持filter操作");
     }
 
@@ -115,7 +116,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object 对象
      * @return 大小
      */
-    default int size(Object object) {
+    default int size(PropertyWrapper object) {
         return -1;
     }
 
@@ -125,7 +126,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object 对象
      * @return List
      */
-    default List<Object> covertToList(Object object) {
+    default List<Object> covertToList(PropertyWrapper object) {
         throw new UnsupportedOperationException("不支持转换为List");
     }
 
@@ -135,7 +136,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object 对象
      * @return 字符串
      */
-    default String covertToString(Object object) {
+    default String covertToString(PropertyWrapper object) {
         throw new UnsupportedOperationException("不支持转换为字符串");
     }
 
@@ -145,7 +146,7 @@ public interface ObjectAccessor extends ConfigurationAccessor {
      * @param object 对象
      * @return 数值
      */
-    default Number covertToNumber(Object object) {
+    default Number covertToNumber(PropertyWrapper object) {
         throw new UnsupportedOperationException("不支持转换为数值");
     }
 }

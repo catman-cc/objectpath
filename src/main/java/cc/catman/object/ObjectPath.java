@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.atn.PredictionMode;
 
 /**
  * 默认ObjectPath实现
@@ -38,12 +39,26 @@ public class ObjectPath implements IObjectPath {
         CodePointCharStream stream = CharStreams.fromString(path);
         ObjectPathLexer lexer = new ObjectPathLexer(stream);
         lexer.addErrorListener(new StandardErrorListener(this.config));
-        ObjectPathParser opp = new ObjectPathParser(new CommonTokenStream(lexer));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ObjectPathParser opp = new ObjectPathParser(tokens);
+        opp.getInterpreter().setPredictionMode(PredictionMode.SLL);
         opp.removeErrorListeners();
+
         opp.addErrorListener(new StandardErrorListener(this.config));
         if (this.config.isSyntaxErrorStop()){
             opp.setErrorHandler(new BailErrorStrategy());
         }
-        return new DefaultObjectPathAccessor(opp,config);
+
+        ObjectPathParser.ObjectPathContext objectPathContext;
+        try {
+            objectPathContext = opp.objectPath();
+        }catch (Exception e){
+            tokens.seek(0);
+            opp.reset();
+            opp.getInterpreter().setPredictionMode(PredictionMode.LL);
+            objectPathContext=opp.objectPath();
+        }
+
+        return new DefaultObjectPathAccessor(opp,config,objectPathContext);
     }
 }

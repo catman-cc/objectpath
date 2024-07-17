@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 /**
  * 标准错误监听器
@@ -54,7 +55,7 @@ public class StandardErrorListener extends BaseErrorListener {
         if (configuration.isPreventSyntaxErrorAndSendToErrorLog()) {
             log.error("syntax error:line:{}:{},msg:{}", line, charPositionInLine, msg, exception);
         } else {
-            throw exception;
+            throw new ParseCancellationException(exception);
         }
     }
 }

@@ -1,16 +1,13 @@
 package cc.catman.object.syntax;
 
-import cc.catman.object.GsonCoder;
 import cc.catman.object.ObjectPath;
 import cc.catman.object.ObjectPathAccessor;
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.cases.Order.OrderMock;
-import cc.catman.object.core.accessor.ClassifierObjectAccessor;
 import cc.catman.object.core.exception.ObjectPathSyntaxRuntimeException;
-import cc.catman.object.core.function.DefaultFunctionManager;
-import cc.catman.object.core.rewrite.AggregationObjectRewrite;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,10 +17,12 @@ public class SyntaxErrorTest extends BaseErrorListener {
      */
     @Test
     public void hasSyntaxError() {
-        ObjectPathAccessor parse = createParse(false,true);
         try {
+            ObjectPathAccessor parse = createParse(false,true);
             parse.eval(OrderMock.mockOrder());
-        } catch (ObjectPathSyntaxRuntimeException e) {
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof ParseCancellationException);
+            Assert.assertTrue(e.getCause() instanceof ObjectPathSyntaxRuntimeException);
             Assert.assertTrue(true);
         }
     }
@@ -34,8 +33,8 @@ public class SyntaxErrorTest extends BaseErrorListener {
     @Test
     @SuppressWarnings("all")
     public void noSyntaxError() {
-        ObjectPathAccessor parse = createParse(true,false);
         try {
+            ObjectPathAccessor parse = createParse(true,false);
             parse.eval(OrderMock.mockOrder());
             Assert.assertTrue(true);
         } catch (Exception e) {
@@ -46,11 +45,12 @@ public class SyntaxErrorTest extends BaseErrorListener {
 
     @Test
     public void hasObjectPathSyntaxRuntimeException() {
-        ObjectPathAccessor parse = createParse(false,false);
         try {
+            ObjectPathAccessor parse = createParse(false,false);
             parse.eval(OrderMock.mockOrder());
-        } catch (ObjectPathSyntaxRuntimeException e) {
-            Assert.assertTrue(true);
+        } catch (Exception e) {
+            Assert.assertFalse(e instanceof ObjectPathSyntaxRuntimeException);
+            Assert.assertFalse(e instanceof RecognitionException);
         }
     }
 
@@ -58,14 +58,12 @@ public class SyntaxErrorTest extends BaseErrorListener {
             boolean preventSyntaxErrorAndSendToErrorLog
             ,boolean syntaxErrorStop
     ) {
-        ObjectPathConfiguration configuration = ObjectPathConfiguration.builder()
-                .jsonCoder(new GsonCoder())
-                .functionManager(new DefaultFunctionManager())
-                .objectAccessor(ClassifierObjectAccessor.defaultAccessor())
-                .objectRewrite(new AggregationObjectRewrite())
-                .preventSyntaxErrorAndSendToErrorLog(preventSyntaxErrorAndSendToErrorLog)
-                .syntaxErrorStop(syntaxErrorStop)
-                .build();
+        ObjectPathConfiguration configuration =ObjectPathConfiguration.create();
+
+
+        configuration
+                .setPreventSyntaxErrorAndSendToErrorLog(preventSyntaxErrorAndSendToErrorLog);
+        configuration.setSyntaxErrorStop(syntaxErrorStop);
 
         ObjectPath op = ObjectPath.builder()
                 .config(configuration)

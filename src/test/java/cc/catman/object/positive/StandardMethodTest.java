@@ -24,20 +24,43 @@ public class StandardMethodTest extends BaseTest {
     @Test
     public void min() {
         Object root = objectPath.parse("$.store.book.min(@.price)").eval(ROOT);
+        Assert.assertTrue(root instanceof Book);
+        ROOT.getStore().getBook().stream().min(Comparator.comparingDouble(Book::getPrice)).ifPresent(o -> Assert.assertEquals(o, root));
+    }
+
+    @Test
+    public void minWithNoArg(){
+        Object root = objectPath.parse("$.store.book.min(@.price).price").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).min(Double::compareTo).ifPresent(o -> Assert.assertEquals(o, root));
     }
 
     @Test
     public void max() {
+        // 获取所有书籍中,价格最大的书籍
         Object root = objectPath.parse("$.store.book.max(@.price)").eval(ROOT);
+        Assert.assertTrue(root instanceof Book);
+        ROOT.getStore().getBook().stream().max(Comparator.comparingDouble(Book::getPrice)).ifPresent(o -> Assert.assertEquals(o, root));
+    }
+
+    @Test
+    public void maxWithChild(){
+        // 获取所有书籍中,价格最大的书籍
+        Object root = objectPath.parse("$.store.book.max(@.price).price").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
-        ROOT.getStore().getBook().stream().map(Book::getPrice).max(Double::compareTo).ifPresent(o -> Assert.assertEquals(o, root));
+        ROOT.getStore().getBook().stream().max(Comparator.comparingDouble(Book::getPrice)).ifPresent(o -> Assert.assertEquals(o.getPrice(), root));
     }
 
     @Test
     public void sum() {
         Object root = objectPath.parse("$.store.book.sum(@.price)").eval(ROOT);
+        Assert.assertTrue(root instanceof Number);
+        ROOT.getStore().getBook().stream().map(Book::getPrice).reduce(Double::sum).ifPresent(o -> Assert.assertEquals(o, root));
+    }
+
+    @Test
+    public void sumWithPipe() {
+        Object root = objectPath.parse("$.store.book[*].price|$.sum()").eval(ROOT);
         Assert.assertTrue(root instanceof Number);
         ROOT.getStore().getBook().stream().map(Book::getPrice).reduce(Double::sum).ifPresent(o -> Assert.assertEquals(o, root));
     }
@@ -205,6 +228,21 @@ public class StandardMethodTest extends BaseTest {
         assert root instanceof List;
         List<?> list = (List<?>) root;
         assert list.size() == ROOT.getStore().getBook().stream().map(Book::getCategory).distinct().count();
+    }
+
+    @Test
+    public void testForMap(){
+        Object root = objectPath.parse("$.store.book[*].map(@.category + '-' + @.index() )").eval(ROOT);
+        assert root instanceof List;
+        List<?> list = (List<?>) root;
+        List<Book> books = ROOT.getStore().getBook();
+        List<String> rewirte=new ArrayList<>();
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+            rewirte.add(book.getCategory()+'-'+i);
+        }
+        assert list.size() == rewirte.size();
+        Assert.assertEquals(list,rewirte);
     }
 
 }

@@ -1,10 +1,10 @@
 package cc.catman.object.core.accessor;
 
 import cc.catman.object.core.Entity;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -19,43 +19,42 @@ public class MapObjectAccessor  extends AbstractObjectAccessor {
      * key值理论上可以是任意类型,所以不会对key值进行验证
      */
     @Override
-    public boolean isSupport(Object object, Object key, EAccessorKind kind) {
-        return Objects.nonNull(object)&&object instanceof Map;
+    public boolean isSupport(PropertyWrapper object, Object key, EAccessorKind kind) {
+        return object.isNotNull()&&object.isInstanceOf(Map.class);
     }
 
     @Override
-    public Object get(Object object, Object key) {
-        if (object instanceof Map) {
-            return ((Map<?, ?>) object).get(key);
+    public PropertyWrapper get(PropertyWrapper object, Object key) {
+        if (object.isInstanceOf(Map.class)){
+            return object.read(key);
         }
-        return null;
+        return object.wrapper(null);
     }
 
     @Override
-    public Object filter(Object object, Predicate<Object> filter) {
+    public PropertyWrapper filter(PropertyWrapper object, Predicate<Object> filter) {
 
-        if (object instanceof Map) {
+        if (object.isInstanceOf(Map.class)) {
             Map<Object, Object> map = new HashMap<>();
-            ((Map<?, ?>) object).forEach((k, v) -> {
+            ((Map<?, ?>) object.read(Map.class)).forEach((k, v) -> {
                 if (filter.test(v)) {
                     map.put(k, v);
                 }
             });
-            return map;
+            return object.wrapper(map);
         }
-        return null;
+        return object.wrapper(null);
     }
 
     @Override
-    public void eachEntry(Object object, Consumer<Entity> consumer) {
-        if (object instanceof Map) {
-            ((Map<?, ?>) object).forEach((k, v) -> consumer.accept(Entity.builder()
+    public void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
+        if (object.isInstanceOf(Map.class)) {
+            ((Map<?, ?>) object.read(Map.class)).forEach((k, v) -> consumer.accept(Entity.builder()
                             .key(k)
                             .value(v)
                     .build()
 
             ));
         }
-
     }
 }

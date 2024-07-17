@@ -1,12 +1,8 @@
 package cc.catman.object.positive;
 
 import cc.catman.object.*;
-import cc.catman.object.core.accessor.ClassifierObjectAccessor;
 import cc.catman.object.core.function.DateFormatFunctionProvider;
-import cc.catman.object.core.function.DefaultFunctionManager;
 import cc.catman.object.core.function.FunctionManager;
-import cc.catman.object.core.rewrite.AggregationObjectRewrite;
-import cc.catman.object.core.script.DefaultScriptExecutorManager;
 import cc.catman.object.core.script.javascript.JavaScriptExecutor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,12 +15,7 @@ public class AdvanceTest extends BaseTest {
 
     @Test
     public void customMethodTest() {
-        ObjectPathConfiguration configuration = ObjectPathConfiguration.builder()
-                .jsonCoder(new GsonCoder())
-                .functionManager(new DefaultFunctionManager())
-                .objectAccessor(ClassifierObjectAccessor.defaultAccessor())
-                .objectRewrite(new AggregationObjectRewrite())
-                .build();
+        ObjectPathConfiguration configuration = ObjectPathConfiguration.create();
 
         FunctionManager fm = configuration.getFunctionManager();
         fm.register(new DateFormatFunctionProvider("format"));
@@ -42,13 +33,7 @@ public class AdvanceTest extends BaseTest {
 
     @Test
     public void jsScriptTest() {
-        ObjectPathConfiguration configuration = ObjectPathConfiguration.builder()
-                .jsonCoder(new GsonCoder())
-                .functionManager(new DefaultFunctionManager())
-                .objectAccessor(ClassifierObjectAccessor.defaultAccessor())
-                .objectRewrite(new AggregationObjectRewrite())
-                .scriptExecutorManager(new DefaultScriptExecutorManager())
-                .build().inject();
+        ObjectPathConfiguration configuration = ObjectPathConfiguration.create();
 
         configuration.getScriptExecutorManager().addExecutor("js",new JavaScriptExecutor());
 

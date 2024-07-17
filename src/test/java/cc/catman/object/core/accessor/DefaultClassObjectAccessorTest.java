@@ -1,12 +1,15 @@
 package cc.catman.object.core.accessor;
 
 
+import cc.catman.object.ObjectPathConfiguration;
+import cc.catman.object.core.accessor.property.wrapper.PropertyWrapperFactory;
 import lombok.Getter;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DefaultClassObjectAccessorTest {
-
+    ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
+    PropertyWrapperFactory wf = cfg.getWrapperFactory();
     @Test
     public void testUnSupport() {
         DefaultClassObjectAccessor objectAccessor = new DefaultClassObjectAccessor();
@@ -16,25 +19,25 @@ public class DefaultClassObjectAccessorTest {
     public void testGet() {
         TestClass testObject = createTestObject();
         DefaultClassObjectAccessor objectAccessor = new DefaultClassObjectAccessor();
-        Assert.assertEquals("a", objectAccessor.get(testObject, "a"));
-        Assert.assertEquals(true, objectAccessor.get(testObject, "b"));
-        Assert.assertEquals("c", objectAccessor.get(testObject, "c"));
-        Assert.assertEquals("d", objectAccessor.get(testObject, "d"));
-        Assert.assertEquals("e", objectAccessor.get(testObject, "e"));
-        Assert.assertNull(objectAccessor.get(testObject, "f"));
+        Assert.assertEquals("a", objectAccessor.get(wf.create(testObject), "a").read());
+        Assert.assertEquals(true, objectAccessor.get(wf.create(testObject), "b").read());
+        Assert.assertEquals("c", objectAccessor.get(wf.create(testObject), "c").read());
+        Assert.assertEquals("d", objectAccessor.get(wf.create(testObject), "d").read());
+        Assert.assertEquals("e", objectAccessor.get(wf.create(testObject), "e").read());
+        Assert.assertNull(objectAccessor.get(wf.create(testObject), "f").read());
     }
 
     @Test
     public void testGetNull() {
         DefaultClassObjectAccessor objectAccessor = new DefaultClassObjectAccessor();
-        Assert.assertNull(objectAccessor.get(null, "a"));
-        Assert.assertNull(objectAccessor.get(null, null));
+        Assert.assertNull(objectAccessor.get(wf.create(null), "a"));
+        Assert.assertNull(objectAccessor.get(wf.create(null), null));
     }
 
     @Test
     public void testGetWithNullKey() {
         DefaultClassObjectAccessor objectAccessor = new DefaultClassObjectAccessor();
-        Assert.assertNull(objectAccessor.get(createTestObject(), null));
+        Assert.assertNull(objectAccessor.get(wf.create(createTestObject()), null));
     }
 
     private static TestClass createTestObject(){

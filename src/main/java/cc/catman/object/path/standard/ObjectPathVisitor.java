@@ -9,7 +9,6 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-@SuppressWarnings("all")
 public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	/**
 	 * Visit a parse tree produced by {@link ObjectPathParser#objectPath}.
@@ -518,6 +517,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitINDEXOF(ObjectPathParser.INDEXOFContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MAP}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMAP(ObjectPathParser.MAPContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link ObjectPathParser#scripts}.
 	 * @param ctx the parse tree

@@ -3,9 +3,11 @@ package cc.catman.object.core.accessor;
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.Entity;
 import cc.catman.object.core.accessor.invoke.*;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -45,8 +47,11 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
-    public boolean isSupport(Object object, Object key, EAccessorKind kind) {
-        if (object == null) {
+    public boolean isSupport(PropertyWrapper object, Object key, EAccessorKind kind) {
+        if (Objects.isNull(object)){
+            return false;
+        }
+        if (object.isNull()) {
             return false;
         }
         if (kind != EAccessorKind.GET) {
@@ -56,8 +61,8 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
-    public Object get(Object object, Object key) {
-        if (object == null) {
+    public PropertyWrapper get(PropertyWrapper object, Object key) {
+        if (object.isNull()) {
             return null;
         }
         if (key == null) {
@@ -69,35 +74,38 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
         // 3. key,如果存在该属性,则直接返回该属性
         // 4. 直接寻找对应key值的方法,如果存在,则调用该方法,但是不推荐这种方式
         // 5. 如果都不存在,则返回null
-        Class<?> clazz = object.getClass();
+        Class<?> clazz = object.readType();
+        Object obj=object.read();
         String keyString = key.toString();
         Invoke invoke = finder.find(clazz, keyString);
         if (invoke != null) {
-            return invoke.invoke(object);
+            return object.wrapper(invoke.invoke(obj));
         }
-        return null;
+        return object.wrapper(null);
     }
 
     @Override
-    public void eachValue(Object object, Consumer<Object> consumer) {
+    public void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
         // 变量当前对象中的所有属性,并且调用consumer
-        Class<?> clazz = object.getClass();
+        Class<?> clazz = object.readType();
+        Object obj=object.read();
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
             Invoke i = finder.find(clazz, f.getName(), () -> FieldInvoke.of(f));
-            Object value = i.invoke(object);
+            Object value = i.invoke(obj);
             consumer.accept(value);
         }
     }
 
     @Override
-    public void eachEntry(Object object, Consumer<Entity> consumer) {
+    public void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
         // 变量当前对象中的所有属性,并且调用consumer
-        Class<?> clazz = object.getClass();
+        Class<?> clazz = object.readType();
+        Object obj=object.read();
         Field[] fields = clazz.getDeclaredFields();
         for (Field f : fields) {
             Invoke i = finder.find(clazz, f.getName(), () -> FieldInvoke.of(f));
-            Object value = i.invoke(object);
+            Object value = i.invoke(obj);
             consumer.accept(Entity.builder()
                     .key(f.getName())
                     .value(value)

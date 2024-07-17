@@ -13,7 +13,7 @@ public final class OP {
     /**
      * 配置对象
      */
-    private static ObjectPathConfiguration config;
+    private static ObjectPathConfiguration config=ObjectPathConfiguration.create();
 
     private OP() {
     }

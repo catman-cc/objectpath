@@ -2,6 +2,7 @@ package cc.catman.object.core;
 
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.accessor.ObjectAccessor;
+import cc.catman.object.core.accessor.property.PropertyWrapper;
 import cc.catman.object.core.function.FunctionManager;
 import cc.catman.object.core.function.FunctionProvider;
 import cc.catman.object.core.json.JsonCoder;
@@ -9,6 +10,7 @@ import cc.catman.object.core.rewrite.ObjectRewrite;
 import cc.catman.object.core.script.ScriptExecutor;
 import cc.catman.object.core.script.ScriptExecutorManager;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -24,15 +26,15 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     /**
      * 根对象
      */
-    private final Object root;
+    private final PropertyWrapper root;
     /**
      * 父对象,需要注意,此处的父对象并不是指当前对象的父对象,而是指当前上下文的创建者所持有的cv
      */
-    private Object pv;
+    private PropertyWrapper pv;
     /**
      * 当前对象
      */
-    private Object cv;
+    private PropertyWrapper cv;
 
     /**
      * 父上下文
@@ -66,15 +68,24 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     @Getter
     private final ObjectPathConfiguration configuration;
 
-    public DefaultObjectPathParserContext(Object root, ObjectPathConfiguration configuration) {
+    @Getter
+    @Setter
+    private EContextMod mod;
+
+    @Override
+    public boolean readOnly() {
+        return EContextMod.READ_ONLY.equals(mod);
+    }
+
+    public DefaultObjectPathParserContext(PropertyWrapper root, ObjectPathConfiguration configuration) {
        this(root,root,configuration);
     }
 
-    public DefaultObjectPathParserContext(Object root, Object cv, ObjectPathConfiguration configuration) {
+    public DefaultObjectPathParserContext(PropertyWrapper root, PropertyWrapper cv, ObjectPathConfiguration configuration) {
       this(root,cv,null,configuration);
     }
 
-    public DefaultObjectPathParserContext(Object root, Object cv, ObjectPathParserContext parent, ObjectPathConfiguration configuration) {
+    public DefaultObjectPathParserContext(PropertyWrapper root, PropertyWrapper cv, ObjectPathParserContext parent, ObjectPathConfiguration configuration) {
         this.root = root;
         this.cv = cv;
         this.parent = parent;
@@ -84,6 +95,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
         this.jsonCoder=configuration.getJsonCoder();
         this.scriptExecutorManager=configuration.getScriptExecutorManager();
         this.functionManager=configuration.getFunctionManager();
+        this.mod=EContextMod.READ_ONLY;
     }
 
     @Override
@@ -92,28 +104,29 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
-    public Object rootValue() {
+    public PropertyWrapper rootValue() {
         return root;
     }
 
     @Override
-    public Object parentValue() {
+    public PropertyWrapper parentValue() {
         return pv;
     }
 
     @Override
-    public Object currentValue() {
+    public PropertyWrapper currentValue() {
         return cv;
     }
 
     @Override
-    public void updateCurrent(Object current) {
-        this.cv = current;
+    public PropertyWrapper updateCurrent(Object current) {
+        this.cv=configuration.getWrapperFactory().create(current);
+        return this.cv;
     }
 
     @Override
     public void updateParent(Object parent) {
-        this.pv = parent;
+        this.pv=configuration.getWrapperFactory().create(parent);
     }
 
     @Override
@@ -132,12 +145,13 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     @Override
     public ObjectPathParserContext createContext(Object root, Object parent, Object current) {
         DefaultObjectPathParserContext context = new DefaultObjectPathParserContext(
-                root,
-                current,
+                configuration.getWrapperFactory().create(root),
+                configuration.getWrapperFactory().create(current),
                 this,
                 this.configuration
         );
-        context.pv = parent;
+        context.setMod(this.getMod());
+        context.pv = configuration.getWrapperFactory().create(parent);
         return context;
     }
 
@@ -147,8 +161,8 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
-    public Object eval(String path) {
-        return objectAccessor.get(cv, path);
+    public PropertyWrapper eval(String path) {
+        return cv.read(path);
     }
 
     @Override
@@ -212,60 +226,61 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
 
     @Override
     public List<Object> covertToList() {
-        if (Objects.isNull(cv)){
+        if (cv.isNull()){
             return configuration.isUseZeroForNull()?Collections.emptyList():null;
         }
         return objectAccessor.covertToList(cv);
     }
 
     @Override
-    public String covertToString(Object object) {
-        if (Objects.isNull(object)){
+    public String covertToString(PropertyWrapper object) {
+        if (object.isNull()){
             return configuration.isUseZeroForNull()?"":null;
         }
         return objectAccessor.covertToString(object);
     }
 
     @Override
-    public Number covertToNumber(Object object) {
-        if (object==null){
+    public Number covertToNumber(PropertyWrapper object) {
+        if (object.isNull()){
             return configuration.isUseZeroForNull()?0:null;
         }
-        if (object instanceof Number){
-            return (Number) object;
+        if (object.isInstanceOf(Number.class)){
+            return object.read(Number.class);
         }
-        if (object instanceof String){
-            return Double.parseDouble((String) object);
+        if (object.isInstanceOf(String.class)){
+            return Double.parseDouble(object.read(String.class));
         }
         return objectAccessor.covertToNumber(object);
     }
 
     @Override
-    public Object parseJson(String json) {
-        return jsonCoder.decode(json,Object.class);
+    public PropertyWrapper parseJson(String json) {
+        return this.configuration.getWrapperFactory().create(jsonCoder.decode(json,Object.class));
     }
 
     @Override
-    public Object rewrite(Object object) {
-        return this.objectRewrite.rewrite(object).getRewrite();
+    public PropertyWrapper rewrite(Object object) {
+        return this.configuration.getWrapperFactory().create(this.objectRewrite.rewrite(object).getRewrite());
     }
 
     @Override
-    public Object invokeMethod(String functionName, List<Object> params) {
+    public PropertyWrapper invokeMethod(String functionName, List<Object> params) {
         FunctionProvider fp = this.functionManager.getProvider(functionName, params);
         if (fp!=null){
-            return fp.apply(params);
+            return this.configuration.getWrapperFactory().create(fp.apply(params));
         }
         throw new UnsupportedOperationException("not support function "+functionName);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object executeScript(String scriptName, Object nas, String text) {
+    public PropertyWrapper executeScript(String scriptName, Object nas, String text) {
         ScriptExecutor executor = this.scriptExecutorManager.getExecutor(scriptName);
         if (executor!=null){
-            return executor.eval(text, (Map<String, Object>) nas);
+            return this.configuration.getWrapperFactory().create(executor.eval(text, (Map<String, Object>) nas));
         }
         return null;
     }
+
 }
