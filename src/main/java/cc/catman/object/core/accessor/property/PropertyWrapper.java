@@ -18,6 +18,10 @@ public interface PropertyWrapper {
      */
     Optional<PropertyWrapper> getBelong();
 
+    default void setBelong(PropertyWrapper belong){
+
+    }
+
     /**
      *  对应的值是null
      * @return 是否为null
@@ -31,6 +35,8 @@ public interface PropertyWrapper {
          return !isNull();
    }
 
+   boolean readOnly();
+
     /**
      * 是否允许设置属性值
      */
@@ -40,6 +46,7 @@ public interface PropertyWrapper {
      * 获取属性值
      */
     Object read();
+
     <T> T read(Class<T> clazz);
 
     /**
@@ -92,4 +99,5 @@ public interface PropertyWrapper {
    PropertyWrapper wrapper(Object object);
 
    Object getIndexOrKey();
+
 }

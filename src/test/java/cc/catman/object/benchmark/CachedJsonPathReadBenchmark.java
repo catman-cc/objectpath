@@ -1,6 +1,5 @@
 package cc.catman.object.benchmark;
 
-import cc.catman.object.BenchmarkTest;
 import com.alibaba.fastjson2.JSON;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -23,7 +22,6 @@ public class CachedJsonPathReadBenchmark implements Benchmark{
                 .stream()
                 .map(j-> Configuration.defaultConfiguration().jsonProvider().parse(j))
                 .collect(Collectors.toList());
-        orderStrList=null;
         StopAndWatch saw= StopAndWatch.start(getClass().getSimpleName());
         preParedOrderDocuments.forEach(d->JsonPath.read(d,expr));
         return saw.stop();

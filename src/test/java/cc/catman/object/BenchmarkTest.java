@@ -4,7 +4,6 @@ import cc.catman.OP;
 import cc.catman.object.cases.Order.Order;
 import cc.catman.object.cases.Order.OrderMock;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Ignore
+@SuppressWarnings("java:S1481")
 public class BenchmarkTest extends BaseTest {
     @Test
     @Ignore("take long time")
@@ -29,9 +29,7 @@ public class BenchmarkTest extends BaseTest {
         List<Order> orders = IntStream.range(0, count).mapToObj(i -> OrderMock.mockOrder()).collect(Collectors.toList());
 
         long baseStart = System.currentTimeMillis();
-        orders.forEach(order -> {
-            order.getItems().stream().filter(oi -> (oi.getPrice() - oi.getCostPrice()) * oi.getQuantity() > 2).count();
-        });
+        orders.forEach(order -> order.getItems().stream().filter(oi -> (oi.getPrice() - oi.getCostPrice()) * oi.getQuantity() > 2).count());
 
         long baseTime = System.currentTimeMillis() - baseStart;
         System.out.println("base cost:" + baseTime + "ms");
@@ -83,7 +81,7 @@ public class BenchmarkTest extends BaseTest {
     @Test
     @SneakyThrows
     public void fastjson() {
-        List<Order> orders = IntStream.range(0, 100000).mapToObj(i -> OrderMock.mockOrder()).collect(Collectors.toList());
+        List<Order> orders = IntStream.range(0, 1000000).mapToObj(i -> OrderMock.mockOrder()).collect(Collectors.toList());
         StopAndWatch bsw = StopAndWatch.start("basic serialization");
         orders.forEach(order -> {
             String ignored = JSON.toJSONString(order);
@@ -104,16 +102,12 @@ public class BenchmarkTest extends BaseTest {
         System.out.println(ssw.stop());
 
         StopAndWatch cssw = StopAndWatch.start("[objet-path] set for object with catman");
-        orders.forEach(order -> {
-            OP.parse("$.items[0].price").setValue(order, 100);
-        });
+        orders.forEach(order -> OP.parse("$.items[0].price").setValue(order, 100));
         System.out.println(cssw.stop());
 
         StopAndWatch ccssw = StopAndWatch.start("[cached][object-path] set for object with catman");
         ObjectPathAccessor cached = OP.parse("$.items[0].price");
-        orders.forEach(order -> {
-            cached.setValue(order, 100);
-        });
+        orders.forEach(order -> cached.setValue(order, 100));
         System.out.println(ccssw.stop());
 
         StopAndWatch ccossw = StopAndWatch.start("[cached][object-path] read for object with catman");
@@ -144,9 +138,7 @@ public class BenchmarkTest extends BaseTest {
 
         StopAndWatch jppdsw = StopAndWatch.start("[json-path pre-document] read from json");
 
-        preParedOrderDocuments.forEach(order->{
-            JsonPath.read(order,"$.items[*].price");
-        });
+        preParedOrderDocuments.forEach(order-> JsonPath.read(order,"$.items[*].price"));
         System.out.println(jppdsw.stop());
     }
 

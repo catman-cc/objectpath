@@ -3,8 +3,8 @@ objectPath: expr (pipe)*;
 /* 扩展jsonpath,在未显式提供$/@前导符号时,默认为@,表示当前对象本身 */
 /* 新增计算方法后,表达式,就变成了两部分,计算表达式和标准表达式 */
 expr:
-(location|ID|selector) selector*        #PATH_EXPR
-|(DOUBLE|NUMBER|STRING|BOOL)            #VALUE_EXPR
+(DOUBLE|NUMBER|STRING|BOOL)             #VALUE_EXPR
+|(location  selector*)                  #PATH_EXPR
 | expr ('+'|'-'|'*'|'/'|'%') expr       #CALCULATE_EXPR
 |'(' expr ')'                           #GROUP_EXPR
 |expr ('?'|filterExpr) ':' expr         #DEFAULT_EXPR
@@ -15,11 +15,11 @@ location: '$'                                       #ROOT_NODE
 |'@@'                                               #PARENT_NODE
 ;
 selector:
-ID                                  #CHILD
-|'.' ID                             #CHILD
-| '..' ID                           #RECURSIVE_CHILD
-| '[' ID ']'                        #INDEX_OR_NAME
-| '[' ID (','ID)+ ']'               #INDEX_OR_NAME_LIST   // 逗号分隔的多个id标志,该操作会从当前节点中提取对应的属性,并将其转换为map对象
+(ID |STRING  )                                       #CHILD
+|'.' (ID |STRING  )                                  #CHILD
+| '..' ID                                            #RECURSIVE_CHILD
+| '[' (ID |STRING  )  ']'                            #INDEX_OR_NAME
+| '[' (ID |STRING  )  (','(ID |STRING  ) )+ ']'      #INDEX_OR_NAME_LIST   // 逗号分隔的多个id标志,该操作会从当前节点中提取对应的属性,并将其转换为map对象
 | '[' NUMBER ']'                    #INDEX
 | '[' '*'? ']'                      #WILDCARD_ALL
 | '[' NUMBER ':' NUMBER ']'         #SLICE
@@ -80,15 +80,15 @@ func: '.' ID '(' (args|) ')'                   #METHOD_CALL
 |'.' 'rsort' '(' expr (',' expr)* ')'         #RSORT
 |'.' 'groupBy' '(' expr ')'        #GROUPBY
 |'.' 'join' '(' args ')'                     #JOIN
-|'.' 'split' '(' ID ')'                    #SPLIT
-|'.' 'replace' '(' ID ',' ID ')'                  #REPLACE
+|'.' 'split' '(' expr ')'                    #SPLIT
+|'.' 'replace' '(' expr ',' expr ')'                  #REPLACE
 |'.' ('substring'|'sub') '(' NUMBER? ','NUMBER? ')'    #SUBSTRING
 |'.' 'toUpper' '(' ')'                       #TOUPPER
 |'.' 'toLower' '(' ')'                       #TOLOWER
 |'.' 'trim' '(' ')'                          #TRIM
 |'.' 'ltrim' '(' ')'                         #LTRIM
 |'.' 'rtrim' '(' ')'                         #RTRIM
-|'.' 'concat' '(' ID ')'                   #CONCAT
+|'.' 'concat' '(' expr ')'                   #CONCAT
 |'.' 'first' '(' ')'                         #FIRST
 |'.' 'last' '(' ')'                          #LAST
 |'.' 'indexOf' '(' NUMBER ')'                #INDEXOF
@@ -118,10 +118,11 @@ BOOL: 'true' | 'false'|'TRUE'|'FALSE';
 NUMBER: DIGIT+ ('l'|'L')?;
 DOUBLE: (NUMBER ( '.' NUMBER)('d'|'D')?|NUMBER ('d'|'D')?) ;
 CACLUATE: '+'|'-'|'*'|'/'|'%';
-ID: [a-zA-Z_][a-zA-Z_0-9]*|STRING;
-STRING: '"' (.*?) '"'
+STRING: '"' .*? '"'
 | '\'' .*? '\''
 ;
+ID: ([a-zA-Z_][a-zA-Z_0-9]*)|STRING;
+
 INT: '0' | [1-9] [0-9]*;
 DIGIT: [0-9];
 fragment

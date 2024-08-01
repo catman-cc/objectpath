@@ -90,7 +90,13 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
         if (object.isNull()){
             return null;
         }
-        return object.wrapper(objects.stream().filter(filter).collect(Collectors.toList()));
+        List<Object> res=new ArrayList<>();
+        objects.forEach(o->{
+            if (filter.test(o)){
+                res.add(o);
+            }
+        });
+        return object.wrapper(res);
     }
 
     @Override
@@ -215,9 +221,6 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
                 .map(PropertyWrapperHelper::unWrapper)
                 .collect(Collectors.toList());
         return pw.wrapper(list);
-//        Stream<?> stream = toStream(object);
-//        // 映射
-//        return pw.wrapper(stream.map(mapper).collect(Collectors.toList()));
     }
 
     private void addCollectionVerifications() {

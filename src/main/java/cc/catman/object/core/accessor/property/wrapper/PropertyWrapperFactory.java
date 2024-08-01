@@ -18,6 +18,8 @@ public interface PropertyWrapperFactory extends ConfigurationAccessor {
      */
      PropertyWrapper create(Object object);
 
+     PropertyWrapper createReadOnly(Object object);
+
     /**
      * 创建属性包装器
      * @param belong  该属性包装器所属的属性包装器

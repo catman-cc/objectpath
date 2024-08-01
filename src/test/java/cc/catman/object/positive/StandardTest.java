@@ -6,8 +6,7 @@ import cc.catman.object.Cases;
 import cc.catman.object.cases.basic.StoreHolder;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,7 +79,11 @@ public class StandardTest extends BaseTest {
      */
     @Test
     public void readAllAuthors() {
-        Object root = objectPath.parse("$.store.book[*].author").eval(ROOT);
+        test("$.store.book[*].author");
+    }
+
+    private void test(String expr) {
+        Object root = objectPath.parse(expr).eval(ROOT);
         List<String> want = ROOT.getStore().getBook().stream()
                 .map(Book::getAuthor)
                 .collect(Collectors.toList());
@@ -92,6 +95,15 @@ public class StandardTest extends BaseTest {
         }
     }
 
+    @Test
+    public void readAllAuthor(){
+        test("$['store']['book'][*].author");
+    }
+
+    @Test
+    public void readAllAuthor2(){
+        test("$[store][book][*].author");
+    }
 
 
     /**
@@ -119,7 +131,7 @@ public class StandardTest extends BaseTest {
     @Test
     public void readPriceLessThanExpensive() {
         // 注意这里没有用到.号
-        Stream.of("expensive", "'expensive'","\"expensive\"").forEach(expensive -> {
+        Stream.of("expensive", "['expensive']","\"expensive\"").forEach(expensive -> {
             Object root = objectPath.parse("$.store.book[?(@.price <= $" + expensive + ")]").eval(ROOT);
             List<Book> want = ROOT.getStore().getBook().stream()
                     .filter(book -> book.getPrice() <= ROOT.getExpensive())
@@ -224,6 +236,23 @@ public class StandardTest extends BaseTest {
     public void readAllChildren() {
         Object root = objectPath.parse("$.*").eval(ROOT);
         List<Object> want = Arrays.asList(ROOT.getStore(), ROOT.getExpensive());
+        assert root instanceof List;
+        List<?> list = (List<?>) root;
+        assert list.size() == want.size();
+        for (int i = 0; i < want.size(); i++) {
+            assert want.get(i).equals(list.get(i));
+        }
+    }
+    @Test
+    public void  readPartChild(){
+        Object root = objectPath.parse("$.store[book][*][title,'author']").eval(ROOT);
+        List<Map<String,String>> want=new ArrayList<>();
+        ROOT.getStore().getBook().forEach(book -> {
+            Map<String,String> m=new HashMap<>();
+            m.put("title",book.getTitle());
+            m.put("author",book.getAuthor());
+            want.add(m);
+        });
         assert root instanceof List;
         List<?> list = (List<?>) root;
         assert list.size() == want.size();

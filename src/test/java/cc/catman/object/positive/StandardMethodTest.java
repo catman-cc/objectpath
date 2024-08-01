@@ -239,7 +239,7 @@ public class StandardMethodTest extends BaseTest {
         List<String> rewirte=new ArrayList<>();
         for (int i = 0; i < books.size(); i++) {
             Book book = books.get(i);
-            rewirte.add(book.getCategory()+'-'+i);
+            rewirte.add(book.getCategory()+"-"+i);
         }
         assert list.size() == rewirte.size();
         Assert.assertEquals(list,rewirte);

@@ -1,5 +1,8 @@
 package cc.catman.object.core.classifier;
 
+import cc.catman.object.ObjectPathConfiguration;
+import cc.catman.object.core.cache.ICache;
+import cc.catman.object.core.cache.DefaultICache;
 import cc.catman.object.core.classifier.iterator.IteratorObjectClassifier;
 import cc.catman.object.core.classifier.array.ArrayObjectClassifier;
 import cc.catman.object.core.classifier.collection.CollectionObjectClassifier;
@@ -11,18 +14,26 @@ import cc.catman.object.core.classifier.str.StringObjectClassifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 聚合对象分类器
+ *
  * @author jpanda
  * @since 0.0.1
  */
-public class AggregationObjectClassifier implements ObjectClassifier{
+public class AggregationObjectClassifier implements ObjectClassifier {
 
     private final List<ObjectClassifier> classifiers;
 
-    public static AggregationObjectClassifier defaultClassifier(){
-        List<ObjectClassifier> classifiers=new ArrayList<>();
+    private ICache<ObjectClassifier> cache;
+
+    private ObjectPathConfiguration configuration;
+
+    public static final String DEFAULT_CACHE_KEY = "";
+
+    public static AggregationObjectClassifier defaultClassifier() {
+        List<ObjectClassifier> classifiers = new ArrayList<>();
         classifiers.add(new NullObjectClassifier());
         classifiers.add(new NumberObjectClassifier());
         classifiers.add(new StringObjectClassifier());
@@ -31,9 +42,11 @@ public class AggregationObjectClassifier implements ObjectClassifier{
         classifiers.add(new MapObjectClassifier());
         classifiers.add(new IteratorObjectClassifier());
         classifiers.add(new DefaultObjectClassifier());
-
-        return new AggregationObjectClassifier(classifiers);
+        AggregationObjectClassifier aoc = new AggregationObjectClassifier(classifiers);
+        aoc.cache = new DefaultICache<>();
+        return aoc;
     }
+
     public AggregationObjectClassifier() {
         this(new ArrayList<>());
     }
@@ -44,14 +57,25 @@ public class AggregationObjectClassifier implements ObjectClassifier{
 
     /**
      * 对对象进行分类
+     *
      * @param object 对象
      * @return 对象分类
      */
     @Override
     public ClassifierObject classify(Object object) {
+        boolean canUseCache = Objects.nonNull(this.configuration)
+                              && this.configuration.isEnableObjectClassifierCache()
+                              && Objects.nonNull(object);
+        if (canUseCache) {
+            ClassifierObject cached = tryReadFromCache(object);
+            if (Objects.nonNull(cached)) {
+                return cached;
+            }
+        }
+
         return this.classifiers.stream()
                 .map(classifier -> classifier.classify(object))
-                .filter(co->{
+                .filter(co -> {
                     if (co == null) {
                         throw new NullPointerException("分类器返回的对象不能为空");
                     }
@@ -60,5 +84,27 @@ public class AggregationObjectClassifier implements ObjectClassifier{
                 .filter(ClassifierObject::classified)
                 .findFirst()
                 .orElseGet(() -> UnknownClassifierObject.create(object));
+    }
+
+    private ClassifierObject tryReadFromCache(Object object) {
+        return cache.get(object.getClass(), DEFAULT_CACHE_KEY)
+                .map(classifier -> classifier.classify(object))
+                .orElseGet(() -> {
+                    for (ObjectClassifier classifier : this.classifiers) {
+                        ClassifierObject classify = classifier.classify(object);
+                        if (classify.classified()) {
+                            cache.put(object.getClass(), DEFAULT_CACHE_KEY, classifier);
+                            return classify;
+                        }
+                    }
+                    return null;
+                });
+    }
+
+    @Override
+    public void injectConfiguration(ObjectPathConfiguration configuration) {
+        this.configuration = configuration;
+        this.cache = configuration.getObjectClassifierCache();
+        this.classifiers.forEach(c -> c.injectConfiguration(configuration));
     }
 }

@@ -144,6 +144,17 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
 
     @Override
     public ObjectPathParserContext createContext(Object root, Object parent, Object current) {
+        if (this.mod.isReadOnly()){
+            DefaultObjectPathParserContext context = new DefaultObjectPathParserContext(
+                    configuration.getWrapperFactory().createReadOnly(root),
+                    configuration.getWrapperFactory().createReadOnly(current),
+                    this,
+                    this.configuration
+            );
+            context.setMod(this.getMod());
+            context.pv = configuration.getWrapperFactory().createReadOnly(parent);
+            return context;
+        }
         DefaultObjectPathParserContext context = new DefaultObjectPathParserContext(
                 configuration.getWrapperFactory().create(root),
                 configuration.getWrapperFactory().create(current),

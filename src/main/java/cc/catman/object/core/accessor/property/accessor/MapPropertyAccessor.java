@@ -29,13 +29,16 @@ public class MapPropertyAccessor extends AbstractPropertyAccessor {
         if (this.isRoot()){
             return object;
         }
+        if (Objects.isNull(object)){
+            return null;
+        }
         Map<Object, Object> map = tryCast2Map(object);
         return map.get(this.indexOrName);
     }
 
     @Override
     public Object get(PropertyWrapper object) {
-        return object.read();
+        return this.get(object.read());
     }
 
     /**

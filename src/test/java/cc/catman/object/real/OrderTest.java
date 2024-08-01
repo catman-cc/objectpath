@@ -5,15 +5,11 @@ import cc.catman.object.ObjectPathAccessor;
 import cc.catman.object.cases.Order.Order;
 import cc.catman.object.cases.Order.OrderItem;
 import cc.catman.object.cases.Order.OrderMock;
-import lombok.SneakyThrows;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class OrderTest extends BaseTest {
 

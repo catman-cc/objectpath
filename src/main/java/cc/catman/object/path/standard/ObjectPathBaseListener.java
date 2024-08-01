@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * which can be extended to create a listener which only needs to handle a subset
  * of the available methods.
  */
-@SuppressWarnings("CheckReturnValue")
+@SuppressWarnings({"CheckReturnValue","java:S1186"})
 public class ObjectPathBaseListener implements ObjectPathListener {
 	/**
 	 * {@inheritDoc}

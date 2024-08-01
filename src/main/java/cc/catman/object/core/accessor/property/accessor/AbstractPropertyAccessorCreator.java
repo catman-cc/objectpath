@@ -6,7 +6,6 @@ import cc.catman.object.core.accessor.property.PropertyWrapper;
 import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 抽象 公共 属性访问器 创建器
@@ -22,15 +21,16 @@ public abstract class AbstractPropertyAccessorCreator implements PropertyAccesso
         if (Objects.isNull(object)){
             return -1;
         }
-
         return this.score(object.getClass(),indexOrName);
     }
 
     @Override
     public int score(PropertyWrapper belong, Object indexOrName) {
-        return Optional.ofNullable(belong.readType())
-                .map(t -> this.score(t, indexOrName))
-                .orElse(-1);
+        Class<?> t = belong.readType();
+        if (Objects.isNull(t)){
+            return this.score(t,indexOrName);
+        }
+        return -1;
     }
 
     @Override

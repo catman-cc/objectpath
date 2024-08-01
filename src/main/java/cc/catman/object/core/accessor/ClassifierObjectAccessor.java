@@ -1,7 +1,9 @@
 package cc.catman.object.core.accessor;
 
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.Entity;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.cache.ICache;
 import cc.catman.object.core.classifier.AggregationObjectClassifier;
 import cc.catman.object.core.classifier.ClassifierObject;
 import cc.catman.object.core.classifier.EObjectClassification;
@@ -22,6 +24,7 @@ public class ClassifierObjectAccessor extends AbstractObjectAccessor {
      * 对象分类器
      */
     private final ObjectClassifier objectClassifier;
+    private ICache<ObjectAccessor> cache;
     /**
      * 分类访问器
      */
@@ -58,9 +61,18 @@ public class ClassifierObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
+    public void injectConfiguration(ObjectPathConfiguration configuration) {
+        super.injectConfiguration(configuration);
+        this.cache=configuration.getObjectAccessorCache();
+        this.objectClassifier.injectConfiguration(configuration);
+        this.accessors.values().forEach(l-> l.forEach(a->a.injectConfiguration(configuration)));
+    }
+
+    @Override
     public boolean isSupport(PropertyWrapper object, Object key, EAccessorKind kind) {
         List<ObjectAccessor> as = findAccessors(object);
         return as.stream().anyMatch(accessor -> accessor.isSupport(object, key, kind));
+
     }
 
 
@@ -74,61 +86,97 @@ public class ClassifierObjectAccessor extends AbstractObjectAccessor {
 
     @Override
     public PropertyWrapper get(PropertyWrapper object, Object key) {
-        return this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, key)).findFirst()
+       return findAccessionWithCache(object,key,null,findAccessors(object))
                 .map(accessor -> accessor.get(object, key)).orElse(null);
     }
 
     @Override
     public void eachKey(PropertyWrapper object, Consumer<Object> consumer) {
-        this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_KEY))
-                .findFirst().ifPresent(accessor -> accessor.eachKey(object, consumer));
+        findAccessionWithCache(object,EAccessorKind.EACH_KEY,findAccessors(object))
+                .ifPresent(a-> a.eachKey(object,consumer));
     }
 
     @Override
     public void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
-        this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_VALUE))
-                .findFirst().ifPresent(accessor -> accessor.eachValue(object, consumer));
+        findAccessionWithCache(object,EAccessorKind.EACH_VALUE,findAccessors(object))
+                .ifPresent(a-> a.eachValue(object,consumer));
     }
 
     @Override
     public void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
-        this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_ENTRY))
-                .findFirst().ifPresent(accessor -> accessor.eachEntry(object, consumer));
+         findAccessionWithCache(object,EAccessorKind.EACH_ENTRY,findAccessors(object))
+                 .ifPresent(a-> a.eachEntry(object,consumer));
+
     }
 
     @Override
     public PropertyWrapper filter(PropertyWrapper object,  Predicate<Object> filter) {
-        return this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.FILTER))
-                .findFirst().map(accessor -> accessor.filter(object, filter)).orElse(null);
+        return findAccessionWithCache(object,EAccessorKind.FILTER,findAccessors(object))
+                .map(a->a.filter(object,filter))
+                .orElse(null);
     }
 
     @Override
     public PropertyWrapper map(PropertyWrapper object, Function<Object, Object> mapper) {
-        return this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.MAP))
-                .findFirst()
-                .map(accessor -> accessor.map(object, mapper))
+        return findAccessionWithCache(object,EAccessorKind.MAP,findAccessors(object))
+                .map(a->a.map(object,mapper))
                 .orElse(null);
     }
 
     @Override
     public int size(PropertyWrapper object) {
-        return this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, null))
-                .findFirst().map(accessor -> accessor.size(object)).orElse(-1);
+        return findAccessionWithCache(object,null,findAccessors(object))
+                .map(a->a.size(object))
+                .orElse(-1);
     }
 
     @Override
     public List<Object> covertToList(PropertyWrapper object) {
-        return this.findAccessors(object)
-                .stream()
-                .filter(accessor -> accessor.isSupport(object, EAccessorKind.COVERT_TO_LIST))
-                .findFirst()
-                .map(accessor -> accessor.covertToList(object))
+        return findAccessionWithCache(object,EAccessorKind.COVERT_TO_LIST,findAccessors(object))
+                .map(a->a.covertToList(object))
                 .orElse(null);
     }
 
     @Override
     public String covertToString(PropertyWrapper object) {
-        return this.findAccessors(object).stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.COVERT_TO_STRING))
-                .findFirst().map(accessor -> accessor.covertToString(object)).orElse(null);
+        return findAccessionWithCache(object,EAccessorKind.COVERT_TO_STRING,findAccessors(object))
+                .map(a->a.covertToString(object))
+                .orElse(null);
+    }
+
+    @Override
+    public Number covertToNumber(PropertyWrapper object) {
+        return findAccessionWithCache(object,EAccessorKind.COVERT_TO_NUMBER,findAccessors(object))
+                .map(a->a.covertToNumber(object))
+                .orElse(null);
+    }
+    protected Optional<ObjectAccessor> findAccessionWithCache(PropertyWrapper object,EAccessorKind kind,List<ObjectAccessor> accessors){
+       return findAccessionWithCache(object,null,kind,accessors);
+    }
+
+    protected Optional<ObjectAccessor> findAccessionWithCache(PropertyWrapper object,Object key, EAccessorKind kind, List<ObjectAccessor> accessors) {
+
+        if (!this.configuration.isEnableObjectAccessorCache()){
+            for (ObjectAccessor accessor:accessors){
+                if (accessor.isSupport(object,key,kind)){
+                    return Optional.of(accessor);
+                }
+            }
+            return Optional.empty();
+        }
+
+        Class<?> oType = object.readType();
+        Optional<ObjectAccessor> oaOpt = cache.get(oType, key);
+        if (oaOpt.isPresent()){
+            return oaOpt;
+        }
+
+        for (ObjectAccessor accessor : accessors) {
+            if (accessor.isSupport(object,key,kind)) {
+                cache.put(oType, key, accessor);
+                return Optional.of(accessor);
+            }
+        }
+        return Optional.empty();
     }
 }
