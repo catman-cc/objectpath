@@ -65,7 +65,7 @@ public abstract class  AbstractPropertyWrapper<I,T> implements PropertyWrapper {
 
     protected Map<Object, PropertyWrapper> childWrappers = new WeakHashMap<>();
 
-    public AbstractPropertyWrapper(ObjectPathConfiguration configuration, T object) {
+    protected AbstractPropertyWrapper(ObjectPathConfiguration configuration, T object) {
         this.object = object;
 
         this.configuration = configuration;
@@ -75,7 +75,7 @@ public abstract class  AbstractPropertyWrapper<I,T> implements PropertyWrapper {
         this.postConstruct();
     }
 
-    public AbstractPropertyWrapper(ObjectPathConfiguration configuration, PropertyWrapper belong, I indexOrKey, PropertyAccessor accessor) {
+    protected AbstractPropertyWrapper(ObjectPathConfiguration configuration, PropertyWrapper belong, I indexOrKey, PropertyAccessor accessor) {
         this.indexOrKey = indexOrKey;
         this.belong = belong;
         this.accessor = accessor;
