@@ -1,12 +1,13 @@
 package cc.catman.object.core.accessor.property.accessor;
 
 import cc.catman.object.ObjectPathConfiguration;
-import cc.catman.object.core.accessor.invoke.Invoke;
-import cc.catman.object.core.accessor.invoke.JavaBeanInvokeFinder;
+import cc.catman.object.core.accessor.invoke.*;
 import cc.catman.object.core.accessor.property.PropertyAccessor;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
 import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
+import cc.catman.object.core.exception.ReflectionRuntimeException;
 import cc.catman.object.core.util.ReflectionHelper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -18,11 +19,14 @@ import java.util.Optional;
  * @author jpanda
  * @since 0.0.3
  */
+@Slf4j
 public class ObjectPropertyAccessor extends AbstractPropertyAccessor implements PropertyAccessor {
 
     private Invoke invoke;
 
     private Invoke setInvoke;
+
+    private InvokeFinder finder;
 
     public ObjectPropertyAccessor(ObjectPathConfiguration configuration) {
         super(configuration);
@@ -30,6 +34,11 @@ public class ObjectPropertyAccessor extends AbstractPropertyAccessor implements 
 
     public ObjectPropertyAccessor(ObjectPathConfiguration configuration, Object indexOrName) {
         super(configuration, indexOrName);
+        if (configuration.isUseCacheForReflect()
+        ) {
+            log.debug("Using cached reflect finder.");
+            this.finder = new CachedInvokeFinder(new StandardInvokeFinder());
+        }
     }
 
 
@@ -51,7 +60,15 @@ public class ObjectPropertyAccessor extends AbstractPropertyAccessor implements 
             return configuration.isUseZeroForNull() ? 0 : null;
         }
         if (!Optional.ofNullable(this.invoke).isPresent()) {
-            this.invoke = JavaBeanInvokeFinder.findInvoke(object.getClass(), indexOrName.toString());
+            try {
+                this.invoke = finder.find(object.getClass(), indexOrName.toString());
+            }catch (ReflectionRuntimeException e){
+                if (configuration.isAllowAccessFieldWhenNotFound()){
+                    this.invoke=new NullInvoke();
+                }else{
+                    throw e;
+                }
+            }
         }
         if (Objects.isNull(this.invoke)){
             return null;
@@ -104,7 +121,7 @@ public class ObjectPropertyAccessor extends AbstractPropertyAccessor implements 
             throw new PropertyAccessorRuntimeException("Cannot set value to root property");
         }
         if(Objects.isNull(this.setInvoke)){
-            this.setInvoke = JavaBeanInvokeFinder.findWriteInvoke(object.getClass(), indexOrName.toString(),Objects.isNull(value)?null:value.getClass());
+            this.setInvoke = this.finder.findWrite(object.getClass(), indexOrName.toString(),Objects.isNull(value)?null:value.getClass());
         }
 
         return this.setInvoke.invoke(object,value);

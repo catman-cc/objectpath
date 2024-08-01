@@ -1,7 +1,8 @@
 package cc.catman.object.benchmark;
 
-import cc.catman.OP;
+import cc.catman.object.ObjectPath;
 import cc.catman.object.ObjectPathAccessor;
+import cc.catman.object.ObjectPathConfiguration;
 
 import java.util.List;
 
@@ -16,9 +17,16 @@ public class ObjectPathCachedReadBenchmark implements Benchmark{
 
     @Override
     public StopAndWatch exec(List<Object> objects) {
-        ObjectPathAccessor accessor = OP.parse(expr);
+        ObjectPathConfiguration opc=ObjectPathConfiguration.create();
+        opc.setUseCacheForReflect(true);
+        opc.setEnableObjectClassifierCache(true);
+        opc.setEnableObjectAccessorCache(true);
+        opc.inject();
+        ObjectPathAccessor accessor = ObjectPath.parse(expr, opc);
+
         StopAndWatch saw = StopAndWatch.start(getClass().getSimpleName());
         objects.forEach(accessor::eval);
         return saw.stop();
     }
+
 }

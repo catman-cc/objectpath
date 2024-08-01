@@ -11,21 +11,22 @@ import java.util.function.Supplier;
  * @author jpanda
  * @since 0.0.2
  */
-public class CachedReadInvokeFinder implements ReadInvokeFinder {
+public class CachedInvokeFinder implements InvokeFinder {
     /**
      * 一个简单的缓存
      */
     private final Map<Class<?>, Map<String, Invoke>> cache = new WeakHashMap<>();
+    private final Map<Class<?>,Map<String,Invoke>> writeCache=new WeakHashMap<>();
     /**
      * 委托查找器
      */
     private final ReadInvokeFinder delegate;
 
-    public CachedReadInvokeFinder() {
-        this(new StandardReadInvokeFinder());
+    public CachedInvokeFinder() {
+        this(new StandardInvokeFinder());
     }
 
-    public CachedReadInvokeFinder(ReadInvokeFinder delegate) {
+    public CachedInvokeFinder(InvokeFinder delegate) {
         this.delegate = delegate;
     }
 
@@ -34,7 +35,7 @@ public class CachedReadInvokeFinder implements ReadInvokeFinder {
         Map<String, Invoke> invokeCache = cache.computeIfAbsent(clazz, k -> new WeakHashMap<>());
         Invoke invoke = invokeCache.computeIfAbsent(name, k -> JavaBeanInvokeFinder.findInvoke(clazz, name));
         return Optional.ofNullable(invoke)
-                .orElseThrow(() -> new ReflectionRuntimeException("Cannot find method " + name + " in class " + clazz.getName()));
+                .orElseThrow(() -> new ReflectionRuntimeException(buildErrorMessage(name,clazz)));
     }
 
     /**
@@ -54,7 +55,7 @@ public class CachedReadInvokeFinder implements ReadInvokeFinder {
             }
             return Optional.ofNullable(delegate.find(clazz, name))
                     .map(i -> cache.computeIfAbsent(clazz, k -> new WeakHashMap<>()).put(name, i))
-                    .orElseThrow(() -> new ReflectionRuntimeException("Cannot find method " + name + " in class " + clazz.getName()));
+                    .orElseThrow(() -> new ReflectionRuntimeException(buildErrorMessage(name,clazz)));
         });
     }
 
@@ -86,5 +87,23 @@ public class CachedReadInvokeFinder implements ReadInvokeFinder {
     protected Invoke findFromCache(Class<?> clazz, String name) {
         Map<String, Invoke> invokeCache = cache.computeIfAbsent(clazz, k -> new WeakHashMap<>());
         return invokeCache.get(name);
+    }
+
+    /**
+     * 查找调用器
+     *
+     * @param clazz 类
+     * @param name  名称
+     * @return 调用器
+     */
+    @Override
+    public Invoke findWrite(Class<?> clazz, String name,Class<?> valueType) {
+        Map<String, Invoke> invokeCache = writeCache.computeIfAbsent(clazz, k -> new WeakHashMap<>());
+        Invoke invoke = invokeCache.computeIfAbsent(name, k -> JavaBeanInvokeFinder.findWriteInvoke(clazz, name,valueType));
+        return Optional.ofNullable(invoke)
+                .orElseThrow(() -> new ReflectionRuntimeException(buildErrorMessage(name,clazz)));
+    }
+    private String buildErrorMessage(String name,Class<?> clazz){
+        return "Cannot find method " + name + " in class " + clazz.getName();
     }
 }

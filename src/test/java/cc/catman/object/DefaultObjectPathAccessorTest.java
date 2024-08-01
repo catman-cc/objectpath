@@ -18,7 +18,7 @@ public class DefaultObjectPathAccessorTest {
         cfg.getFeatures().put(Features.CONNECT_STRING_USE_PLUS_SIGN,true);
 
         ObjectPathAccessor accessor = ObjectPath.parse("$.name", cfg);
-        accessor.setExpr(person,"\"1\"+$.name+\"1\"");
+        accessor.setExpr(person,"1+$.name+1");
         assertEquals("1panda1",person.name);
     }
 

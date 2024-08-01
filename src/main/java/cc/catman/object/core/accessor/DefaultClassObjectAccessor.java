@@ -24,14 +24,14 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
     /**
      * 读取方法查找器
      */
-    private ReadInvokeFinder finder;
+    private InvokeFinder finder;
 
 
     public DefaultClassObjectAccessor() {
-        this(new StandardReadInvokeFinder());
+        this(new StandardInvokeFinder());
     }
 
-    public DefaultClassObjectAccessor(ReadInvokeFinder finder) {
+    public DefaultClassObjectAccessor(InvokeFinder finder) {
         this.finder = finder;
     }
 
@@ -39,10 +39,10 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
     public void injectConfiguration(ObjectPathConfiguration configuration) {
         super.injectConfiguration(configuration);
         if (configuration.isUseCacheForReflect()
-            && (this.finder.getClass().equals(StandardReadInvokeFinder.class))
+            && (this.finder.getClass().equals(StandardInvokeFinder.class))
         ) {
             log.debug("Using cached reflect finder.");
-            this.finder = new CachedReadInvokeFinder(this.finder);
+            this.finder = new CachedInvokeFinder(this.finder);
         }
     }
 

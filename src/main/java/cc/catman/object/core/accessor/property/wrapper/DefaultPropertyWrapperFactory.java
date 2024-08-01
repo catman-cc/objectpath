@@ -14,6 +14,7 @@ import java.util.Objects;
  * @since 0.0.3
  */
 public class DefaultPropertyWrapperFactory implements PropertyWrapperFactory{
+
     protected ObjectPathConfiguration configuration;
 
     /**
@@ -31,6 +32,15 @@ public class DefaultPropertyWrapperFactory implements PropertyWrapperFactory{
         return new DefaultPropertyWrapper<>(configuration,object);
     }
 
+    @Override
+    public PropertyWrapper createReadOnly(Object object) {
+        if (Objects.nonNull(object) && ReflectionHelper.isAssignableFrom(PropertyWrapper.class, object.getClass())) {
+            return (PropertyWrapper) object;
+        }
+
+        return new ReadOnlyPropertyWrapper<>(configuration,object);
+    }
+
     /**
      * 创建属性访问器
      * @param belong  该属性包装器所属的属性包装器
@@ -39,6 +49,9 @@ public class DefaultPropertyWrapperFactory implements PropertyWrapperFactory{
      */
     @Override
     public PropertyWrapper create(PropertyWrapper belong, Object key) {
+        if (belong.readOnly()){
+            return new ReadOnlyPropertyWrapper<>(configuration,belong,key);
+        }
         return new DefaultPropertyWrapper<>(configuration, belong, key);
     }
 
@@ -52,6 +65,9 @@ public class DefaultPropertyWrapperFactory implements PropertyWrapperFactory{
      */
     @Override
     public PropertyWrapper create(PropertyWrapper belong, Object key, PropertyAccessor propertyAccessor) {
+        if (belong.readOnly()){
+            return new ReadOnlyPropertyWrapper<>(configuration,belong,key,propertyAccessor);
+        }
         return new DefaultPropertyWrapper<>(configuration,belong,key,propertyAccessor);
     }
 

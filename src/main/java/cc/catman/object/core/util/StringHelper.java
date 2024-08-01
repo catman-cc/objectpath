@@ -28,4 +28,11 @@ public final class StringHelper {
         }
         return str;
     }
+
+    public static String toString(Object object){
+        if (Objects.isNull(object)){
+            return "";
+        }
+        return object.toString();
+    }
 }

@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.Entity;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.cache.ICache;
 
 /**
  * 聚合对象访问器
@@ -24,6 +25,9 @@ public class AggregateObjectAccessor extends AbstractObjectAccessor {
      */
     private final List<ObjectAccessor> accessors = new ArrayList<>();
 
+    private ICache<ObjectAccessor> cache;
+
+
     public AggregateObjectAccessor add(ObjectAccessor accessor) {
         Optional.ofNullable(this.configuration).ifPresent(c -> c.inject(accessor));
         this.accessors.add(accessor);
@@ -34,6 +38,7 @@ public class AggregateObjectAccessor extends AbstractObjectAccessor {
     public void injectConfiguration(ObjectPathConfiguration configuration) {
         super.injectConfiguration(configuration);
         this.accessors.forEach(a -> a.injectConfiguration(configuration));
+        this.cache=configuration.getObjectAccessorCache();
     }
 
     @Override
@@ -43,51 +48,49 @@ public class AggregateObjectAccessor extends AbstractObjectAccessor {
 
     @Override
     public PropertyWrapper get(PropertyWrapper object, Object key) {
-        return this.accessors.stream().filter(accessor -> accessor.isSupport(object, key)).findFirst()
-                .map(accessor -> accessor.get(object, key)).orElse(null);
+        return this.getAccessor(object, key).map(accessor -> accessor.get(object, key)).orElse(null);
     }
 
     @Override
     public void eachKey(PropertyWrapper object, Consumer<Object> consumer) {
-        this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_KEY))
-                .findFirst().ifPresent(accessor -> accessor.eachKey(object, consumer));
+        getAccessor(object, EAccessorKind.EACH_KEY).ifPresent(accessor -> accessor.eachKey(object, consumer));
     }
 
     @Override
     public void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
-        this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_VALUE))
-                .findFirst().ifPresent(accessor -> accessor.eachValue(object, consumer));
+        getAccessor(object, EAccessorKind.EACH_VALUE).ifPresent(accessor -> accessor.eachValue(object, consumer));
     }
 
     @Override
     public void eachEntry(PropertyWrapper object, Consumer<Entity> consumer) {
-        this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.EACH_ENTRY))
-                .findFirst().ifPresent(accessor -> accessor.eachEntry(object, consumer));
+        getAccessor(object, EAccessorKind.EACH_ENTRY).ifPresent(accessor -> accessor.eachEntry(object, consumer));
     }
 
     @Override
     public PropertyWrapper filter(PropertyWrapper object, Predicate<Object> filter) {
-        return this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.FILTER))
-                .findFirst().map(accessor -> accessor.filter(object, filter)).orElse(null);
+       return getAccessor(object, EAccessorKind.FILTER).map(accessor -> accessor.filter(object, filter)).orElse(null);
     }
 
     @Override
     public PropertyWrapper map(PropertyWrapper object, Function<Object, Object> mapper) {
-        return this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.MAP))
-                .findFirst()
-                .map(accessor -> accessor.map(object, mapper))
+        return getAccessor(object,EAccessorKind.MAP)
+                .map(accessor->accessor.map(object,mapper))
                 .orElse(null);
     }
 
     @Override
     public int size(PropertyWrapper object) {
-        return this.accessors.stream().filter(accessor -> accessor.isSupport(object, null))
-                .findFirst().map(accessor -> accessor.size(object)).orElse(-1);
+        return getAccessor(object,null).map(accessor -> accessor.size(object)).orElse(-1);
     }
 
     @Override
     public List<Object> covertToList(PropertyWrapper object) {
-        return this.accessors.stream().filter(accessor -> accessor.isSupport(object, EAccessorKind.COVERT_TO_LIST))
-                .findFirst().map(accessor -> accessor.covertToList(object)).orElse(null);
+        return getAccessor(object,EAccessorKind.COVERT_TO_LIST)
+                .map(accessor->accessor.covertToList(object))
+                .orElse(null);
+    }
+
+    public Optional<ObjectAccessor> getAccessor(PropertyWrapper object, Object key) {
+        return Optional.ofNullable(cache.getOrSet(object.readType(), key, () -> this.accessors.stream().parallel().filter(accessor -> accessor.isSupport(object, key)).findFirst().orElse(null)));
     }
 }

@@ -35,7 +35,7 @@ public class MainTest {
         Library library = Mock.mockLibrary(20,10);
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(library));
-        String first="$.books[*].authors|[^]|[0].name";
+        String first="$.books[*].authors|@[^]|@[0].name";
         PropertyWrapper res = createParser(first).objectPath().accept(visitor);
         assertEquals(library.getBooks().get(0).getAuthors().get(0).getName(),res.read());
     }
@@ -45,7 +45,7 @@ public class MainTest {
         Library library = Mock.mockLibrary(20,10);
         // 创建visitor
         ObjectPathVisitor visitor = new ObjectPathVisitor(createContext(library));
-        String first="$.books[*].authors|[^]|[1:3]";
+        String first="$.books[*].authors|@[^]|@[1:3]";
         Object res = createParser(first).objectPath().accept(visitor).read();
         assertEquals(library.getBooks().get(0).getAuthors().subList(1,3),res);
     }
@@ -70,7 +70,7 @@ public class MainTest {
         String first="$[0].a";
         Object res = createParser(first).objectPath().accept(visitor).read();
         assertEquals(1,res);
-        String second="$[?(a==1)]";
+        String second="$[?(@a==1)]";
         Object res2 = createParser(second).objectPath().accept(visitor).read();
         assertEquals(list.get(0),((List<?>)res2).get(0));
     }

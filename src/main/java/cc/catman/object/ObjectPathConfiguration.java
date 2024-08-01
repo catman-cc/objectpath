@@ -4,13 +4,17 @@ import cc.catman.object.core.ConfigurationAccessor;
 import cc.catman.object.core.Features;
 import cc.catman.object.core.accessor.ClassifierObjectAccessor;
 import cc.catman.object.core.accessor.ObjectAccessor;
+import cc.catman.object.core.accessor.convert.DefaultConvert;
+import cc.catman.object.core.accessor.convert.IConvert;
 import cc.catman.object.core.accessor.property.DefaultPropertyAccessorCache;
-import cc.catman.object.core.accessor.property.DiscardPropertyAccessorCache;
-import cc.catman.object.core.accessor.property.PropertyAccessorCache;
+import cc.catman.object.core.accessor.property.PropertyAccessor;
 import cc.catman.object.core.accessor.property.accessor.DefaultPropertyAccessorFactory;
 import cc.catman.object.core.accessor.property.accessor.PropertyAccessorFactory;
 import cc.catman.object.core.accessor.property.wrapper.DefaultPropertyWrapperFactory;
 import cc.catman.object.core.accessor.property.wrapper.PropertyWrapperFactory;
+import cc.catman.object.core.cache.ICache;
+import cc.catman.object.core.cache.DefaultICache;
+import cc.catman.object.core.classifier.ObjectClassifier;
 import cc.catman.object.core.function.DefaultFunctionManager;
 import cc.catman.object.core.function.FunctionManager;
 import cc.catman.object.core.instance.DefaultInstanceFactory;
@@ -59,8 +63,11 @@ public class ObjectPathConfiguration {
                 .scriptExecutorManager(DefaultScriptExecutorManager.defaultScriptExecutorManager())
                 .instanceFactory(DefaultInstanceFactory.defaultInstance())
                 .propertyAccessorCache(new DefaultPropertyAccessorCache())
+                .objectAccessorCache(new DefaultICache<>())
+                .objectClassifierCache(new DefaultICache<>())
                 .propertyAccessorFactory(DefaultPropertyAccessorFactory.create())
                 .wrapperFactory(new DefaultPropertyWrapperFactory())
+                .convert(new DefaultConvert())
                 .syntaxErrorStop(true)
                 .preventSyntaxErrorAndSendToErrorLog(true)
                 .build();
@@ -73,6 +80,12 @@ public class ObjectPathConfiguration {
      */
     @Builder.Default
     private boolean stopParseWhenNull=false;
+
+    /**
+     * 是否允许访问不存在的字段,如果字段不存在则返回null
+     */
+    @Builder.Default
+    private boolean allowAccessFieldWhenNotFound=true;
 
     /**
      * 在进行解析时,如果访问了一个null数据,则尝试使用其零值作为参数进行解析
@@ -145,6 +158,19 @@ public class ObjectPathConfiguration {
      */
     @Builder.Default
     private EnumMap<Features,Boolean> features=new EnumMap<>(Features.class);
+
+    /**
+     * 是否启用对象分类器缓存
+     */
+    @Builder.Default
+    private boolean enableObjectClassifierCache=true;
+
+    /**
+     * 是否启用对象访问器缓存
+     */
+    @Builder.Default
+    private boolean enableObjectAccessorCache=true;
+
     /**
      * json解析器
      */
@@ -162,9 +188,15 @@ public class ObjectPathConfiguration {
 
     private PropertyWrapperFactory wrapperFactory;
 
-    private PropertyAccessorCache propertyAccessorCache;
+    private ICache<PropertyAccessor> propertyAccessorCache;
+
+    private ICache<ObjectAccessor> objectAccessorCache;
+
+    private ICache<ObjectClassifier> objectClassifierCache;
 
     private PropertyAccessorFactory propertyAccessorFactory;
+
+    private IConvert convert;
 
     public boolean isEnableFeature(Features feature){
         return features.getOrDefault(feature,false);
@@ -190,6 +222,9 @@ public class ObjectPathConfiguration {
         this.inject(this.getWrapperFactory());
         this.inject(this.getPropertyAccessorFactory());
         this.inject(this.getPropertyAccessorCache());
+        this.inject(this.getObjectClassifierCache());
+        this.inject(this.getObjectAccessorCache());
+        this.inject(this.getConvert());
         return this;
     }
 

@@ -35,6 +35,9 @@ public class ListPropertyAccessor extends AbstractPropertyAccessor {
         if (this.isRoot()){
             return object;
         }
+        if (Objects.isNull(object)){
+            return null;
+        }
         List<?> list=tryCast2List(object);
         try {
             return list.get(tryCast2Integer(indexOrName));
@@ -45,7 +48,7 @@ public class ListPropertyAccessor extends AbstractPropertyAccessor {
 
     @Override
     public Object get(PropertyWrapper belong) {
-       return belong.read();
+       return this.get(belong.read());
     }
 
     /**

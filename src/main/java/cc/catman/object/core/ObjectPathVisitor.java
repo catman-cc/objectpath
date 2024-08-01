@@ -3,7 +3,9 @@ package cc.catman.object.core;
 
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
 import cc.catman.object.core.util.ReflectionHelper;
+import cc.catman.object.core.util.StringHelper;
 import cc.catman.object.path.standard.ObjectPathBaseVisitor;
 import cc.catman.object.path.standard.ObjectPathParser;
 import lombok.Getter;
@@ -64,7 +66,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
         this.context = this.context.createContext(cv, null, cv);
         // 创建新的访问器
         // 访问通道,获取值
-        return this.visit(ctx.expr());
+        PropertyWrapper pipeValue = this.visit(ctx.expr());
+        this.context.updateCurrent(pipeValue);
+        return pipeValue;
     }
 
     /**
@@ -134,18 +138,16 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
         if (this.config.isEnableFeature(Features.CONNECT_STRING_USE_PLUS_SIGN)
             && ("+".equals(text)))
         {
-            String leftText = ctx.expr(0).getText();
-            String rightText = ctx.expr(1).getText();
-            if (left.isNull()){
-                if (leftText.startsWith("\"")||leftText.startsWith("'")){
+            String leftText =left.read(String.class);
+            String rightText = right.read(String.class);
+            if (Objects.nonNull(leftText) && (leftText.startsWith("\"")||leftText.startsWith("'"))){
                     left=wrapper(unquote(leftText));
                 }
-            }
-            if (right.isNull()){
-                if (rightText.startsWith("\"")||rightText.startsWith("'")){
+
+            if (Objects.nonNull(rightText) && (rightText.startsWith("\"")||rightText.startsWith("'"))){
                     right=wrapper(unquote(rightText));
                 }
-            }
+
 
             if (config.isUseZeroForNull()) {
                 return wrapper(Optional.ofNullable(left.read()).map(Object::toString).orElse("")
@@ -247,11 +249,6 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
             ELocation l = ELocation.fromLocation(ctx.location().getText());
             return this.context.createChildContext(l);
         }
-
-        if (Optional.ofNullable(ctx.ID()).isPresent()) {
-            String id = ctx.ID().getText();
-            return this.context.createChild(this.context.eval(id));
-        }
         // never reach here
         return this.context;
     }
@@ -281,13 +278,15 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     @Override
     public PropertyWrapper visitINDEX_OR_NAME(ObjectPathParser.INDEX_OR_NAMEContext ctx) {
         // 获取待访问的索引值
-        TerminalNode index = ctx.ID();
+        String id = Optional.ofNullable(ctx.ID()).orElseGet(ctx::STRING)
+                .getText();
         // 访问索引,获取索引对应的对象
-        PropertyWrapper obj = this.context.eval(index.getText());
+        PropertyWrapper obj = this.context.eval(id);
         // 切换上下文
         this.context = this.context.createChild(obj);
         return obj;
     }
+
 
     /**
      * 访问子对象,此时目标对象可以是数组,集合,Map,对象,只要不是基本类型即可
@@ -298,11 +297,14 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
      */
     @Override
     public PropertyWrapper visitINDEX_OR_NAME_LIST(ObjectPathParser.INDEX_OR_NAME_LISTContext ctx) {
-        List<TerminalNode> ids = ctx.ID();
-        Map<Object, Object> map = new HashMap<>(ids.size());
-        for (TerminalNode id : ids) {
-            Object obj = this.context.eval(id.getText());
-            map.put(id.getText(), obj);
+        List<String> childs=new ArrayList<>();
+        for (int i = 1; i < ctx.getChildCount(); i+=2) {
+            childs.add(StringHelper.unquote(ctx.getChild(i).getText()));
+        }
+        Map<Object, Object> map = new HashMap<>(childs.size());
+        for (String id : childs) {
+            PropertyWrapper obj = this.context.eval(id);
+            map.put(id, obj.read());
         }
         this.context = this.context.createChild(map);
         return wrapper(map);
@@ -310,7 +312,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
 
     @Override
     public PropertyWrapper visitCHILD(ObjectPathParser.CHILDContext ctx) {
-        String id = ctx.ID().getText();
+
+        String id = Optional.ofNullable(ctx.ID()).orElseGet(ctx::STRING)
+                        .getText();
         PropertyWrapper obj = this.context.eval(id);
         this.context = this.context.createChild(obj);
         return obj;
@@ -679,11 +683,11 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
         return wrapper(objects);
     }
 
-    protected List<Object> up(List<?> objects, int number) {
+    protected List<Object> up(Collection<?> objects, int number) {
         List<Object> newObjects = new ArrayList<>();
         for (Object object : objects) {
-            if (object instanceof List) {
-                List<?> list = (List<?>) object;
+            if (object instanceof Collection) {
+                Collection<?> list = (Collection<?>) object;
                 if (number == 0) {
                     newObjects.addAll(list);
                 } else {
@@ -1308,7 +1312,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     @Override
     public PropertyWrapper visitSPLIT(ObjectPathParser.SPLITContext ctx) {
         String s = this.context.covertToString();
-        String split = unquote(ctx.ID().getText());
+        String split = unquote(visit(ctx.expr()).read(String.class));
         // 移除开头和结尾的引号
         String[] splitStr = s.split(split);
         return this.context.updateCurrent(Arrays.asList(splitStr));
@@ -1316,8 +1320,8 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
 
     @Override
     public PropertyWrapper visitREPLACE(ObjectPathParser.REPLACEContext ctx) {
-        String old = unquote(ctx.ID(0).getText());
-        String want = unquote(ctx.ID(1).getText());
+        String old = visit(ctx.expr(0)).read(String.class);
+        String want = visit(ctx.expr(1)).read(String.class);
         String s = this.context.covertToString();
         String replace = s.replace(old, want);
         return this.context.updateCurrent(replace);
@@ -1368,7 +1372,8 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     @Override
     public PropertyWrapper visitCONCAT(ObjectPathParser.CONCATContext ctx) {
         String s = this.context.covertToString();
-        String cs = unquote(ctx.ID().getText());
+        PropertyWrapper exprValue = visit(ctx.expr());
+        String cs = StringHelper.unquote(exprValue.read(String.class));
         String concat = s.concat(cs);
         return this.context.updateCurrent(concat);
     }
@@ -1423,7 +1428,19 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
 
     @Override
     public PropertyWrapper visitArg(ObjectPathParser.ArgContext ctx) {
-        return visit(ctx.getChild(0));
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        if (Objects.nonNull(expr)){
+            return visit(expr);
+        }
+        ObjectPathParser.ComplexValueContext complexValue = ctx.complexValue();
+        if (Objects.nonNull(complexValue)){
+            return visit(complexValue);
+        }
+        ObjectPathParser.ValueContext value = ctx.value();
+        if (Objects.nonNull(value)){
+            return visit(value);
+        }
+        throw new PropertyAccessorRuntimeException("");
     }
 
     @Override
@@ -1478,8 +1495,8 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
             return wrapper(i);
         }
         if (Optional.ofNullable(ctx.STRING()).isPresent()) {
-            String string = ctx.STRING().getText();
-            this.context = this.context.createChild(this.context.eval(string));
+            String string = StringHelper.unquote( ctx.STRING().getText());
+            this.context = this.context.createChild(wrapper(string));
             return wrapper(string);
         }
         if (Optional.ofNullable(ctx.DOUBLE()).isPresent()) {
@@ -1498,6 +1515,9 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     }
 
     protected PropertyWrapper wrapper(Object object) {
+        if (this.context.getMod().isReadOnly()){
+            return this.config.getWrapperFactory().createReadOnly(object);
+        }
         return this.config.getWrapperFactory().create(object);
     }
 }

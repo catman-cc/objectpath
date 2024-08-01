@@ -50,14 +50,13 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T eval(Object object, Class<T> clazz) {
         reset();
         ObjectPathParserContext ctx;
         if (object instanceof ObjectPathParserContext){
             ctx= (ObjectPathParserContext) object;
         }else {
-            ctx = createContext(object);
+            ctx = createContext(object,EContextMod.READ_ONLY);
         }
 
         ObjectPathParser.ObjectPathContext opc = Optional.ofNullable(this.objectPathContext)
@@ -65,7 +64,6 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
 
         ObjectPathVisitor visitor = new ObjectPathVisitor(ctx);
 
-        ctx.setMod(EContextMod.READ_ONLY);
 
         PropertyWrapper result =opc.accept(visitor);
         return result.read(clazz);
@@ -81,7 +79,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
     public void setExpr(Object object, String expr) {
         reset();
 
-        DefaultObjectPathParserContext ctx = createContext(object);
+        DefaultObjectPathParserContext ctx = createContext(object,EContextMod.WRITE_MOD);
         ObjectPathParser.ObjectPathContext opc = Optional.ofNullable(this.objectPathContext)
                 .orElseGet(parser::objectPath);
 
@@ -112,7 +110,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
     @Override
     public void setExpr(Object object,ObjectPathParser.ObjectPathContext objectPath){
         reset();
-        DefaultObjectPathParserContext ctx = createContext(object);
+        DefaultObjectPathParserContext ctx = createContext(object,EContextMod.WRITE_MOD);
         ObjectPathParser.ObjectPathContext opc = Optional.ofNullable(this.objectPathContext)
                 .orElseGet(parser::objectPath);
 
@@ -138,8 +136,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
     @Override
     public void setValue(Object object, Object value) {
         reset();
-        DefaultObjectPathParserContext ctx = createContext(object);
-        ctx.setMod(EContextMod.READ_ONLY);
+        DefaultObjectPathParserContext ctx = createContext(object,EContextMod.WRITE_MOD);
 
         ObjectPathVisitor visitor = new ObjectPathVisitor(ctx);
         ObjectPathParser.ObjectPathContext opc = Optional.ofNullable(this.objectPathContext)
@@ -148,13 +145,25 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor{
         result.set(value);
     }
 
-    public DefaultObjectPathParserContext createContext(Object root){
-        return new DefaultObjectPathParserContext(
-                this.config.getWrapperFactory().create(root),
-                this.config.getWrapperFactory().create(root),
-                null,
-                config
-        );
+    public DefaultObjectPathParserContext createContext(Object root,EContextMod mod){
+        DefaultObjectPathParserContext context;
+        if (mod.isReadOnly()){
+            context= new DefaultObjectPathParserContext(
+                    this.config.getWrapperFactory().createReadOnly(root),
+                    this.config.getWrapperFactory().createReadOnly(root),
+                    null,
+                    config
+            );
+        }else {
+            context=new DefaultObjectPathParserContext(
+                    this.config.getWrapperFactory().create(root),
+                    this.config.getWrapperFactory().create(root),
+                    null,
+                    config
+            );
+        }
+       context.setMod(mod);
+        return context;
     }
 
     public DefaultObjectPathParserContext createContext(PropertyWrapper pw){

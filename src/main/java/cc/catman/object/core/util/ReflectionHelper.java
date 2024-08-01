@@ -129,6 +129,7 @@ public final class ReflectionHelper {
                 makeAccessible(f);
                 return f;
             } catch (NoSuchFieldException ignored) {
+                // ignored
             }
         }
         throw new PropertyAccessorRuntimeException("can not find field:"+fieldName+"with:"+type.getName());

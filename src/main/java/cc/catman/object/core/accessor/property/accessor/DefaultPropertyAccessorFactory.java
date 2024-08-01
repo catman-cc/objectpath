@@ -2,8 +2,8 @@ package cc.catman.object.core.accessor.property.accessor;
 
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.accessor.property.PropertyAccessor;
-import cc.catman.object.core.accessor.property.PropertyAccessorCache;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.cache.ICache;
 import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
 
 import java.util.*;
@@ -49,9 +49,10 @@ public class DefaultPropertyAccessorFactory implements PropertyAccessorFactory{
      */
     @Override
     public PropertyAccessor create(Class<?> type, Object indexOrKeyName) {
-        PropertyAccessorCache cache = configuration.getPropertyAccessorCache();
+        ICache<PropertyAccessor> cache = configuration.getPropertyAccessorCache();
         return cache.getOrSet(type,indexOrKeyName,()->{
             PropertyAccessorCreator pac = this.creators.stream()
+                    .parallel()
                     .max(Comparator.comparingInt(a -> a.score(type, indexOrKeyName)))
                     .orElseThrow(() -> new PropertyAccessorRuntimeException(
                             "no property accessor found for type "
@@ -73,9 +74,10 @@ public class DefaultPropertyAccessorFactory implements PropertyAccessorFactory{
      */
     @Override
     public PropertyAccessor create(Object belong, Object indexOrKeyName) {
-        PropertyAccessorCache cache = configuration.getPropertyAccessorCache();
+        ICache<PropertyAccessor> cache = configuration.getPropertyAccessorCache();
         return cache.getOrSet(belong.getClass(),indexOrKeyName,()-> {
             PropertyAccessorCreator pac = this.creators.stream()
+                    .parallel()
                     .max(Comparator.comparingInt(a -> a.score(belong, indexOrKeyName)))
                     .orElseThrow(() -> new PropertyAccessorRuntimeException(
                             "no property accessor found for object "
@@ -97,7 +99,8 @@ public class DefaultPropertyAccessorFactory implements PropertyAccessorFactory{
      */
     @Override
     public PropertyAccessor create(PropertyWrapper belong, Object indexOrKeyName) {
-        PropertyAccessorCache cache = configuration.getPropertyAccessorCache();
+        ICache<PropertyAccessor> cache = configuration.getPropertyAccessorCache();
+        // 不对泛型集合做缓存
         return cache.getOrSet(belong.readType(),indexOrKeyName,()-> {
 
             Object obj = belong.read();
@@ -109,6 +112,7 @@ public class DefaultPropertyAccessorFactory implements PropertyAccessorFactory{
                 return this.create(type, indexOrKeyName);
             }
             PropertyAccessorCreator pac = this.creators.stream()
+                    .parallel()
                     .max(Comparator.comparingInt(a -> a.score(belong, indexOrKeyName)))
                     .orElseThrow(() -> new PropertyAccessorRuntimeException(
                             "no property accessor found for object "
