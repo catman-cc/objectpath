@@ -1,13 +1,35 @@
 grammar ObjectPath;
-objectPath: expr (pipe)*;
+objectPath: typeCast? ('('expr (pipe)*')'|expr (pipe)*);
+
 /* 扩展jsonpath,在未显式提供$/@前导符号时,默认为@,表示当前对象本身 */
 /* 新增计算方法后,表达式,就变成了两部分,计算表达式和标准表达式 */
 expr:
-(DOUBLE|NUMBER|STRING|BOOL)             #VALUE_EXPR
+typeCast ('('expr')'|expr)                           #TYPE_CAST_EXPR
+|value             #VALUE_EXPR
 |(location  selector*)                  #PATH_EXPR
 | expr ('+'|'-'|'*'|'/'|'%') expr       #CALCULATE_EXPR
 |'(' expr ')'                           #GROUP_EXPR
-|expr ('?'|filterExpr) ':' expr         #DEFAULT_EXPR
+|expr ('?'expr?) ':' expr                #DEFAULT_EXPR
+| expr '==' expr #EQ
+| expr '!='expr           #NEQ
+| expr '<' expr           #LT
+| expr '<=' expr          #LE
+| expr '>' expr           #GT
+| expr '>=' expr          #GE
+| expr 'is' 'null'                 #ISNULL
+| REG '~=' expr                          #LREGEX    //正则表达式,~的位置表示正则表达式的位置,此处左侧为正则表达式
+| expr '=~'REG                          #RREGEX   //正则表达式,=~的位置表示正则表达式的位置,此处右侧为表达式
+| expr 'between' '('  (expr|value)  ','  (expr|value)  ')'  #BETWEEN
+| expr 'like'  (expr|value)                        #LIKE
+| expr 'in' '(' args ')'                    #IN
+| expr 'notIn' '(' args')'                  #NOTIN
+| expr 'contains' '(' args ')'              #CONTAINS
+| expr 'startWith' '(' arg ')'             #STARTSWITH
+| expr 'endWith' '(' arg ')'               #ENDSWITH
+| expr 'match' '(' arg ')'                  #MATCHES
+| expr ('and'|'&&') expr                    #AND
+| expr ('or'|'||') expr                     #OR
+|'!'expr #REVERT_EXPR
 ;
 
 location: '$'                                       #ROOT_NODE
@@ -15,59 +37,46 @@ location: '$'                                       #ROOT_NODE
 |'@@'                                               #PARENT_NODE
 ;
 selector:
-(ID |STRING  )                                       #CHILD
+func                               #METHOD
+|(ID |STRING  )                                       #CHILD
 |'.' (ID |STRING  )                                  #CHILD
 | '..' ID                                            #RECURSIVE_CHILD
 | '[' (ID |STRING  )  ']'                            #INDEX_OR_NAME
 | '[' (ID |STRING  )  (','(ID |STRING  ) )+ ']'      #INDEX_OR_NAME_LIST   // 逗号分隔的多个id标志,该操作会从当前节点中提取对应的属性,并将其转换为map对象
-| '[' NUMBER ']'                    #INDEX
+| '[' expr ']'                    #INDEX
 | '[' '*'? ']'                      #WILDCARD_ALL
-| '[' NUMBER ':' NUMBER ']'         #SLICE
-| '[' NUMBER (',' NUMBER )* ']'     #SLICE_PICK
+| '[' expr ':' expr ']'         #SLICE
+| '[' expr (',' expr )* ']'     #SLICE_PICK
 |filterExpr                         #FILTER
-|func                               #METHOD
 |'.' scripts                        #SCRIPT
-|'[^'NUMBER?']'                     #UP
+|'[^'expr?']'                     #UP
 |'.*'                               #ALL
+
 ;
 
 /* 管道表达式 */
 pipe: '|'expr ;
+typeCast: '('
+          (
+          'string'|'String'|'str'
+          |'Integer'|'int'|'i'|'I'
+          |'Double'|'double'|'d'|'D'
+          |'Boolean'|'b'|'boolean'|'bool'|'B'
+          |'float'|'Float'|'f'
+          |'long'|'Long'|'l'|'L'
+          |'short'|'Short'|'s'|'S'
+          |'byte'|'Byte'
+          |'char'|'Character'|'c'|'C'
+          )('['']')?')';
 
 /* 过滤表达式 */
-filterExpr: '[' '?' '('( comparExpr|reverseComparExpr|scripts) ')' ']';
+filterExpr: '[' '?' '('( expr) ')' ']';
 
-/* 比较表达式 */
-comparExpr: (expr|value) '=='  (expr|value) #EQ
-|  (expr|value) '!=' (expr|value)           #NEQ
-|  (expr|value) '<'  (expr|value)           #LT
-|  (expr|value) '<='  (expr|value)          #LE
-|  (expr|value) '>'  (expr|value)           #GT
-|  (expr|value) '>='  (expr|value)          #GE
-|  (expr|value) 'is' 'null'                 #ISNULL
-| REG '~=' expr                          #LREGEX    //正则表达式,~的位置表示正则表达式的位置,此处左侧为正则表达式
-| expr '=~'REG                          #RREGEX   //正则表达式,=~的位置表示正则表达式的位置,此处右侧为表达式
-| expr 'between' '(' NUMBER ',' NUMBER ')'  #BETWEEN
-| expr 'like' ID                        #LIKE
-| expr 'in' '(' args ')'                    #IN
-| expr 'notIn' '(' args')'                  #NOTIN
-| expr 'contains' '(' args ')'              #CONTAINS
-| expr 'startWith' '(' args ')'             #STARTSWITH
-| expr 'endWith' '(' args ')'               #ENDSWITH
-| expr 'matches' '(' ID ')'             #MATCHES
-| expr ('and'|'&&') expr                    #AND
-| expr ('or'|'||') expr                     #OR
-;
-
-reverseComparExpr: '!' comparExpr;
-
-
-
-func: '.' ID '(' (args|) ')'                   #METHOD_CALL
-|'.' 'min' '(' (expr|) (',' (DOUBLE|NUMBER))? ')'                     #MIN
-|'.' 'max' '('(expr|)(',' (DOUBLE|NUMBER))?')'                      #MAX
-|'.' 'sum' '(' (expr|)(',' (DOUBLE|NUMBER))? ')'                     #SUM
-|'.' 'avg' '(' (expr|)(',' (DOUBLE|NUMBER))?')'                     #AVG
+func:
+'.' 'min' '('  (expr|)  ')'                     #MIN
+|'.' 'max' '(' (expr|)  ')'                      #MAX
+|'.' 'sum' '(' (expr|) ')'                     #SUM
+|'.' 'avg' '(' (expr|) ')'                     #AVG
 |'.' ('size'|'count') '(' ')'                          #SIZE
 |'.' 'isEmpty' '(' ')'                       #ISEMPTY
 |'.' 'index' '(' ')'                         #METHOD_INDEX
@@ -82,7 +91,7 @@ func: '.' ID '(' (args|) ')'                   #METHOD_CALL
 |'.' 'join' '(' args ')'                     #JOIN
 |'.' 'split' '(' expr ')'                    #SPLIT
 |'.' 'replace' '(' expr ',' expr ')'                  #REPLACE
-|'.' ('substring'|'sub') '(' NUMBER? ','NUMBER? ')'    #SUBSTRING
+|'.' ('substring'|'sub') '(' (expr (','expr)?)? ')'    #SUBSTRING
 |'.' 'toUpper' '(' ')'                       #TOUPPER
 |'.' 'toLower' '(' ')'                       #TOLOWER
 |'.' 'trim' '(' ')'                          #TRIM
@@ -91,8 +100,15 @@ func: '.' ID '(' (args|) ')'                   #METHOD_CALL
 |'.' 'concat' '(' expr ')'                   #CONCAT
 |'.' 'first' '(' ')'                         #FIRST
 |'.' 'last' '(' ')'                          #LAST
-|'.' 'indexOf' '(' NUMBER ')'                #INDEXOF
+|'.' 'indexOf' '(' expr ')'                #INDEXOF
 |'.' 'map' '(' expr ')'                      #MAP
+|'.' 'isNull' '(' expr? ')'                   #IS_NULL_METHOD
+|'.' 'notNull' '(' expr? ')'                  #NOT_NULL_METHOD
+|'.' 'and' '(' expr (',' expr)* ')'   #AND_METHOD
+|'.' 'or' '(' expr (',' expr)* ')'    #OR_METHOD
+|'.' 'not' '(' expr? ')'                      #NOT_METHOD
+|'.' 'filter' '(' expr (',' expr)* ')'       #FILTER_METHOD
+|'.' ID '(' (args|) ')'                   #METHOD_CALL
 ;
 
 /* 扩展脚本支持,其中ID表示脚本语言 */
@@ -106,12 +122,11 @@ namedArg: ID '=' arg;
 args: arg (',' arg)*;
 arg:  value|complexValue| expr;
 complexValue: value|json;
-calcValue: expr|DOUBLE|NUMBER;
 value:STRING|NUMBER|DOUBLE|BOOL|ID;
 json: object|array;
 object: '{' pair (',' pair)* '}';
-array: '[' value (',' value)* ']';
-pair: STRING ':' complexValue;
+array: '[' expr (',' expr)* ']';
+pair: STRING ':' expr;
 
 SCRIPT_CONTENT: '>' (~[<])* '</';
 BOOL: 'true' | 'false'|'TRUE'|'FALSE';

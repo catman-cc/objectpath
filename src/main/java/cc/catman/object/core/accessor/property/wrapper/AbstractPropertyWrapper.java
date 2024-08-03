@@ -203,7 +203,7 @@ public abstract class  AbstractPropertyWrapper<I,T> implements PropertyWrapper {
     @SuppressWarnings("unchecked")
     protected void postConstruct() {
         if (Objects.isNull(this.accessor) && Objects.isNull(this.belong) && Objects.nonNull(this.object)) {
-            this.accessor = this.accessorFactory.create(object, null);
+            this.accessor = this.accessorFactory.create(object, this.indexOrKey);
         }
 
         if (Objects.nonNull(this.belong)) {
