@@ -574,6 +574,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code RAW_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code METHOD_CALL}
 	 * labeled alternative in {@link ObjectPathParser#func}.
 	 * @param ctx the parse tree

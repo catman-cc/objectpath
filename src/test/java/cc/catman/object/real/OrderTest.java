@@ -3,6 +3,7 @@ package cc.catman.object.real;
 import cc.catman.object.BaseTest;
 import cc.catman.object.ObjectPath;
 import cc.catman.object.ObjectPathAccessor;
+import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.cases.Order.Order;
 import cc.catman.object.cases.Order.OrderItem;
 import cc.catman.object.cases.Order.OrderMock;
@@ -1004,6 +1005,17 @@ public class OrderTest extends BaseTest {
             Boolean res = as.eval(order,Boolean.class);
             Assert.assertTrue(res);
         });
+    }
+
+    @Test
+    public void  funcForRaw(){
+        Order order = OrderMock.mockOrderWithFixedSize(10);
+        String expr="$.items.raw('size')";
+        ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
+        cfg.setAllowExecuteRawMethod(true);
+        ObjectPathAccessor as = ObjectPath.parse(expr,cfg);
+        Integer res = as.eval(order,Integer.class);
+        Assert.assertEquals(10, (int) res);
     }
 
     @Test

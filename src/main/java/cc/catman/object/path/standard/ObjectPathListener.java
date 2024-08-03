@@ -972,6 +972,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code RAW_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code RAW_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code METHOD_CALL}
 	 * labeled alternative in {@link ObjectPathParser#func}.
 	 * @param ctx the parse tree
