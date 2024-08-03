@@ -989,6 +989,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx) { }
 	/**
 	 * {@inheritDoc}

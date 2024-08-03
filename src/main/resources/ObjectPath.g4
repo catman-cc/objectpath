@@ -108,6 +108,7 @@ func:
 |'.' 'or' '(' expr (',' expr)* ')'    #OR_METHOD
 |'.' 'not' '(' expr? ')'                      #NOT_METHOD
 |'.' 'filter' '(' expr (',' expr)* ')'       #FILTER_METHOD
+|'.' 'raw' '(' methodName=expr args?')'                 #RAW_METHOD
 |'.' ID '(' (args|) ')'                   #METHOD_CALL
 ;
 

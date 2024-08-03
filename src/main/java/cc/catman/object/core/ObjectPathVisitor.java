@@ -1450,6 +1450,21 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
         return wrapper(!res.read(Boolean.class));
     }
 
+    @Override
+    public PropertyWrapper visitRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx) {
+        ObjectPathParser.ExprContext methodName = ctx.methodName;
+        String name = unquote(independentContextVisit(methodName).read(String.class));
+        // 获取调用时的参数列表,是一个参数集合
+        List<Object> args = new ArrayList<>();
+        ObjectPathParser.ArgsContext argsCtx = ctx.args();
+        if (Objects.nonNull(argsCtx)){
+            PropertyWrapper argsPW = independentContextVisit(ctx.args());
+            args=argsPW.read(List.class);
+        }
+        // 调用方法
+        PropertyWrapper res = this.context.invokeRawMethod(name, args);
+        return this.context.updateCurrent(res);
+    }
 
     @Override
     public PropertyWrapper visitArgs(ObjectPathParser.ArgsContext ctx) {

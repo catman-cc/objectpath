@@ -154,6 +154,13 @@ public class ObjectPathConfiguration {
     private boolean allowWriteForSet=false;
 
     /**
+     * 是否允许执行对象的原始方法
+     */
+    @Builder.Default
+    private boolean allowExecuteRawMethod=false;
+
+
+    /**
      * 一些特性方法
      */
     @Builder.Default

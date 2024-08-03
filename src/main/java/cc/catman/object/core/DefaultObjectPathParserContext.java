@@ -3,6 +3,7 @@ package cc.catman.object.core;
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.accessor.ObjectAccessor;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
 import cc.catman.object.core.function.FunctionManager;
 import cc.catman.object.core.function.FunctionProvider;
 import cc.catman.object.core.json.JsonCoder;
@@ -13,6 +14,7 @@ import cc.catman.object.core.util.ReflectionHelper;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -302,6 +304,33 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
             return this.configuration.getWrapperFactory().create(fp.apply(params));
         }
         throw new UnsupportedOperationException("not support function "+functionName);
+    }
+
+    @Override
+    public PropertyWrapper invokeRawMethod(String name, List<Object> args) {
+        if (!configuration.isAllowExecuteRawMethod()) {
+            throw new PropertyAccessorRuntimeException("can not execute raw method:["+name+"]"
+                                                       +"please set allowExecuteRawMethod to true in configuration"
+                                                       + " or use invokeMethod instead.");
+        }
+        if (this.currentValue().isNull()){
+            throw new PropertyAccessorRuntimeException("can not call raw method:["+name+"] for null object");
+        }
+        Object object = this.currentValue().read();
+        Object result = ReflectionHelper.invokeMethod(object, name, args,m->{
+            if (configuration.isAllowExecuteRawMethod()) {
+                int modifiers = m.getModifiers();
+                if (Modifier.isPrivate(modifiers)) {
+                    return configuration.isEnableFeature(Features.ALLOW_EXEC_PRIVATE_METHOD);
+                }
+                if (Modifier.isProtected(modifiers)) {
+                    return configuration.isEnableFeature(Features.ALLOW_EXEC_PROTECTED_METHOD);
+                }
+                return true;
+            }
+            return false;
+        });
+        return this.cv.wrapper(result);
     }
 
     @Override

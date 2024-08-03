@@ -330,6 +330,14 @@ public interface ObjectPathParserContext {
 
     PropertyWrapper invokeMethod(String functionName, List<Object> params);
 
+    /**
+     * 调用当前对象的原始方法
+     * @param name 方法mc
+     * @param args 参数列表
+     * @return 执行结果
+     */
+    PropertyWrapper invokeRawMethod(String name,List<Object> args);
+
     PropertyWrapper executeScript(String scriptName, Object nas, String text);
 
     /**
