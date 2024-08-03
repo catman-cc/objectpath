@@ -6,9 +6,13 @@ import java.util.UUID;
 public class OrderMock {
 
     public static Order mockOrder(int size){
+        return mockOrderWithFixedSize(randomInt(size));
+    }
+
+    public static Order mockOrderWithFixedSize(int size){
         String id = UUID.randomUUID().toString();
         Order order = Order.builder().id(id).build();
-        for (int i = 0; i < randomInt(size); i++) {
+        for (int i = 0; i <size; i++) {
             order.getItems().add(mockItem());
         }
         return order;

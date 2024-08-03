@@ -34,6 +34,10 @@ public class ObjectPath implements IObjectPath {
         return new ObjectPath(config).parse(path);
     }
 
+    public static ObjectPathAccessor analyzer(String path){
+        return parse(path,ObjectPathConfiguration.create());
+    }
+
     @Override
     public ObjectPathAccessor parse(String path) {
         CodePointCharStream stream = CharStreams.fromString(path);

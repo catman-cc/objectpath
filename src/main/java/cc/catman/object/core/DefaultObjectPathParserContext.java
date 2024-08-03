@@ -9,6 +9,7 @@ import cc.catman.object.core.json.JsonCoder;
 import cc.catman.object.core.rewrite.ObjectRewrite;
 import cc.catman.object.core.script.ScriptExecutor;
 import cc.catman.object.core.script.ScriptExecutorManager;
+import cc.catman.object.core.util.ReflectionHelper;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -263,6 +264,25 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
             return Double.parseDouble(object.read(String.class));
         }
         return objectAccessor.covertToNumber(object);
+    }
+
+    @Override
+    public boolean isTrue(PropertyWrapper pw) {
+        Class<?> vt = pw.readType();
+        // 尝试断言为boolean,字符串,数值类型
+        if(ReflectionHelper.isAssignableFrom(Boolean.class,vt)){
+            return pw.read(boolean.class);
+
+        }
+        if (ReflectionHelper.isAssignableFrom(String.class,vt)){
+            String match = pw.read(String.class);
+            return "TRUE".equalsIgnoreCase(match);
+        }
+        if (ReflectionHelper.isAssignableFrom(Number.class,vt)){
+            Number match = pw.read(Number.class);
+            return Objects.nonNull(match)&&match.doubleValue() == 0;
+        }
+        return false;
     }
 
     @Override

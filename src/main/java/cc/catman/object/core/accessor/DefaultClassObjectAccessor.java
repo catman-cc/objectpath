@@ -85,6 +85,14 @@ public class DefaultClassObjectAccessor extends AbstractObjectAccessor {
     }
 
     @Override
+    public void eachKey(PropertyWrapper object, Consumer<Object> consumer) {
+        Field[] fields = object.readType().getDeclaredFields();
+        for (Field f : fields) {
+            consumer.accept(f.getName());
+        }
+    }
+
+    @Override
     public void eachValue(PropertyWrapper object, Consumer<Object> consumer) {
         // 变量当前对象中的所有属性,并且调用consumer
         Class<?> clazz = object.readType();

@@ -2,6 +2,7 @@ package cc.catman.object.core;
 
 import cc.catman.object.ObjectPathConfiguration;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
+import cc.catman.object.core.util.StringHelper;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,6 +58,70 @@ public interface ObjectPathParserContext {
         updateParent(currentValue());
     }
 
+    @SuppressWarnings("java:S3776")
+    default Class<?> analyzerType(String typeDesc){
+        if (typeDesc == null) {
+            return Object.class;
+        }
+        typeDesc=StringHelper.trim(typeDesc,"(",")");
+        boolean isArray=typeDesc.endsWith("[]");
+        if ("String".equalsIgnoreCase(typeDesc)
+            || "str".equals(typeDesc)
+        ){
+            return isArray? String[].class : String.class;
+        }
+        switch (typeDesc) {
+            case "Integer":
+            case "I":
+                return isArray ? Integer[].class : Integer.class;
+            case "int":
+            case "i":
+                return isArray ? int[].class : int.class;
+            case "Double":
+            case "D":
+                return isArray ? Double[].class : Double.class;
+            case "double":
+            case "d":
+                return isArray ? double[].class : double.class;
+            case "Float":
+            case "F":
+                return isArray ? Float[].class : Float.class;
+            case "float":
+            case "f":
+                return isArray ? float[].class : float.class;
+            case "Boolean":
+            case "B":
+                return isArray ? Boolean[].class : Boolean.class;
+            case "boolean":
+            case "b":
+                return isArray ? boolean[].class : boolean.class;
+            case "Long":
+            case "L":
+                return isArray ? Long[].class : Long.class;
+            case "long":
+            case "l":
+                return isArray ? long[].class : long.class;
+            case "Short":
+            case "S":
+                return isArray ? Short[].class : Short.class;
+            case "short":
+            case "s":
+                return isArray ? short[].class : short.class;
+            case "Byte":
+                return isArray ? Byte[].class : Byte.class;
+            case "byte":
+                return isArray ? byte[].class : byte.class;
+            case "Character":
+            case "C":
+                return isArray ? Character[].class : Character.class;
+            case "char":
+            case "c":
+                return isArray ? char[].class : char.class;
+            default:
+                return isArray?Object[].class:Object.class;
+        }
+    }
+
     void updateParent(Object parent);
 
     /**
@@ -77,6 +142,12 @@ public interface ObjectPathParserContext {
      */
     ObjectPathParserContext createContext(Object root, Object parent, Object current);
 
+    /**
+     * 复制一个当前的上下文,供调用方使用
+     */
+    default ObjectPathParserContext createChild(){
+        return createChild(this.currentValue());
+    }
     /**
      * 创建子上下文
      *
@@ -240,6 +311,7 @@ public interface ObjectPathParserContext {
      */
     Number covertToNumber(PropertyWrapper object);
 
+    boolean isTrue(PropertyWrapper pw);
     /**
      * 将字符串转换为对象
      *

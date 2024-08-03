@@ -69,7 +69,7 @@ public class MapPropertyAccessor extends AbstractPropertyAccessor {
 
     @Override
     public PropertyAccessor createChildAccessor(PropertyWrapper belong, Object indexOrName) {
-        return new MapPropertyAccessor(configuration,indexOrName);
+        return configuration.getPropertyAccessorFactory().create(belong,indexOrName);
     }
 
     /**

@@ -29,6 +29,16 @@ public final class StringHelper {
         return str;
     }
 
+    public static String trim(String text,String prefix,String suffix){
+        if (text.startsWith(prefix)){
+            text = text.substring(prefix.length());
+        }
+        if (text.endsWith(suffix)){
+            text = text.substring(0,text.length()-suffix.length());
+        }
+        return text;
+    }
+
     public static String toString(Object object){
         if (Objects.isNull(object)){
             return "";

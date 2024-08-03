@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  * This interface defines a complete listener for a parse tree produced by
  * {@link ObjectPathParser}.
  */
-@SuppressWarnings("all")
 public interface ObjectPathListener extends ParseTreeListener {
 	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#objectPath}.
@@ -31,29 +30,41 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code VALUE_EXPR}
+	 * Enter a parse tree produced by the {@code RREGEX}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	void enterRREGEX(ObjectPathParser.RREGEXContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code VALUE_EXPR}
+	 * Exit a parse tree produced by the {@code RREGEX}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	void exitRREGEX(ObjectPathParser.RREGEXContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code CALCULATE_EXPR}
+	 * Enter a parse tree produced by the {@code LT}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	void enterLT(ObjectPathParser.LTContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code CALCULATE_EXPR}
+	 * Exit a parse tree produced by the {@code LT}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	void exitLT(ObjectPathParser.LTContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code BETWEEN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBETWEEN(ObjectPathParser.BETWEENContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code BETWEEN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBETWEEN(ObjectPathParser.BETWEENContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code DEFAULT_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
@@ -67,6 +78,78 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code CONTAINS}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCONTAINS(ObjectPathParser.CONTAINSContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CONTAINS}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCONTAINS(ObjectPathParser.CONTAINSContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LREGEX}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLREGEX(ObjectPathParser.LREGEXContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LREGEX}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLREGEX(ObjectPathParser.LREGEXContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code STARTSWITH}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code STARTSWITH}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code TYPE_CAST_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTYPE_CAST_EXPR(ObjectPathParser.TYPE_CAST_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TYPE_CAST_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTYPE_CAST_EXPR(ObjectPathParser.TYPE_CAST_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code REVERT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterREVERT_EXPR(ObjectPathParser.REVERT_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code REVERT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitREVERT_EXPR(ObjectPathParser.REVERT_EXPRContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code PATH_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
@@ -78,6 +161,174 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPATH_EXPR(ObjectPathParser.PATH_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code GE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGE(ObjectPathParser.GEContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGE(ObjectPathParser.GEContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code OR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterOR(ObjectPathParser.ORContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code OR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitOR(ObjectPathParser.ORContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ENDSWITH}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ENDSWITH}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code IN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterIN(ObjectPathParser.INContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitIN(ObjectPathParser.INContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NOTIN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterNOTIN(ObjectPathParser.NOTINContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NOTIN}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitNOTIN(ObjectPathParser.NOTINContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code EQ}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterEQ(ObjectPathParser.EQContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EQ}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitEQ(ObjectPathParser.EQContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code GT}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGT(ObjectPathParser.GTContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GT}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGT(ObjectPathParser.GTContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LIKE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLIKE(ObjectPathParser.LIKEContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LIKE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLIKE(ObjectPathParser.LIKEContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AND}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAND(ObjectPathParser.ANDContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AND}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAND(ObjectPathParser.ANDContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code LE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLE(ObjectPathParser.LEContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code LE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLE(ObjectPathParser.LEContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ISNULL}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterISNULL(ObjectPathParser.ISNULLContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ISNULL}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitISNULL(ObjectPathParser.ISNULLContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code MATCHES}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMATCHES(ObjectPathParser.MATCHESContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code MATCHES}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMATCHES(ObjectPathParser.MATCHESContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NEQ}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterNEQ(ObjectPathParser.NEQContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NEQ}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitNEQ(ObjectPathParser.NEQContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.
@@ -114,6 +365,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPARENT_NODE(ObjectPathParser.PARENT_NODEContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code METHOD}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void enterMETHOD(ObjectPathParser.METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code METHOD}
+	 * labeled alternative in {@link ObjectPathParser#selector}.
+	 * @param ctx the parse tree
+	 */
+	void exitMETHOD(ObjectPathParser.METHODContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code CHILD}
 	 * labeled alternative in {@link ObjectPathParser#selector}.
@@ -223,18 +486,6 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitFILTER(ObjectPathParser.FILTERContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code METHOD}
-	 * labeled alternative in {@link ObjectPathParser#selector}.
-	 * @param ctx the parse tree
-	 */
-	void enterMETHOD(ObjectPathParser.METHODContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code METHOD}
-	 * labeled alternative in {@link ObjectPathParser#selector}.
-	 * @param ctx the parse tree
-	 */
-	void exitMETHOD(ObjectPathParser.METHODContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code SCRIPT}
 	 * labeled alternative in {@link ObjectPathParser#selector}.
 	 * @param ctx the parse tree
@@ -281,6 +532,16 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitPipe(ObjectPathParser.PipeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#typeCast}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeCast(ObjectPathParser.TypeCastContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#typeCast}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeCast(ObjectPathParser.TypeCastContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#filterExpr}.
 	 * @param ctx the parse tree
 	 */
@@ -290,256 +551,6 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFilterExpr(ObjectPathParser.FilterExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code EQ}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterEQ(ObjectPathParser.EQContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code EQ}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitEQ(ObjectPathParser.EQContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code NEQ}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterNEQ(ObjectPathParser.NEQContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code NEQ}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitNEQ(ObjectPathParser.NEQContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LT}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterLT(ObjectPathParser.LTContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LT}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitLT(ObjectPathParser.LTContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterLE(ObjectPathParser.LEContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitLE(ObjectPathParser.LEContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code GT}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterGT(ObjectPathParser.GTContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code GT}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitGT(ObjectPathParser.GTContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code GE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterGE(ObjectPathParser.GEContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code GE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitGE(ObjectPathParser.GEContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ISNULL}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterISNULL(ObjectPathParser.ISNULLContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ISNULL}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitISNULL(ObjectPathParser.ISNULLContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LREGEX}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterLREGEX(ObjectPathParser.LREGEXContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LREGEX}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitLREGEX(ObjectPathParser.LREGEXContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code RREGEX}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterRREGEX(ObjectPathParser.RREGEXContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code RREGEX}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitRREGEX(ObjectPathParser.RREGEXContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code BETWEEN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterBETWEEN(ObjectPathParser.BETWEENContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code BETWEEN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitBETWEEN(ObjectPathParser.BETWEENContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code LIKE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterLIKE(ObjectPathParser.LIKEContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code LIKE}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitLIKE(ObjectPathParser.LIKEContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code IN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterIN(ObjectPathParser.INContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code IN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitIN(ObjectPathParser.INContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code NOTIN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterNOTIN(ObjectPathParser.NOTINContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code NOTIN}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitNOTIN(ObjectPathParser.NOTINContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code CONTAINS}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterCONTAINS(ObjectPathParser.CONTAINSContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code CONTAINS}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitCONTAINS(ObjectPathParser.CONTAINSContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code STARTSWITH}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code STARTSWITH}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ENDSWITH}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ENDSWITH}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code MATCHES}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterMATCHES(ObjectPathParser.MATCHESContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code MATCHES}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitMATCHES(ObjectPathParser.MATCHESContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code AND}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterAND(ObjectPathParser.ANDContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code AND}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitAND(ObjectPathParser.ANDContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code OR}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterOR(ObjectPathParser.ORContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code OR}
-	 * labeled alternative in {@link ObjectPathParser#comparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitOR(ObjectPathParser.ORContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link ObjectPathParser#reverseComparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterReverseComparExpr(ObjectPathParser.ReverseComparExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ObjectPathParser#reverseComparExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitReverseComparExpr(ObjectPathParser.ReverseComparExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code METHOD_CALL}
-	 * labeled alternative in {@link ObjectPathParser#func}.
-	 * @param ctx the parse tree
-	 */
-	void enterMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code METHOD_CALL}
-	 * labeled alternative in {@link ObjectPathParser#func}.
-	 * @param ctx the parse tree
-	 */
-	void exitMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code MIN}
 	 * labeled alternative in {@link ObjectPathParser#func}.
@@ -889,6 +900,90 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitMAP(ObjectPathParser.MAPContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code IS_NULL_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterIS_NULL_METHOD(ObjectPathParser.IS_NULL_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IS_NULL_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitIS_NULL_METHOD(ObjectPathParser.IS_NULL_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NOT_NULL_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterNOT_NULL_METHOD(ObjectPathParser.NOT_NULL_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NOT_NULL_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitNOT_NULL_METHOD(ObjectPathParser.NOT_NULL_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code AND_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterAND_METHOD(ObjectPathParser.AND_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AND_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitAND_METHOD(ObjectPathParser.AND_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code OR_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterOR_METHOD(ObjectPathParser.OR_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code OR_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitOR_METHOD(ObjectPathParser.OR_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code NOT_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterNOT_METHOD(ObjectPathParser.NOT_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code NOT_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitNOT_METHOD(ObjectPathParser.NOT_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FILTER_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FILTER_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code METHOD_CALL}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code METHOD_CALL}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitMETHOD_CALL(ObjectPathParser.METHOD_CALLContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#scripts}.
 	 * @param ctx the parse tree
 	 */
@@ -968,16 +1063,6 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitComplexValue(ObjectPathParser.ComplexValueContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link ObjectPathParser#calcValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterCalcValue(ObjectPathParser.CalcValueContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ObjectPathParser#calcValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitCalcValue(ObjectPathParser.CalcValueContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ObjectPathParser#value}.
 	 * @param ctx the parse tree
