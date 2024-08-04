@@ -29,6 +29,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCOMPLEX_VALUE_EXPR(ObjectPathParser.COMPLEX_VALUE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCOMPLEX_VALUE_EXPR(ObjectPathParser.COMPLEX_VALUE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -36,6 +48,30 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOR(ObjectPathParser.ORContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOR(ObjectPathParser.ORContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -65,18 +101,6 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBETWEEN(ObjectPathParser.BETWEENContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBETWEEN(ObjectPathParser.BETWEENContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -89,13 +113,25 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCONTAINS(ObjectPathParser.CONTAINSContext ctx) { }
+	@Override public void enterEQ(ObjectPathParser.EQContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCONTAINS(ObjectPathParser.CONTAINSContext ctx) { }
+	@Override public void exitEQ(ObjectPathParser.EQContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGT(ObjectPathParser.GTContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGT(ObjectPathParser.GTContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -113,6 +149,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterREG_EXPR(ObjectPathParser.REG_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitREG_EXPR(ObjectPathParser.REG_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -125,13 +173,25 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) { }
+	@Override public void enterLIKE(ObjectPathParser.LIKEContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) { }
+	@Override public void exitLIKE(ObjectPathParser.LIKEContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAND(ObjectPathParser.ANDContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAND(ObjectPathParser.ANDContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -144,6 +204,42 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTYPE_CAST_EXPR(ObjectPathParser.TYPE_CAST_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLE(ObjectPathParser.LEContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLE(ObjectPathParser.LEContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterISNULL(ObjectPathParser.ISNULLContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitISNULL(ObjectPathParser.ISNULLContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNEQ(ObjectPathParser.NEQContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNEQ(ObjectPathParser.NEQContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -180,162 +276,6 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitGE(ObjectPathParser.GEContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOR(ObjectPathParser.ORContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOR(ObjectPathParser.ORContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterENDSWITH(ObjectPathParser.ENDSWITHContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitENDSWITH(ObjectPathParser.ENDSWITHContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIN(ObjectPathParser.INContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIN(ObjectPathParser.INContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNOTIN(ObjectPathParser.NOTINContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNOTIN(ObjectPathParser.NOTINContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEQ(ObjectPathParser.EQContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEQ(ObjectPathParser.EQContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterGT(ObjectPathParser.GTContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGT(ObjectPathParser.GTContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLIKE(ObjectPathParser.LIKEContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLIKE(ObjectPathParser.LIKEContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAND(ObjectPathParser.ANDContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAND(ObjectPathParser.ANDContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLE(ObjectPathParser.LEContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLE(ObjectPathParser.LEContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterISNULL(ObjectPathParser.ISNULLContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitISNULL(ObjectPathParser.ISNULLContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterMATCHES(ObjectPathParser.MATCHESContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMATCHES(ObjectPathParser.MATCHESContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNEQ(ObjectPathParser.NEQContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNEQ(ObjectPathParser.NEQContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -917,6 +857,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTOMAP_METHOD(ObjectPathParser.TOMAP_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTOMAP_METHOD(ObjectPathParser.TOMAP_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIS_NULL_METHOD(ObjectPathParser.IS_NULL_METHODContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -984,6 +936,102 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBETWEEN(ObjectPathParser.BETWEENContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBETWEEN(ObjectPathParser.BETWEENContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLIKE_METHOD(ObjectPathParser.LIKE_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLIKE_METHOD(ObjectPathParser.LIKE_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIN(ObjectPathParser.INContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIN(ObjectPathParser.INContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNOTIN(ObjectPathParser.NOTINContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNOTIN(ObjectPathParser.NOTINContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCONTAINS(ObjectPathParser.CONTAINSContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCONTAINS(ObjectPathParser.CONTAINSContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterENDSWITH(ObjectPathParser.ENDSWITHContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitENDSWITH(ObjectPathParser.ENDSWITHContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMATCHES(ObjectPathParser.MATCHESContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMATCHES(ObjectPathParser.MATCHESContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -284,7 +284,7 @@ public class OrderTest extends BaseTest {
         OrderItem item = OrderMock.mockItem();
         item.setPrice(200);
         order.getItems().add(item);
-        String expr = "$.items[?(@.price between(100,200))]";
+        String expr = "$.items[?(@.price.between(100,200))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(order);
         Assert.assertTrue(res instanceof List);
@@ -332,7 +332,7 @@ public class OrderTest extends BaseTest {
         OrderItem item = OrderMock.mockItem();
         item.setName("jpanda");
         order.getItems().add(item);
-        String expr = "$.items[?(@.name like 'jpa%')]";
+        String expr = "$.items[?(@.name.like('jpa%'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(order);
         Assert.assertTrue(res instanceof List);
@@ -348,7 +348,7 @@ public class OrderTest extends BaseTest {
         OrderItem item = OrderMock.mockItem();
         item.setName("jpanda");
         order.getItems().add(item);
-        String expr = "$.items[?(@.name in('jpanda','apple','banana'))]";
+        String expr = "$.items[?(@.name.in('jpanda','apple','banana'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(order);
         Assert.assertTrue(res instanceof List);
@@ -367,7 +367,7 @@ public class OrderTest extends BaseTest {
         OrderItem item = OrderMock.mockItem();
         item.setName("jpanda");
         order.getItems().add(item);
-        String expr = "$.items[?(@.name notIn('jpanda','apple','banana'))]";
+        String expr = "$.items[?(@.name.notIn('jpanda','apple','banana'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(order);
         Assert.assertTrue(res instanceof List);
@@ -393,7 +393,7 @@ public class OrderTest extends BaseTest {
                 });
 
 
-        String expr = "$[?(@ contains('jpanda','apple','banana'))]";
+        String expr = "$[?(@.contains('jpanda','apple','banana'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nameList);
         Assert.assertTrue(res instanceof List);
@@ -406,7 +406,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareContainsForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ contains('j','p','a'))]";
+        String expr = "$[?(@.contains('j','p','a'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -419,7 +419,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareStartWithForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ startWith('j'))]";
+        String expr = "$[?(@.startWith('j'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -432,7 +432,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareEndWithForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ endWith('a'))]";
+        String expr = "$[?(@.endWith('a'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -445,7 +445,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareMatchForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ match('^jp.*$'))]";
+        String expr = "$[?(@.match('^jp.*$'))]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -458,7 +458,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareAndForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ match('^jp.*$') and @ startWith('j') and @ endWith('a') and @ contains('a') )]";
+        String expr = "$[?(@.match('^jp.*$') and @.startWith('j') and @.endWith('a') and @.contains('a') )]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -471,7 +471,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareAndSymbolForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ match('^jp.*$') && @ startWith('j') && @ endWith('a') && @ contains('a') )]";
+        String expr = "$[?(@.match('^jp.*$') && @.startWith('j') && @.endWith('a') && @.contains('a') )]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -484,7 +484,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareOrForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ match('^jp.*$') or @ startWith('b') or @ endWith('a') or @ contains('an') )]";
+        String expr = "$[?(@.match('^jp.*$') or @.startWith('b') or @.endWith('a') or @.contains('an') )]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -497,7 +497,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareOrSymbolForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?(@ match('^jp.*$') || @ startWith('b') || @ endWith('a') || @ contains('an') )]";
+        String expr = "$[?(@.match(/^jp.*$/) || @.startWith('b') || @.endWith('a') || @.contains('an') )]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -510,7 +510,7 @@ public class OrderTest extends BaseTest {
     @SuppressWarnings("unchecked")
     public void selectorForFilterCompareOrGroupForString() {
         List<String> nvs = Arrays.asList("jpanda", "apple", "banana");
-        String expr = "$[?((@ match('^jp.*$') || @ startWith('b') || @ endWith('a') )|| @ contains('a') )]";
+        String expr = "$[?((@.match('^jp.*$') || @.startWith('b') || @.endWith('a') )|| @.contains('a') )]";
         ObjectPathAccessor as = objectPath.parse(expr);
         Object res = as.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -518,7 +518,7 @@ public class OrderTest extends BaseTest {
         Assert.assertEquals(3,list.size());
         Assert.assertEquals(nvs,res);
         // apple not match
-        expr = "$[?((@ match('^jp.*$') || @ startWith('b') || @ endWith('a') )|| @ contains('b') )]";
+        expr = "$[?((@.match('^jp.*$') || @.startWith('b') || @.endWith('a') )|| @.contains('b') )]";
         ObjectPathAccessor as2 = objectPath.parse(expr);
         res = as2.eval(nvs);
         Assert.assertTrue(res instanceof List);
@@ -994,6 +994,17 @@ public class OrderTest extends BaseTest {
     }
 
     @Test
+    public void funcToMap(){
+        Order order = OrderMock.mockOrderWithFixedSize(10);
+        ObjectPathAccessor as = objectPath.parse("$.items[*].toMap()");
+        Object res = as.eval(order);
+        Assert.assertTrue(ReflectionHelper.isAssignableFrom(List.class,res.getClass()));
+        List<?> ls = (List<?>) res;
+        Assert.assertEquals(10,ls.size());
+        Assert.assertTrue(ReflectionHelper.isAssignableFrom(Map.class,ls.get(0).getClass()));
+    }
+
+    @Test
     public void funcForNot(){
         Order order = OrderMock.mockOrderWithFixedSize(10);
         order.setId(null);
@@ -1007,16 +1018,16 @@ public class OrderTest extends BaseTest {
         });
     }
 
-    @Test
-    public void  funcForRaw(){
-        Order order = OrderMock.mockOrderWithFixedSize(10);
-        String expr="$.items.raw('size')";
-        ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
-        cfg.setAllowExecuteRawMethod(true);
-        ObjectPathAccessor as = ObjectPath.parse(expr,cfg);
-        Integer res = as.eval(order,Integer.class);
-        Assert.assertEquals(10, (int) res);
-    }
+@Test
+public void  funcForRaw(){
+    Order order = OrderMock.mockOrderWithFixedSize(10);
+    String expr="$.items.raw('size')";
+    ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
+    cfg.setAllowExecuteRawMethod(true);
+    ObjectPathAccessor as = ObjectPath.parse(expr,cfg);
+    Integer res = as.eval(order,Integer.class);
+    Assert.assertEquals(10, (int) res);
+}
 
     @Test
     @SuppressWarnings("unchecked")

@@ -75,6 +75,8 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     @Setter
     private EContextMod mod;
 
+    private boolean disableWrite;
+
     @Override
     public boolean readOnly() {
         return EContextMod.READ_ONLY.equals(mod);
@@ -138,7 +140,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
             case ROOT:
                 return createContext(root,null,root);
             case PARENT:
-                return createContext(root,null,pv);
+                return createContext(root,null,cv.getBelong().get());
             case CURRENT:
                 return createContext(root,pv,cv);
         }
@@ -156,6 +158,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
             );
             context.setMod(this.getMod());
             context.pv = configuration.getWrapperFactory().createReadOnly(parent);
+            context.disableWrite=this.disableWrite;
             return context;
         }
         DefaultObjectPathParserContext context = new DefaultObjectPathParserContext(
@@ -166,6 +169,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
         );
         context.setMod(this.getMod());
         context.pv = configuration.getWrapperFactory().create(parent);
+        context.disableWrite=this.disableWrite;
         return context;
     }
 
@@ -341,6 +345,19 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
             return this.configuration.getWrapperFactory().create(executor.eval(text, (Map<String, Object>) nas));
         }
         return null;
+    }
+
+    @Override
+    public void disableWrite() {
+        this.disableWrite=true;
+        Optional.ofNullable(this.parent).ifPresent(ObjectPathParserContext::disableWrite);
+    }
+
+    @Override
+    public void checkWrite() {
+        if (this.disableWrite){
+            throw new PropertyAccessorRuntimeException("can not write property in read-only context or disableWrite is true");
+        }
     }
 
 }

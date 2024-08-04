@@ -17,12 +17,33 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitObjectPath(ObjectPathParser.ObjectPathContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code COMPLEX_VALUE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCOMPLEX_VALUE_EXPR(ObjectPathParser.COMPLEX_VALUE_EXPRContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code GROUP_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CALCULATE_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code OR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOR(ObjectPathParser.ORContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code RREGEX}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
@@ -38,13 +59,6 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLT(ObjectPathParser.LTContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code BETWEEN}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBETWEEN(ObjectPathParser.BETWEENContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code DEFAULT_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
@@ -52,12 +66,19 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDEFAULT_EXPR(ObjectPathParser.DEFAULT_EXPRContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code CONTAINS}
+	 * Visit a parse tree produced by the {@code EQ}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCONTAINS(ObjectPathParser.CONTAINSContext ctx);
+	T visitEQ(ObjectPathParser.EQContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GT}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGT(ObjectPathParser.GTContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code LREGEX}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
@@ -66,6 +87,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLREGEX(ObjectPathParser.LREGEXContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code REG_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitREG_EXPR(ObjectPathParser.REG_EXPRContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code VALUE_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
@@ -73,12 +101,19 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVALUE_EXPR(ObjectPathParser.VALUE_EXPRContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code STARTSWITH}
+	 * Visit a parse tree produced by the {@code LIKE}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
+	T visitLIKE(ObjectPathParser.LIKEContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code AND}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAND(ObjectPathParser.ANDContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code TYPE_CAST_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
@@ -86,6 +121,27 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTYPE_CAST_EXPR(ObjectPathParser.TYPE_CAST_EXPRContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LE}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLE(ObjectPathParser.LEContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ISNULL}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitISNULL(ObjectPathParser.ISNULLContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NEQ}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNEQ(ObjectPathParser.NEQContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code REVERT_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
@@ -107,97 +163,6 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitGE(ObjectPathParser.GEContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code CALCULATE_EXPR}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCALCULATE_EXPR(ObjectPathParser.CALCULATE_EXPRContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code OR}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOR(ObjectPathParser.ORContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ENDSWITH}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code IN}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIN(ObjectPathParser.INContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code NOTIN}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNOTIN(ObjectPathParser.NOTINContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code EQ}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEQ(ObjectPathParser.EQContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code GT}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGT(ObjectPathParser.GTContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code LIKE}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLIKE(ObjectPathParser.LIKEContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code AND}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAND(ObjectPathParser.ANDContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code LE}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLE(ObjectPathParser.LEContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ISNULL}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitISNULL(ObjectPathParser.ISNULLContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code MATCHES}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMATCHES(ObjectPathParser.MATCHESContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code NEQ}
-	 * labeled alternative in {@link ObjectPathParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNEQ(ObjectPathParser.NEQContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.
@@ -532,6 +497,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMAP(ObjectPathParser.MAPContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code TOMAP_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTOMAP_METHOD(ObjectPathParser.TOMAP_METHODContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code IS_NULL_METHOD}
 	 * labeled alternative in {@link ObjectPathParser#func}.
 	 * @param ctx the parse tree
@@ -573,6 +545,62 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFILTER_METHOD(ObjectPathParser.FILTER_METHODContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code BETWEEN}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBETWEEN(ObjectPathParser.BETWEENContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code LIKE_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLIKE_METHOD(ObjectPathParser.LIKE_METHODContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IN}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIN(ObjectPathParser.INContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code NOTIN}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNOTIN(ObjectPathParser.NOTINContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code CONTAINS}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCONTAINS(ObjectPathParser.CONTAINSContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code STARTSWITH}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSTARTSWITH(ObjectPathParser.STARTSWITHContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ENDSWITH}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitENDSWITH(ObjectPathParser.ENDSWITHContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code MATCHES}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMATCHES(ObjectPathParser.MATCHESContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code RAW_METHOD}
 	 * labeled alternative in {@link ObjectPathParser#func}.
