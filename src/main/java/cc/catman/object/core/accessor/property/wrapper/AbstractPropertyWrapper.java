@@ -237,5 +237,10 @@ public abstract class  AbstractPropertyWrapper<I,T> implements PropertyWrapper {
         // 然后是当前属性有所属的对象,此时需要创建当前对象的访问器
         this.accessor = this.accessorFactory.create(this.belong, this.indexOrKey);
     }
+
+    @Override
+    public void setIndexOrKey(Object key) {
+        this.indexOrKey= (I) key;
+    }
 }
 

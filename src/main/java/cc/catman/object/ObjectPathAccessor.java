@@ -35,14 +35,14 @@ public interface ObjectPathAccessor {
      * @param object 对象
      * @param expr 表达式
      */
-    void setExpr(Object object, String expr);
+    Object setExpr(Object object, String expr);
 
-    void setExpr(Object object, ObjectPathParser.ObjectPathContext objectPath);
+    Object setExpr(Object object, ObjectPathParser.ObjectPathContext objectPath);
 
     /**
      * 设值
      * @param object 对象
      * @param value 新值
      */
-    void setValue(Object object, Object value);
+    Object setValue(Object object, Object value);
 }

@@ -99,5 +99,5 @@ public interface PropertyWrapper {
    PropertyWrapper wrapper(Object object);
 
    Object getIndexOrKey();
-
+    void  setIndexOrKey(Object key);
 }

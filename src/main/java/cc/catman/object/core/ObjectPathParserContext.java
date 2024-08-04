@@ -348,4 +348,8 @@ public interface ObjectPathParserContext {
     void setMod(EContextMod mod);
 
     boolean readOnly();
+
+    void disableWrite();
+
+    void checkWrite();
 }

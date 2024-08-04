@@ -1,6 +1,9 @@
 package cc.catman.object;
 
 import cc.catman.OP;
+import cc.catman.object.cases.Order.Order;
+import cc.catman.object.cases.Order.OrderItem;
+import cc.catman.object.cases.Order.OrderMock;
 import cc.catman.object.core.Features;
 import org.junit.Test;
 
@@ -52,6 +55,15 @@ public class DefaultObjectPathAccessorTest {
         OP.parse("$['like'][0]").setValue(person,"a");
         assertNotNull(person.like);
         assertEquals("a", person.like.get(0));
+    }
+
+    @Test
+    public void setExprWithComputer(){
+        Order order= OrderMock.mockOrderWithFixedSize(10);
+        OP.parse("$['items'][*]['quantity']").setExpr(order,"@*10");
+        for (OrderItem item : order.getItems()) {
+            assertEquals(0, item.getQuantity() % 10);
+        }
     }
 
     public static class Person{

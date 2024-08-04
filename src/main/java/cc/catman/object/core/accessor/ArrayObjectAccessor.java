@@ -218,7 +218,7 @@ public class ArrayObjectAccessor extends AbstractObjectAccessor {
         List<Object> list = IntStream.range(0, size)
                 .mapToObj(pw::read)
                 .map(mapper)
-                .map(PropertyWrapperHelper::unWrapper)
+//                .map(PropertyWrapperHelper::unWrapper)
                 .collect(Collectors.toList());
         return pw.wrapper(list);
     }
