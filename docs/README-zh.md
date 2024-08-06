@@ -4,10 +4,39 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=catman-cc_objectpath&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=catman-cc_objectpath)
 [![unit test](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml/badge.svg)](https://github.com/catman-cc/objectpath/actions/workflows/mvn.yml)
 
-> ObjectPath是一个用于访问java对象的路径解析器,类似于jsonpath,但是ObjectPath用于访问java对象,而不是json对象.
-
 [中文文档](./README-zh.md) | [English Document](../README.md)
 
+> ObjectPath是一个用于访问java对象的路径解析器,类似于jsonpath,但是ObjectPath用于访问java对象,而不是json对象.
+
+## 为什么我们需要ObjectPath
+现在已经有很多成熟的jsonpath库,比如
+- [jayway的json-path](https://github.com/json-path/JsonPath)库,该库用于从json文档中读取内容,但是该库仅支持操作json字符串,
+  或者其定义的json文档对象.
+- [alibaba的fastjson](https://github.com/alibaba/fastjson2)库,该库可以操作json内容,也可以操作java对象,且具有非常好的性能,
+  但是其语法支持不够完善,缺少很多jsonpath的高级特性.
+
+如果您需要一个可以使用jsonpath语法访问java对象的库,且要求具有jsonpath的高级特性,以及可以灵活扩展的功能,那么ObjectPath就是为您准备的.
+
+因为,ObjectPath的目标就是提供一个易于使用的,灵活的,功能丰富的,易于扩展的,可靠的java对象访问库.
+
+在复杂的jsonpath语法下,ObjectPath的性能基本和json-path接近,但是要比fastjson弱一个数量级,以下面的语法为例:
+```jsonpath
+$.items[0].price
+```
+性能表现如下:
+```text
+Benchmark                                                                  Mode     Cnt      Score      Error   Units
+ObjectPathBenchmarkTest.fastjson                                          thrpt       5  15362.228 ±  525.609  ops/ms
+ObjectPathBenchmarkTest.fastjsonWithCache                                 thrpt       5  52067.545 ± 7330.572  ops/ms
+ObjectPathBenchmarkTest.jsonpathWithCache                                 thrpt       5  10191.875 ± 1537.634  ops/ms
+ObjectPathBenchmarkTest.objectPath                                        thrpt       5   1134.568 ±  336.965  ops/ms
+ObjectPathBenchmarkTest.objectPathWithCache                               thrpt       5   3081.250 ± 1124.854  ops/ms
+ObjectPathBenchmarkTest.fastjson                                           avgt       5     ≈ 10⁻⁴              ms/op
+ObjectPathBenchmarkTest.fastjsonWithCache                                  avgt       5     ≈ 10⁻⁴              ms/op
+ObjectPathBenchmarkTest.jsonpathWithCache                                  avgt       5     ≈ 10⁻⁴              ms/op
+ObjectPathBenchmarkTest.objectPath                                         avgt       5      0.001 ±    0.001   ms/op
+ObjectPathBenchmarkTest.objectPathWithCache                                avgt       5      0.001 ±    0.001   ms/op
+```
 ---
 ## 快速开始
 ### 1. 引入依赖
