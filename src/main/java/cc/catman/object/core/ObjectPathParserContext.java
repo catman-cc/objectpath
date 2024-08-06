@@ -328,7 +328,7 @@ public interface ObjectPathParserContext {
      */
     PropertyWrapper rewrite(Object object);
 
-    PropertyWrapper invokeMethod(String functionName, List<Object> params);
+    PropertyWrapper invokeMethod(ObjectPathParserContext context,String functionName, List<Object> params);
 
     /**
      * 调用当前对象的原始方法

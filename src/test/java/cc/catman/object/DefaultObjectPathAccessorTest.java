@@ -20,7 +20,7 @@ public class DefaultObjectPathAccessorTest {
         ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
         cfg.getFeatures().put(Features.CONNECT_STRING_USE_PLUS_SIGN,true);
 
-        ObjectPathAccessor accessor = ObjectPath.parse("$.name", cfg);
+        ObjectPathAccessor accessor = ObjectPath.of("$.name", cfg);
         accessor.setExpr(person,"1+$.name+1");
         assertEquals("1panda1",person.name);
     }
@@ -30,7 +30,7 @@ public class DefaultObjectPathAccessorTest {
         Person person = new Person("panda");
         ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
         List<String> list = Arrays.asList("a", "b");
-        ObjectPathAccessor accessor = ObjectPath.parse("$[\"like\"]",cfg);
+        ObjectPathAccessor accessor = ObjectPath.of("$[\"like\"]",cfg);
         accessor.setValue(person, list);
         assertEquals(person.like,list);
     }

@@ -22,7 +22,7 @@ public class ObjectPathCachedReadBenchmark implements Benchmark{
         opc.setEnableObjectClassifierCache(true);
         opc.setEnableObjectAccessorCache(true);
         opc.inject();
-        ObjectPathAccessor accessor = ObjectPath.parse(expr, opc);
+        ObjectPathAccessor accessor = ObjectPath.of(expr, opc);
 
         StopAndWatch saw = StopAndWatch.start(getClass().getSimpleName());
         objects.forEach(accessor::eval);

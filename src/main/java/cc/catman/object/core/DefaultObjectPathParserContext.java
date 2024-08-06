@@ -302,10 +302,10 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
-    public PropertyWrapper invokeMethod(String functionName, List<Object> params) {
+    public PropertyWrapper invokeMethod(ObjectPathParserContext context,String functionName, List<Object> params) {
         FunctionProvider fp = this.functionManager.getProvider(functionName, params);
         if (fp!=null){
-            return this.configuration.getWrapperFactory().create(fp.apply(params));
+            return this.configuration.getWrapperFactory().create(fp.apply(this,params));
         }
         throw new UnsupportedOperationException("not support function "+functionName);
     }

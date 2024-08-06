@@ -32,6 +32,13 @@ public class ObjectPathBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

@@ -11,6 +11,7 @@ typeCast ('('expr')'|expr)               #TYPE_CAST_EXPR
 |(location  selector*)                   #PATH_EXPR
 | expr ('+'|'-'|'*'|'/'|'%') expr        #CALCULATE_EXPR
 |'(' expr ')'                            #GROUP_EXPR
+|expr func                               #EXPR_FUNC_EXPR
 | expr ('?'expr?) ':' expr               #DEFAULT_EXPR
 | expr '==' expr                         #EQ
 | expr '!='expr                          #NEQ
@@ -112,7 +113,7 @@ func:
 | '.' 'startWith' '(' arg ')'                 #STARTSWITH
 | '.' 'endWith' '(' arg ')'                   #ENDSWITH
 | '.' 'match' '(' (arg) ')'                   #MATCHES
-|'.' 'raw' '(' methodName=expr args?')'       #RAW_METHOD
+|'.'('raw' '(' methodName=expr args?')'      |'#'methodName=expr'('args?')') #RAW_METHOD
 |'.' ID '(' (args|) ')'                       #METHOD_CALL
 ;
 

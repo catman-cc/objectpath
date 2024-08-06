@@ -32,7 +32,7 @@ public final class OP {
      * @return ObjectPathAccessor
      */
     public static ObjectPathAccessor parse(final String path) {
-        return ObjectPath.parse(path, config);
+        return ObjectPath.of(path, config);
     }
 
 }

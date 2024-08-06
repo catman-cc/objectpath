@@ -26,7 +26,7 @@ public class AdvanceTest extends BaseTest {
         long now = System.currentTimeMillis();
         Map<String,Long> map=new HashMap<>();
         map.put("time",now);
-        ObjectPathAccessor ac = op.parse("$.time.format(@,'yyyy-MM-dd HH:mm:ss')");
+        ObjectPathAccessor ac = op.parse("$.time.format('yyyy-MM-dd HH:mm:ss')");
         Object res = ac.eval(map);
         Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now),res);
     }

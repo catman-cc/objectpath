@@ -1,5 +1,6 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.core.ObjectPathParserContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -113,11 +114,12 @@ public abstract class AbstractFunctionProvider implements FunctionProvider {
         return true;
     }
 
-    public Object apply(List<Object> params) {
-        return doApply(params);
+    @Override
+    public Object apply(ObjectPathParserContext context,List<Object> params) {
+        return doApply(context,params);
     }
 
-    protected abstract Object doApply(List<Object> params);
+    protected abstract Object doApply(ObjectPathParserContext context,List<Object> params);
 
     @SuppressWarnings("unused")
     protected boolean doCheckMatch(List<Object> params) {

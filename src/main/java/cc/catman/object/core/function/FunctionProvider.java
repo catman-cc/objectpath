@@ -1,5 +1,7 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.core.ObjectPathParserContext;
+
 import java.util.List;
 
 /**
@@ -47,5 +49,5 @@ public interface FunctionProvider {
      * @param params 参数列表
      * @return 执行结果
      */
-    Object apply(List<Object> params);
+    Object apply(ObjectPathParserContext context,List<Object> params);
 }

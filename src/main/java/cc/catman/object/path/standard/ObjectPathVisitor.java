@@ -24,6 +24,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCOMPLEX_VALUE_EXPR(ObjectPathParser.COMPLEX_VALUE_EXPRContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code EXPR_FUNC_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code GROUP_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
