@@ -98,7 +98,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor {
 
 
 
-        ObjectPathAccessor valueParse = ObjectPath.parse(expr, config);
+        ObjectPathAccessor valueParse = ObjectPath.of(expr, config);
         if (result.isInstanceOf(Collection.class)) {
             if (result.isNotNull()) {
                 Collection<?> c = (Collection<?>) result.read();

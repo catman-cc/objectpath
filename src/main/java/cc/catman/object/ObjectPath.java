@@ -30,12 +30,12 @@ public class ObjectPath implements IObjectPath {
      * @param path   路径
      * @return 对象
      */
-    public static ObjectPathAccessor parse(String path, ObjectPathConfiguration config) {
+    public static ObjectPathAccessor of(String path, ObjectPathConfiguration config) {
         return new ObjectPath(config).parse(path);
     }
 
-    public static ObjectPathAccessor analyzer(String path){
-        return parse(path,ObjectPathConfiguration.create());
+    public static ObjectPathAccessor of(String path){
+        return of(path,ObjectPathConfiguration.create());
     }
 
     @Override

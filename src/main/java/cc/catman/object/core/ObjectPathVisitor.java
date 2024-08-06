@@ -362,6 +362,14 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
                 visit(defaultValue);
     }
 
+    @Override
+    public PropertyWrapper visitEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx) {
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        this.context.updateCurrent(visit(expr));
+        ObjectPathParser.FuncContext func = ctx.func();
+        return this.context.updateCurrent(visit(func));
+    }
+
     /**
      * 切换上下文,切换上下文有两种方式
      * 一种是指定表达式的位置,切换上下文,即location模式
@@ -584,7 +592,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
                         params.add(res.read());
                     }
                 });
-        return this.context.invokeMethod(functionName, params);
+        return this.context.invokeMethod(this.context,functionName, params);
     }
 
     /**

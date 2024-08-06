@@ -1,10 +1,11 @@
 package cc.catman.object.core.function;
 
+import cc.catman.object.core.ObjectPathParserContext;
 import cc.catman.object.core.exception.FunctionRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 /**
@@ -22,38 +23,20 @@ public class DateFormatFunctionProvider extends AbstractFunctionProvider{
                 .type(String.class)
                 .desc("格式")
                 .build();
-        this.args().add(Arrays.asList(
-                FunctionArgDesc.builder()
-                        .type(Date.class)
-                        .desc("日期")
-                        .build(),
+        this.args().add(Collections.singletonList(
                 format
 
-        ));
-        this.args().add(Arrays.asList(
-                FunctionArgDesc.builder()
-                        .type(Long.class)
-                        .desc("时间戳")
-                        .build(),
-                format
-        ));
-        this.args().add(Arrays.asList(
-                FunctionArgDesc.builder()
-                        .type(String.class)
-                        .desc("日期字符串")
-                        .build(),
-                format
         ));
     }
 
     @Override
-    protected Object doApply(List<Object> params) {
-        if (params.size() != 2) {
+    protected Object doApply(ObjectPathParserContext context,List<Object> params) {
+        if (params.size() != 1) {
             log.error("参数数量不匹配");
             return null;
         }
-        Object date = params.get(0);
-        Object format = params.get(1);
+        Object date = context.currentValue().read();
+        Object format = params.get(0);
         if (date instanceof java.util.Date) {
             return new SimpleDateFormat(format.toString()).format((Date) date);
         } else if (date instanceof Long) {

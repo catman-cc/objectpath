@@ -79,7 +79,7 @@ public class OrderTest extends BaseTest {
                 .mapToObj(i -> OrderMock.mockOrderWithFixedSize(10))
                 .collect(Collectors.toList());
         String expr = "$..price";
-        ObjectPathAccessor as = ObjectPath.analyzer(expr);
+        ObjectPathAccessor as = ObjectPath.of(expr);
         Object res = as.eval(order);
         Assert.assertTrue(res instanceof List);
         List<Object> list = (List<Object>) res;
@@ -1024,7 +1024,7 @@ public void  funcForRaw(){
     String expr="$.items.raw('size')";
     ObjectPathConfiguration cfg = ObjectPathConfiguration.create();
     cfg.setAllowExecuteRawMethod(true);
-    ObjectPathAccessor as = ObjectPath.parse(expr,cfg);
+    ObjectPathAccessor as = ObjectPath.of(expr,cfg);
     Integer res = as.eval(order,Integer.class);
     Assert.assertEquals(10, (int) res);
 }

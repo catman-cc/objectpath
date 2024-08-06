@@ -30,6 +30,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitCOMPLEX_VALUE_EXPR(ObjectPathParser.COMPLEX_VALUE_EXPRContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code EXPR_FUNC_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code EXPR_FUNC_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code GROUP_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree

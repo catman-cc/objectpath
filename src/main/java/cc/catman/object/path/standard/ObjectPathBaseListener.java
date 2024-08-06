@@ -41,6 +41,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEXPR_FUNC_EXPR(ObjectPathParser.EXPR_FUNC_EXPRContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGROUP_EXPR(ObjectPathParser.GROUP_EXPRContext ctx) { }
 	/**
 	 * {@inheritDoc}
