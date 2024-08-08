@@ -13,6 +13,7 @@ public interface ICache<T> {
      * 获取对象
      * @param group 缓存时的分组,比如类名/特定的map集合/特定的对象
      * @param key  缓存的主键
+     * @return 可能存在的缓存值
      */
     Optional<T> get(Object group, Object key);
 

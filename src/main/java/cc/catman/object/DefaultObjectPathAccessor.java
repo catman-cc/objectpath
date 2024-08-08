@@ -162,6 +162,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor {
      *
      * @param object 对象
      * @param value  新值
+     * @return 被赋值后的值
      */
     @Override
     public Object setValue(Object object, Object value) {

@@ -25,12 +25,12 @@ public enum Features {
     CONNECT_STRING_USE_PLUS_SIGN,
 
     /**
-     * 是否允许执行私有方法,前置要求开启功能{@link cc.catman.object.ObjectPathConfiguration#isAllowExecuteRawMethod}
+     * 是否允许执行私有方法,前置要求开启功能{@link cc.catman.object.ObjectPathConfiguration#allowExecuteRawMethod}
      */
     ALLOW_EXEC_PRIVATE_METHOD,
 
     /**
-     * 是否允许执行保护方法,前置要求开启功能{@link cc.catman.object.ObjectPathConfiguration#isAllowExecuteRawMethod}
+     * 是否允许执行保护方法,前置要求开启功能{@link cc.catman.object.ObjectPathConfiguration#allowExecuteRawMethod}
      */
     ALLOW_EXEC_PROTECTED_METHOD,
 

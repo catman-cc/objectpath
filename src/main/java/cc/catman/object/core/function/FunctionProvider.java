@@ -46,6 +46,7 @@ public interface FunctionProvider {
 
     /**
      * 执行函数
+     * @param context 执行当前方法的上下文
      * @param params 参数列表
      * @return 执行结果
      */

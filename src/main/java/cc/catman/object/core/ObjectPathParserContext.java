@@ -144,6 +144,7 @@ public interface ObjectPathParserContext {
 
     /**
      * 复制一个当前的上下文,供调用方使用
+     * @return 新的上下文对象
      */
     default ObjectPathParserContext createChild(){
         return createChild(this.currentValue());
@@ -342,6 +343,7 @@ public interface ObjectPathParserContext {
 
     /**
      * 当前模式是否是只读的
+     * @return 当前上下文的模式
      */
     EContextMod  getMod();
 
