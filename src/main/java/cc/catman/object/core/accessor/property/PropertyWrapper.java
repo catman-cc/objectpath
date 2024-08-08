@@ -30,23 +30,36 @@ public interface PropertyWrapper {
 
     /**
      * 属性对应的值不是null
+     * @return 是否不为空
      */
    default boolean isNotNull(){
          return !isNull();
    }
 
+    /**
+     * 当前上下文是否是只读的
+     * @return 当前上下文是否是只读的
+     */
    boolean readOnly();
 
     /**
      * 是否允许设置属性值
+     * @return 是否允许设置属性值
      */
     boolean canWrite();
 
     /**
      * 获取属性值
+     * @return 被包装的对象,可能为null
      */
     Object read();
 
+    /**
+     * 获取被包装的对象,并将其转换为指定类型
+     * @param clazz 期望类型
+     * @return 转型后的对象
+     * @param <T> 期望类型
+     */
     <T> T read(Class<T> clazz);
 
     /**

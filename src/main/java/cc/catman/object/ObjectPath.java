@@ -28,16 +28,27 @@ public class ObjectPath implements IObjectPath {
     /**
      * 解析
      * @param path   路径
+     * @param config 配置对象
      * @return 对象
      */
     public static ObjectPathAccessor of(String path, ObjectPathConfiguration config) {
         return new ObjectPath(config).parse(path);
     }
 
+    /**
+     * 解析表达式
+     * @param path 表达式
+     * @return 表达式对象访问器
+     */
     public static ObjectPathAccessor of(String path){
         return of(path,ObjectPathConfiguration.create());
     }
 
+    /**
+     * 解析
+     * @param path   路径
+     * @return 表达式对象访问器
+     */
     @Override
     public ObjectPathAccessor parse(String path) {
         CodePointCharStream stream = CharStreams.fromString(path);

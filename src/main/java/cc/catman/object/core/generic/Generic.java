@@ -8,6 +8,7 @@ package cc.catman.object.core.generic;
 public @interface Generic {
     /**
      * 泛型类型,用于标记属性的类型
+     * @return 泛型类型
      */
     Class<?>[] value() default {Object.class};
 }
