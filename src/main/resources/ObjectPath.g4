@@ -113,6 +113,7 @@ func:
 | '.' 'startWith' '(' arg ')'                 #STARTSWITH
 | '.' 'endWith' '(' arg ')'                   #ENDSWITH
 | '.' 'match' '(' (arg) ')'                   #MATCHES
+| '.' 'toString' '('expr (','args)? ')'       #TOSTRING_METHOD
 |'.'('raw' '(' methodName=expr args?')'      |'#'methodName=expr'('args?')') #RAW_METHOD
 |'.' ID '(' (args|) ')'                       #METHOD_CALL
 ;

@@ -609,6 +609,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMATCHES(ObjectPathParser.MATCHESContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code TOSTRING_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code RAW_METHOD}
 	 * labeled alternative in {@link ObjectPathParser#func}.
 	 * @param ctx the parse tree

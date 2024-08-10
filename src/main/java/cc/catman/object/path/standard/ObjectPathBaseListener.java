@@ -1049,6 +1049,18 @@ public class ObjectPathBaseListener implements ObjectPathListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterRAW_METHOD(ObjectPathParser.RAW_METHODContext ctx) { }
 	/**
 	 * {@inheritDoc}

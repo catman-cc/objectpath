@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.catman.jsonpath</groupId>
-    <artifactId>catman-jsonpath</artifactId>
+    <artifactId>objectpath</artifactId>
     <version>0.0.1</version>
 
     <name>object-path</name>

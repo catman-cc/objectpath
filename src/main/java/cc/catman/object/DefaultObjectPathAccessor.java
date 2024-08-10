@@ -99,8 +99,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor {
 
 
         ObjectPathAccessor valueParse = ObjectPath.of(expr, config);
-        if (result.isInstanceOf(Collection.class)) {
-            if (result.isNotNull()) {
+        if (result.isInstanceOf(Collection.class) && result.isNotNull()) {
                 Collection<?> c = (Collection<?>) result.read();
                 Optional<?> any = c.stream()
                         .filter(Objects::nonNull)
@@ -121,7 +120,7 @@ public class DefaultObjectPathAccessor implements ObjectPathAccessor {
                 }
             }
 
-        }
+
         // 创建新的上下文,该上下文用来执行赋值表达式
         DefaultObjectPathParserContext newCtx = createContext(result);
         newCtx.setMod(EContextMod.READ_ONLY);
