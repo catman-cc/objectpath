@@ -1032,6 +1032,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitMATCHES(ObjectPathParser.MATCHESContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code TOSTRING_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TOSTRING_METHOD}
+	 * labeled alternative in {@link ObjectPathParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code RAW_METHOD}
 	 * labeled alternative in {@link ObjectPathParser#func}.
 	 * @param ctx the parse tree

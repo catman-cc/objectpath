@@ -2,6 +2,7 @@ package cc.catman.object.core;
 
 
 import cc.catman.object.ObjectPathConfiguration;
+import cc.catman.object.core.accessor.convert.IConvert;
 import cc.catman.object.core.accessor.property.PropertyWrapper;
 import cc.catman.object.core.exception.PropertyAccessorRuntimeException;
 import cc.catman.object.core.util.ReflectionHelper;
@@ -1647,6 +1648,42 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
             }
         });
         return wrapper(newValues);
+    }
+
+    @Override
+    public PropertyWrapper visitTOSTRING_METHOD(ObjectPathParser.TOSTRING_METHODContext ctx) {
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        if (Objects.isNull(expr)){
+            return wrapper(this.context.currentValue().toString());
+        }
+
+        List<?> pw =Optional.ofNullable(ctx.args()).map(a->visit(a).read(List.class))
+                .orElse(Collections.emptyList());
+
+        List<String> args = pw
+                .stream()
+                .map(o->{
+                    IConvert convert = this.context.getConfiguration().getConvert();
+                    return convert.convert(o,String.class);
+                })
+                .collect(Collectors.toList());
+
+        int size = args.size();
+        String concatText = size>0?args.get(0):"";
+        String startText=size>1?args.get(1):"";
+        String endText=size>2?args.get(2):"";
+        StringBuilder stringBuilder=new StringBuilder(startText);
+        this.context.each(entity -> {
+            ObjectPathVisitor cv = this.createChildVisitor(this.context.createChild(entity));
+            stringBuilder.append(cv.visit(expr).read(String.class))
+                    .append(concatText);
+        });
+        String text=stringBuilder.toString();
+        if(text.endsWith(endText)){
+            text=text.substring(0,text.length()-endText.length());
+        }
+        text=text+endText;
+        return wrapper(text);
     }
 
     @Override
