@@ -708,6 +708,35 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
         return wrapper(res);
     }
 
+    @Override
+    public PropertyWrapper visitIfStatement(ObjectPathParser.IfStatementContext ctx) {
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        PropertyWrapper match = this.createChildVisitor().visit(expr);
+        if (match.read(Boolean.class)) {
+            return visit(ctx.ifBlock());
+        }
+        List<ObjectPathParser.ElseIfClauseContext> eis = ctx.elseIfClause();
+        for (ObjectPathParser.ElseIfClauseContext ei : eis) {
+           if (this.createChildVisitor().visit(ei.expr()).read(Boolean.class)){
+                return visit(ei.ifBlock());
+           }
+        }
+        ObjectPathParser.ElseClauseContext elseCtx = ctx.elseClause();
+        if (Objects.nonNull(elseCtx)){
+            return visit(elseCtx.ifBlock());
+        }
+        return super.visitIfStatement(ctx);
+    }
+
+    @Override
+    public PropertyWrapper visitIfBlock(ObjectPathParser.IfBlockContext ctx) {
+        ObjectPathParser.ExprContext expr = ctx.expr();
+        if (Objects.nonNull(expr)){
+            return visit(expr);
+        }
+        return wrapper(null);
+    }
+
     /**
      * 访问比较操作,比较操作将会比较两个对象的大小,如果比较结果为true,则保留,否则丢弃
      * 比较操作只能在集合上执行

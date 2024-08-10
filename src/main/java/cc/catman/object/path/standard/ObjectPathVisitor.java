@@ -66,6 +66,13 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLT(ObjectPathParser.LTContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code STATENEBT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSTATENEBT_EXPR(ObjectPathParser.STATENEBT_EXPRContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code DEFAULT_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
@@ -170,6 +177,36 @@ public interface ObjectPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitGE(ObjectPathParser.GEContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStatement(ObjectPathParser.StatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#ifStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfStatement(ObjectPathParser.IfStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#elseIfClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElseIfClause(ObjectPathParser.ElseIfClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#elseClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElseClause(ObjectPathParser.ElseClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link ObjectPathParser#ifBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfBlock(ObjectPathParser.IfBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.

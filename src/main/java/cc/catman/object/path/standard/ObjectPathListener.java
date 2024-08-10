@@ -102,6 +102,18 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 */
 	void exitLT(ObjectPathParser.LTContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code STATENEBT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterSTATENEBT_EXPR(ObjectPathParser.STATENEBT_EXPRContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code STATENEBT_EXPR}
+	 * labeled alternative in {@link ObjectPathParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitSTATENEBT_EXPR(ObjectPathParser.STATENEBT_EXPRContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code DEFAULT_EXPR}
 	 * labeled alternative in {@link ObjectPathParser#expr}.
 	 * @param ctx the parse tree
@@ -281,6 +293,56 @@ public interface ObjectPathListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitGE(ObjectPathParser.GEContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatement(ObjectPathParser.StatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatement(ObjectPathParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStatement(ObjectPathParser.IfStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStatement(ObjectPathParser.IfStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#elseIfClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterElseIfClause(ObjectPathParser.ElseIfClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#elseIfClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitElseIfClause(ObjectPathParser.ElseIfClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#elseClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterElseClause(ObjectPathParser.ElseClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#elseClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitElseClause(ObjectPathParser.ElseClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ObjectPathParser#ifBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfBlock(ObjectPathParser.IfBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ObjectPathParser#ifBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfBlock(ObjectPathParser.IfBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ROOT_NODE}
 	 * labeled alternative in {@link ObjectPathParser#location}.
