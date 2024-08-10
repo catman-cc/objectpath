@@ -1055,5 +1055,22 @@ public void  funcForRaw(){
         Assert.assertEquals(want, count.intValue());
     }
 
-
+    @Test
+    public void  testIfStatement(){
+        Order order = OrderMock.mockOrder();
+        for (int i = 0; i < order.getItems().size(); i++) {
+            ObjectPathAccessor as = objectPath.parse(String.format("$.items[%d].price|if(@>150){'150'}else if(@>100){'100'} else if (@>50){'50'}else{'low'}",i));
+            String res = as.eval(order, String.class);
+            int price = order.getItems().get(i).getPrice();
+            if (price>150){
+                Assert.assertEquals("150",res);
+            }else if (price>100){
+                Assert.assertEquals("100",res);
+            }else if (price>50){
+                Assert.assertEquals("50",res);
+            }else {
+                Assert.assertEquals("low",res);
+            }
+        }
+    }
 }

@@ -26,7 +26,28 @@ typeCast ('('expr')'|expr)               #TYPE_CAST_EXPR
 | expr ('and'|'&&') expr                 #AND
 | expr ('or'|'||') expr                  #OR
 |'!'expr                                 #REVERT_EXPR
+| statement                              #STATENEBT_EXPR
 ;
+
+statement
+    : ifStatement
+    ;
+ifStatement
+    : 'if' '(' expr ')' ifBlock (elseIfClause)* (elseClause)?
+    ;
+
+elseIfClause
+    : 'else' 'if' '(' expr ')' ifBlock
+    ;
+
+elseClause
+    : 'else' ifBlock
+    ;
+
+ifBlock
+    : '{' 'return'? expr? ';'? '}'
+    ;
+
 
 location: '$'                            #ROOT_NODE
 | '@'                                    #CURRENT_NODE
