@@ -179,7 +179,7 @@ public class DefaultObjectPathParserContext implements ObjectPathParserContext{
     }
 
     @Override
-    public PropertyWrapper eval(String path) {
+    public PropertyWrapper eval(Object path) {
         return cv.read(path);
     }
 

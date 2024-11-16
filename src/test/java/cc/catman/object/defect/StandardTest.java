@@ -9,6 +9,8 @@ import cc.catman.object.cases.basic.StoreHolder;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @SuppressWarnings("java:S2699")
@@ -51,6 +53,18 @@ public class StandardTest extends BaseTest {
             Book find = OP.parse(expr).eval(store, Book.class);
             Assert.assertEquals(want,find);
         });
+    }
+
+    @Test
+    public void testSimpleReadFromMap(){
+        Map<Object,Object> args=new HashMap<>();
+        args.put(0,"name");
+        args.put("args0","name");
+        args.put("name","name");
+        Map<Object,Object> root=new HashMap<>();
+        root.put("args",args);
+        Object v = OP.parse("$args[0]").eval(root);
+        Assert.assertEquals("name",v);
     }
 
 }

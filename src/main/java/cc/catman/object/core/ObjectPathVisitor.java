@@ -398,7 +398,7 @@ public class ObjectPathVisitor extends ObjectPathBaseVisitor<PropertyWrapper> {
     @Override
     public PropertyWrapper visitINDEX(ObjectPathParser.INDEXContext ctx) {
         // 获取待访问的索引值
-        String index = this.createChildVisitor().visit(ctx.expr()).read(String.class);
+        Object index = this.createChildVisitor().visit(ctx.expr()).read(Object.class);
         // 访问索引,获取索引对应的对象
         this.context.updateCurrent(this.context.currentValue());
         return this.context.eval(index);

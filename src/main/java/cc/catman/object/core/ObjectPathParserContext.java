@@ -163,7 +163,7 @@ public interface ObjectPathParserContext {
      * @param path 表达式
      * @return 解析结果
      */
-    PropertyWrapper eval(String path);
+    PropertyWrapper eval(Object path);
 
     /**
      * 在当前上下文中获取当前对象的属性,并将属性名传递给消费者
